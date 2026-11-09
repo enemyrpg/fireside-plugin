@@ -11,7 +11,8 @@ Plans and decisions: `../osrs-tracker/docs/plan/` (Norwegian).
 The event format is defined in `osrs-tracker` (`shared/` and
 `../osrs-tracker/docs/plan/03-datamodell-og-api.md`). A pinned copy of the
 contract package (JSON Schema + fixtures) lives in
-`src/test/resources/contract/` (added in task 7.3).
+`src/test/resources/contract/` (added in task 7.3). Legal constraints:
+`../osrs-tracker/docs/plan/09-juridisk.md`.
 
 ## Commands
 - `./gradlew build` – build and test
@@ -35,17 +36,27 @@ contract package (JSON Schema + fixtures) lives in
   the Java package name and class names, `README.md`.
 - No dependencies beyond what runelite-client provides. Use the injected
   `OkHttpClient` and `Gson`.
+- Plugin Hub restrictions: no Java reflection, no JNI, no running external
+  programs, no downloading code at runtime.
 - Never block the client thread. Network and disk IO run off-thread.
 - Nothing is sent until server URL and API key are configured.
 - Every event gets a UUIDv7 `eventId` and goes to the on-disk queue before
   sending. Only remove events the server confirmed (`accepted` or `duplicate`).
 - Serialized events must validate against the pinned JSON Schema (tests).
 - Follow Jagex's third-party client rules. The plugin only reads and reports
-  data. It must never automate input or give gameplay advantages.
+  data about the user's own accounts. It must never automate input, change
+  menus, reveal hidden information or give gameplay advantages.
+- Never collect or send data about other players (names, locations, gear).
+  Loot from players is sent without the player's name.
+- AFK detection is statistics only. No in-game alerts based on it.
 - Prefer generic detection (e.g. kill count chat pattern) so new game content
   works without code changes.
 - Reference implementations in RuneLite: Chat Commands (KC parsing),
   Loot Tracker (loot sources), Bank plugin (bank value, potion storage).
+  Keep the BSD-2 copyright notice if code is copied.
+- README and Plugin Hub description include the Jagex Fan Content Policy
+  disclaimer and state that data is only sent to a server the user sets up.
+  The repo must be public before Plugin Hub submission.
 - Code, comments and commit messages in English.
 
 ## Workflow
