@@ -20,5 +20,10 @@ Requires JDK 11.
 To log in with a Jagex account in the development client, see
 [Using Jagex Accounts](https://github.com/runelite/runelite/wiki/Using-Jagex-Accounts).
 
+## Disclaimer
+Created using intellectual property belonging to Jagex Limited under the terms
+of Jagex's Fan Content Policy. This content is not endorsed by or affiliated
+with Jagex.
+
 ## License
 [BSD 2-Clause](LICENSE)
