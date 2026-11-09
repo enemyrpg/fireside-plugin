@@ -41,7 +41,10 @@ contract package (JSON Schema + fixtures) lives in
 - Never block the client thread. Network and disk IO run off-thread.
 - Nothing is sent until server URL and API key are configured.
 - Every event gets a UUIDv7 `eventId` and goes to the on-disk queue before
-  sending. Only remove events the server confirmed (`accepted` or `duplicate`).
+  sending. Event IDs MUST be monotonic: strictly increasing within the same
+  millisecond, in game order (RFC 9562 monotonic counter). The server orders
+  events by (`occurredAt`, `eventId`). Only remove events the server
+  confirmed (`accepted` or `duplicate`).
 - Serialized events must validate against the pinned JSON Schema (tests).
 - Follow Jagex's third-party client rules. The plugin only reads and reports
   data about the user's own accounts. It must never automate input, change
