@@ -14,6 +14,8 @@ import com.osrstracker.net.ServerUrl;
 import com.osrstracker.net.VerifyClient;
 import com.osrstracker.net.VerifyResult;
 import com.osrstracker.queue.EventQueue;
+import com.osrstracker.raid.ClientRaidView;
+import com.osrstracker.raid.RaidTracker;
 import com.osrstracker.send.Backoff;
 import com.osrstracker.send.EventSender;
 import com.osrstracker.send.SenderSettings;
@@ -104,6 +106,9 @@ public class OsrsTrackerPlugin extends Plugin
 	@Inject
 	private PluginManager pluginManager;
 
+	@Inject
+	private ClientRaidView raidView;
+
 	/**
 	 * The plugin's own thread: all queue disk IO and sender state live on it.
 	 * HTTP runs on OkHttp's pool; results come back to this thread.
@@ -153,7 +158,9 @@ public class OsrsTrackerPlugin extends Plugin
 		sessions = new SessionTracker(gameView, eventIds, Clock.systemUTC(), eventSink::submit,
 			() -> Duration.ofMinutes(config.afkThresholdMinutes()), config::sendXp, PluginVersion.read());
 		SessionTracker tracker = sessions;
-		kills = new KillTracker(payload -> tracker.emitInSession(payload), config::sendLoot, config::sendKillCounts);
+		RaidTracker raids = new RaidTracker(tracker::emitInSession, raidView, itemLookup, config::sendRaidPurples,
+			config::sendKillCounts);
+		kills = new KillTracker(tracker::emitInSession, config::sendLoot, config::sendKillCounts, raids);
 		lootMapper = new LootMapper(itemLookup);
 		lootTrackerActive = isLootTrackerActive();
 		// Picks up a game that is already logged in (plugin turned on mid-game).

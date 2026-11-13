@@ -9,6 +9,8 @@ import com.osrstracker.event.Kc;
 import com.osrstracker.event.Loot;
 import com.osrstracker.event.LootItem;
 import com.osrstracker.event.LootSource;
+import com.osrstracker.raid.RaidTracker;
+import com.osrstracker.raid.RaidTrackerTest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,7 +30,9 @@ public class KillTrackerTest
 	private final List<EventPayload> events = new ArrayList<>();
 	private boolean lootEnabled = true;
 	private boolean kcEnabled = true;
-	private final KillTracker tracker = new KillTracker(events::add, () -> lootEnabled, () -> kcEnabled);
+	private final KillTracker tracker = new KillTracker(events::add, () -> lootEnabled, () -> kcEnabled,
+		new RaidTracker(events::add, new RaidTrackerTest.FakeRaidView(), new RaidTrackerTest.FakeItems(), () -> true,
+			() -> kcEnabled));
 
 	private void game(String message, int tick)
 	{
