@@ -2,6 +2,8 @@ package com.osrstracker.session;
 
 import com.osrstracker.event.AccountType;
 import com.osrstracker.event.SessionHeartbeat;
+import com.osrstracker.event.XpSnapshot;
+import java.util.Map;
 import javax.annotation.Nullable;
 
 /**
@@ -26,4 +28,11 @@ public interface GameView
 
 	/** A heartbeat payload for the current position and world. */
 	SessionHeartbeat heartbeat(boolean idle);
+
+	/**
+	 * XP and real level of every skill, keyed by RuneLite's {@code Skill} name
+	 * in enum order; null until all stats are loaded after login.
+	 */
+	@Nullable
+	Map<String, XpSnapshot.SkillXp> skills();
 }

@@ -128,7 +128,7 @@ public class OsrsTrackerPlugin extends Plugin
 
 		EventSender eventSink = sender;
 		sessions = new SessionTracker(gameView, eventIds, Clock.systemUTC(), eventSink::submit,
-			() -> Duration.ofMinutes(config.afkThresholdMinutes()), PluginVersion.read());
+			() -> Duration.ofMinutes(config.afkThresholdMinutes()), config::sendXp, PluginVersion.read());
 		SessionTracker tracker = sessions;
 		// Picks up a game that is already logged in (plugin turned on mid-game).
 		clientThread.invoke(() ->
@@ -253,7 +253,7 @@ public class OsrsTrackerPlugin extends Plugin
 	{
 		if (sessions != null)
 		{
-			sessions.onXp(event.getSkill().name(), event.getXp());
+			sessions.onStat(event.getSkill().name(), event.getXp(), event.getLevel());
 		}
 	}
 

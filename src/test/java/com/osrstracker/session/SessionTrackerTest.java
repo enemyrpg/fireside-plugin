@@ -17,17 +17,21 @@ import com.osrstracker.event.SessionEnd;
 import com.osrstracker.event.SessionHeartbeat;
 import com.osrstracker.event.SessionStart;
 import com.osrstracker.event.UuidV7Generator;
+import com.osrstracker.event.XpSnapshot;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.runelite.api.GameState;
+import net.runelite.api.Skill;
 import net.runelite.http.api.RuneLiteAPI;
 import org.junit.After;
 import org.junit.Before;
@@ -43,8 +47,10 @@ public class SessionTrackerTest
 	private final FakeGame game = new FakeGame();
 	private final List<Event> events = new ArrayList<>();
 	private Duration threshold = Duration.ofMinutes(5);
+	/** Off for the session-only tests; the XP tests turn it on. */
+	private boolean xpEnabled;
 	private final SessionTracker tracker = new SessionTracker(game, new UuidV7Generator(), clock, events::add,
-		() -> threshold, "0.1.0");
+		() -> threshold, () -> xpEnabled, "0.1.0");
 
 	@Before
 	public void setUp()
@@ -230,13 +236,13 @@ public class SessionTrackerTest
 	@Test
 	public void xpGainsCountAsActivity()
 	{
-		tracker.onXp("FISHING", 1000);
+		tracker.onStat("FISHING", 1000, 10);
 		login();
 		game.idleFrom(clock.instant());
 		for (int i = 0; i < 10; i++)
 		{
 			play(Duration.ofMinutes(1));
-			tracker.onXp("FISHING", 1000 + i * 50 + 50);
+			tracker.onStat("FISHING", 1000 + i * 50 + 50, 10);
 		}
 		play(Duration.ofSeconds(1));
 		assertTrue(ofType(EventType.SESSION_AFK).isEmpty());
@@ -339,13 +345,212 @@ public class SessionTrackerTest
 		assertEquals(AccountType.HARDCORE_IRONMAN, ClientGameView.accountType(3));
 	}
 
+	@Test
+	public void loginSnapshotRightAfterSessionStart()
+	{
+		xpEnabled = true;
+		login();
+		assertEquals(types(EventType.SESSION_START, EventType.XP_SNAPSHOT), types());
+		XpSnapshot snapshot = (XpSnapshot) last().getPayload();
+		assertEquals(XpSnapshot.Reason.LOGIN, snapshot.getReason());
+		assertEquals(Skill.values().length, snapshot.getSkills().size());
+		assertEquals(new XpSnapshot.SkillXp(1000, 10), snapshot.getSkills().get("SAILING"));
+		assertEquals(events.get(0).getOccurredAt(), last().getOccurredAt());
+		assertSameSession();
+	}
+
+	@Test
+	public void loginSnapshotWaitsForTheStats()
+	{
+		xpEnabled = true;
+		game.skills = null;
+		login();
+		play(Duration.ofSeconds(3));
+		assertTrue(ofType(EventType.XP_SNAPSHOT).isEmpty());
+		game.skills = allSkills(5000, 20);
+		tick();
+		tick();
+		List<Event> snapshots = ofType(EventType.XP_SNAPSHOT);
+		assertEquals(1, snapshots.size());
+		XpSnapshot snapshot = (XpSnapshot) snapshots.get(0).getPayload();
+		assertEquals(XpSnapshot.Reason.LOGIN, snapshot.getReason());
+		assertEquals(new XpSnapshot.SkillXp(5000, 20), snapshot.getSkills().get("ATTACK"));
+	}
+
+	@Test
+	public void noIntervalSnapshotWithoutXpChange()
+	{
+		xpEnabled = true;
+		login();
+		play(Duration.ofMinutes(16));
+		assertEquals("Only the login snapshot", 1, ofType(EventType.XP_SNAPSHOT).size());
+	}
+
+	@Test
+	public void intervalSnapshotEveryFiveMinutesWhenXpChanged()
+	{
+		xpEnabled = true;
+		login();
+		Instant loginAt = clock.instant();
+		for (int i = 0; i < 20; i++)
+		{
+			play(Duration.ofSeconds(14));
+			game.gainXp("FISHING", 50);
+		}
+		// 280 s of gains, then nothing until 16 min.
+		play(Duration.ofMinutes(16).minus(Duration.between(loginAt, clock.instant())));
+
+		List<Event> snapshots = ofType(EventType.XP_SNAPSHOT);
+		assertEquals("Login + one interval (later checks see no change)", 2, snapshots.size());
+		Event interval = snapshots.get(1);
+		XpSnapshot payload = (XpSnapshot) interval.getPayload();
+		assertEquals(XpSnapshot.Reason.INTERVAL, payload.getReason());
+		assertEquals(2000, payload.getSkills().get("FISHING").getXp());
+		long sinceLogin = Duration.between(loginAt, interval.getOccurredAt()).toMillis();
+		assertTrue(sinceLogin >= 300_000 && sinceLogin < 300_000 + TICK.toMillis());
+		assertSameSession();
+	}
+
+	@Test
+	public void logoutSnapshotFromCachedValuesBeforeSessionEnd()
+	{
+		xpEnabled = true;
+		login();
+		play(Duration.ofMinutes(1));
+		game.gainXp("ATTACK", 500);
+		// The client clears its stats at logout.
+		game.skills = null;
+		tracker.onStat("ATTACK", 0, 0);
+		tracker.onGameState(GameState.LOGIN_SCREEN);
+
+		assertEquals(types(EventType.SESSION_START, EventType.XP_SNAPSHOT, EventType.SESSION_HEARTBEAT,
+			EventType.XP_SNAPSHOT, EventType.SESSION_END), types());
+		Event logout = events.get(3);
+		XpSnapshot payload = (XpSnapshot) logout.getPayload();
+		assertEquals(XpSnapshot.Reason.LOGOUT, payload.getReason());
+		assertEquals(new XpSnapshot.SkillXp(1500, 10), payload.getSkills().get("ATTACK"));
+		assertEquals(Skill.values().length, payload.getSkills().size());
+		assertEquals(clock.instant(), logout.getOccurredAt());
+		assertSameSession();
+	}
+
+	@Test
+	public void logoutSnapshotOnHopAndClientClose()
+	{
+		xpEnabled = true;
+		login();
+		tracker.onGameState(GameState.HOPPING);
+		assertLogoutThenEnd();
+		String firstSession = last().getSessionId();
+
+		tracker.onGameState(GameState.LOADING);
+		tracker.onGameState(GameState.LOGGED_IN);
+		tick();
+		Event login = last();
+		assertEquals(XpSnapshot.Reason.LOGIN, ((XpSnapshot) login.getPayload()).getReason());
+		assertNotEquals(firstSession, login.getSessionId());
+
+		tracker.onClientShutdown();
+		assertLogoutThenEnd();
+	}
+
+	@Test
+	public void logoutAfterConnectionLossIsAtTheLossTime()
+	{
+		xpEnabled = true;
+		login();
+		play(Duration.ofSeconds(30));
+		tracker.onGameState(GameState.CONNECTION_LOST);
+		Instant lostAt = clock.instant();
+		clock.advance(Duration.ofSeconds(40));
+		tracker.onGameState(GameState.LOGIN_SCREEN);
+		assertLogoutThenEnd();
+		assertEquals(lostAt, events.get(events.size() - 2).getOccurredAt());
+	}
+
+	@Test
+	public void afkIsClosedBeforeTheLogoutSnapshot()
+	{
+		xpEnabled = true;
+		login();
+		game.idleFrom(clock.instant());
+		play(Duration.ofMinutes(6));
+		tracker.onGameState(GameState.LOGIN_SCREEN);
+		List<EventType> tail = types().subList(events.size() - 3, events.size());
+		assertEquals(types(EventType.SESSION_AFK, EventType.XP_SNAPSHOT, EventType.SESSION_END), tail);
+	}
+
+	@Test
+	public void xpToggleOffSendsNoSnapshotsButXpStillCountsAsActivity()
+	{
+		login();
+		game.idleFrom(clock.instant());
+		for (int i = 0; i < 12; i++)
+		{
+			play(Duration.ofMinutes(1));
+			game.gainXp("FISHING", 50);
+		}
+		tracker.onGameState(GameState.LOGIN_SCREEN);
+		assertTrue(ofType(EventType.XP_SNAPSHOT).isEmpty());
+		assertTrue(ofType(EventType.SESSION_AFK).isEmpty());
+		assertEquals(EventType.SESSION_END, last().getType());
+	}
+
+	@Test
+	public void xpToggledOnMidSessionSendsAnIntervalBaseline()
+	{
+		login();
+		play(Duration.ofMinutes(2));
+		xpEnabled = true;
+		tick();
+		XpSnapshot baseline = (XpSnapshot) last().getPayload();
+		assertEquals(XpSnapshot.Reason.INTERVAL, baseline.getReason());
+
+		xpEnabled = false;
+		tick();
+		game.gainXp("MINING", 100);
+		play(Duration.ofMinutes(6));
+		tracker.onGameState(GameState.LOGIN_SCREEN);
+		assertEquals("No more snapshots once off", 1, ofType(EventType.XP_SNAPSHOT).size());
+	}
+
+	@Test
+	public void pluginStopSendsNoLogoutSnapshot()
+	{
+		xpEnabled = true;
+		login();
+		play(Duration.ofSeconds(30));
+		tracker.stop();
+		assertEquals(1, ofType(EventType.XP_SNAPSHOT).size());
+	}
+
+	private void assertLogoutThenEnd()
+	{
+		Event snapshot = events.get(events.size() - 2);
+		assertEquals(EventType.XP_SNAPSHOT, snapshot.getType());
+		assertEquals(XpSnapshot.Reason.LOGOUT, ((XpSnapshot) snapshot.getPayload()).getReason());
+		assertEquals(EventType.SESSION_END, last().getType());
+		assertEquals(snapshot.getSessionId(), last().getSessionId());
+	}
+
+	private static Map<String, XpSnapshot.SkillXp> allSkills(int xp, int level)
+	{
+		Map<String, XpSnapshot.SkillXp> skills = new LinkedHashMap<>();
+		for (Skill skill : Skill.values())
+		{
+			skills.put(skill.name(), new XpSnapshot.SkillXp(xp, level));
+		}
+		return skills;
+	}
+
 	private void login()
 	{
 		tracker.onGameState(GameState.LOGGING_IN);
 		tracker.onGameState(GameState.LOADING);
 		tracker.onGameState(GameState.LOGGED_IN);
+		int before = events.size();
 		tick();
-		assertEquals(EventType.SESSION_START, last().getType());
+		assertEquals(EventType.SESSION_START, events.get(before).getType());
 	}
 
 	/** Game ticks for {@code duration}. */
@@ -405,6 +610,18 @@ public class SessionTrackerTest
 		@Nullable
 		String name = "Zezima";
 		int world = 420;
+		/** The game's stats; null while not loaded (like the client before stats arrive). */
+		@Nullable
+		Map<String, XpSnapshot.SkillXp> skills = allSkills(1000, 10);
+
+		/** A gain, as the client reports it: the game's stats change and StatChanged fires. */
+		void gainXp(String skill, int amount)
+		{
+			XpSnapshot.SkillXp old = skills.get(skill);
+			XpSnapshot.SkillXp now = new XpSnapshot.SkillXp(old.getXp() + amount, old.getLevel());
+			skills.put(skill, now);
+			tracker.onStat(skill, now.getXp(), now.getLevel());
+		}
 		/** No input since this time; null while the player keeps moving the mouse. */
 		@Nullable
 		private Instant idleSince;
@@ -455,6 +672,13 @@ public class SessionTrackerTest
 		{
 			return new SessionHeartbeat(12342, world, Collections.singletonList("MEMBERS"), "GERMANY",
 				"Trade - Members", idle);
+		}
+
+		@Nullable
+		@Override
+		public Map<String, XpSnapshot.SkillXp> skills()
+		{
+			return skills == null ? null : new LinkedHashMap<>(skills);
 		}
 	}
 }

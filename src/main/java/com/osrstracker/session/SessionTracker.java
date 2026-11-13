@@ -6,9 +6,12 @@ import com.osrstracker.event.SessionAfk;
 import com.osrstracker.event.SessionEnd;
 import com.osrstracker.event.SessionStart;
 import com.osrstracker.event.UuidV7Generator;
+import com.osrstracker.event.XpSnapshot;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -17,7 +20,8 @@ import net.runelite.api.GameState;
 
 /**
  * Session state machine: {@code session.start}, {@code session.heartbeat},
- * {@code session.afk} and {@code session.end}.
+ * {@code session.afk}, {@code session.end} and the session's
+ * {@code xp.snapshot}s ({@code login}, {@code interval}, {@code logout}).
  * <p>
  * Every event is created (and gets its ID) when it happens, in game order,
  * so {@code session.end} always sorts before the next {@code session.start}.
@@ -29,6 +33,8 @@ import net.runelite.api.GameState;
 public class SessionTracker
 {
 	public static final Duration HEARTBEAT_INTERVAL = Duration.ofSeconds(60);
+	/** How often an {@code interval} snapshot is considered; only sent if XP changed. */
+	public static final Duration XP_SNAPSHOT_INTERVAL = Duration.ofMinutes(5);
 
 	enum State
 	{
@@ -44,8 +50,11 @@ public class SessionTracker
 	private final Clock clock;
 	private final Consumer<Event> sink;
 	private final Supplier<Duration> afkThreshold;
+	/** The "XP" toggle. */
+	private final BooleanSupplier xpEnabled;
 	private final String pluginVersion;
 	private final XpGainTracker xp = new XpGainTracker();
+	private final XpSnapshots xpSnapshots = new XpSnapshots();
 
 	/** Collect sessions at all (the "Send data" toggle). */
 	private boolean enabled;
@@ -64,15 +73,21 @@ public class SessionTracker
 	/** When the connection was lost, until it recovers. A logout after it ends the session then. */
 	@Nullable
 	private Instant connectionLostAt;
+	/** The session's first snapshot is the {@code login} one (false once sent, or once XP was off). */
+	private boolean loginSnapshotPending;
+	/** Next {@code interval} check; set once the session's first snapshot is sent. */
+	@Nullable
+	private Instant nextXpCheck;
 
 	public SessionTracker(GameView game, UuidV7Generator ids, Clock clock, Consumer<Event> sink,
-		Supplier<Duration> afkThreshold, String pluginVersion)
+		Supplier<Duration> afkThreshold, BooleanSupplier xpEnabled, String pluginVersion)
 	{
 		this.game = game;
 		this.ids = ids;
 		this.clock = clock;
 		this.sink = sink;
 		this.afkThreshold = afkThreshold;
+		this.xpEnabled = xpEnabled;
 		this.pluginVersion = pluginVersion;
 	}
 
@@ -128,8 +143,11 @@ public class SessionTracker
 				Instant at = connectionLostAt != null ? connectionLostAt : clock.instant();
 				inGame = false;
 				connectionLostAt = null;
+				// The logout snapshot is built from the cache first; the stats may be cleared by now.
+				boolean ended = end(SessionEnd.Reason.LOGOUT, at);
 				xp.reset();
-				return end(SessionEnd.Reason.LOGOUT, at);
+				xpSnapshots.reset();
+				return ended;
 			}
 			default:
 				return false;
@@ -168,11 +186,17 @@ public class SessionTracker
 				nextHeartbeat = now.plus(HEARTBEAT_INTERVAL);
 			}
 		}
+		xpTick(now);
 	}
 
-	/** A skill's XP from {@code StatChanged}. Gains count as activity for AFK. */
-	public synchronized void onXp(String skill, int xpValue)
+	/**
+	 * A skill's XP and real level from {@code StatChanged}. Gains count as
+	 * activity for AFK (also with the XP toggle off) and update the cache the
+	 * {@code logout} snapshot is built from.
+	 */
+	public synchronized void onStat(String skill, int xpValue, int level)
 	{
+		xpSnapshots.onStat(skill, xpValue, level);
 		if (xp.onXp(skill, xpValue) && state == State.ACTIVE)
 		{
 			afk.onXpGain(clock.instant());
@@ -219,7 +243,49 @@ public class SessionTracker
 		afk = new AfkDetector(now);
 		nextHeartbeat = now.plus(HEARTBEAT_INTERVAL);
 		state = State.ACTIVE;
+		loginSnapshotPending = true;
 		log.debug("Session started");
+		// Right after session.start if the stats are already loaded.
+		xpTick(now);
+	}
+
+	/** XP snapshots while ACTIVE: the session's first one as soon as the stats are loaded, then interval checks. */
+	private void xpTick(Instant now)
+	{
+		if (!xpEnabled.getAsBoolean())
+		{
+			// Turned on later, the first snapshot is an interval baseline, not a login.
+			loginSnapshotPending = false;
+			xpSnapshots.endSession();
+			nextXpCheck = null;
+			return;
+		}
+		if (!xpSnapshots.hasBaseline())
+		{
+			Map<String, XpSnapshot.SkillXp> skills = game.skills();
+			if (skills == null)
+			{
+				return;
+			}
+			xpSnapshots.seed(skills);
+			emit(now, xpSnapshots.snapshot(loginSnapshotPending ? XpSnapshot.Reason.LOGIN : XpSnapshot.Reason.INTERVAL));
+			loginSnapshotPending = false;
+			nextXpCheck = now.plus(XP_SNAPSHOT_INTERVAL);
+			return;
+		}
+		if (now.isBefore(nextXpCheck))
+		{
+			return;
+		}
+		if (xpSnapshots.changedSinceLastSnapshot())
+		{
+			emit(now, xpSnapshots.snapshot(XpSnapshot.Reason.INTERVAL));
+		}
+		nextXpCheck = nextXpCheck.plus(XP_SNAPSHOT_INTERVAL);
+		if (!nextXpCheck.isAfter(now))
+		{
+			nextXpCheck = now.plus(XP_SNAPSHOT_INTERVAL);
+		}
 	}
 
 	/** @return true if an active session was ended */
@@ -231,6 +297,11 @@ public class SessionTracker
 			return false;
 		}
 		closeAfk(at);
+		if (xpEnabled.getAsBoolean() && xpSnapshots.hasBaseline())
+		{
+			// From the cache only: safe at ClientShutdown and after the client cleared its stats.
+			emit(at, xpSnapshots.snapshot(XpSnapshot.Reason.LOGOUT));
+		}
 		emit(at, new SessionEnd(reason));
 		log.debug("Session ended ({})", reason);
 		clearSession();
@@ -253,6 +324,9 @@ public class SessionTracker
 		sessionId = null;
 		nextHeartbeat = null;
 		afk = null;
+		loginSnapshotPending = false;
+		nextXpCheck = null;
+		xpSnapshots.endSession();
 	}
 
 	private void emit(Instant at, EventPayload payload)
