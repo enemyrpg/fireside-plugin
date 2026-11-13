@@ -64,6 +64,12 @@ public final class ServerUrl
 		return api("ingest/verify");
 	}
 
+	/** {@code POST /api/v1/ingest} on this server. */
+	public HttpUrl ingestUrl()
+	{
+		return api("ingest");
+	}
+
 	/** The dashboard, served from the server's base URL. */
 	public HttpUrl dashboardUrl()
 	{

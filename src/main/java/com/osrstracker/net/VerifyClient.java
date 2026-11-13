@@ -128,7 +128,7 @@ public class VerifyClient
 	}
 
 	/** Printable ASCII without spaces, as in a bearer token. */
-	static boolean isValidKey(String key)
+	public static boolean isValidKey(String key)
 	{
 		for (int i = 0; i < key.length(); i++)
 		{

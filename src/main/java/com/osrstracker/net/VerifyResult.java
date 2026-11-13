@@ -193,8 +193,9 @@ public final class VerifyResult
 		return new VerifyResult(Outcome.OK, message, response, skew, tooOld, warnings);
 	}
 
+	/** {@code Retry-After} in seconds, or null if missing or not a number of seconds. */
 	@Nullable
-	private static Long parseRetryAfter(@Nullable String value)
+	static Long parseRetryAfter(@Nullable String value)
 	{
 		if (value == null)
 		{
