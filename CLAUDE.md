@@ -54,8 +54,10 @@ contract package (JSON Schema + fixtures) lives in
   events by (`occurredAt`, `eventId`). Only remove events the server
   confirmed (`accepted` or `duplicate`). Timestamps are UTC with exactly three
   decimals and `Z`.
-- The queue lives under `RuneLite.RUNELITE_DIR` (folder from `Branding`),
-  never under `user.home`.
+- The queue lives in the plugin's data folder under RuneLite's own
+  directory (`RUNELITE_DIR/plugin-data/<internal name>/`, from
+  `Plugin.getPluginDirectory()` and RuneLite's `Filepath`; queue folder name
+  from `Branding`), never under `user.home`.
 - If the server's contract version (from `verify`) is older than the plugin
   requires, keep the queue and do not send. Never move such events to the
   error log.

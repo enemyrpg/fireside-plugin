@@ -3,6 +3,7 @@ package com.osrstracker.ui;
 import com.osrstracker.Branding;
 import com.osrstracker.Contract;
 import com.osrstracker.net.VerifyResponse;
+import com.osrstracker.send.SenderStatus;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -26,7 +27,7 @@ import net.runelite.client.ui.PluginPanel;
 
 /**
  * Side panel: connection status, versions, "Test connection" and
- * "Open dashboard", and a queue section that 7.3 fills in.
+ * "Open dashboard", and the event queue with "Send now" and "Open folder".
  * <p>
  * All methods must be called on the Swing event dispatch thread.
  */
@@ -56,9 +57,18 @@ public class OsrsTrackerPanel extends PluginPanel
 	private final JButton testButton = new JButton("Test connection");
 	private final JButton dashboardButton = new JButton("Open dashboard");
 
+	private final JLabel queueTitle = new JLabel();
 	private final WrappedText queueMessage = new WrappedText(TEXT_WIDTH);
+	private final JLabel waitingValue = valueLabel();
+	private final JLabel lastSentValue = valueLabel();
+	private final JLabel rejectedValue = valueLabel();
+	private final JPanel rejectedRow;
+	private final JPanel queueWarningsPanel = new JPanel();
+	private final JButton sendNowButton = new JButton("Send now");
+	private final JButton openFolderButton = new JButton("Open folder");
 
-	public OsrsTrackerPanel(Runnable onTestConnection, Runnable onOpenDashboard)
+	public OsrsTrackerPanel(Runnable onTestConnection, Runnable onOpenDashboard, Runnable onSendNow,
+		Runnable onOpenFolder)
 	{
 		setLayout(new BorderLayout());
 		setBorder(new EmptyBorder(OUTER_PADDING, OUTER_PADDING, OUTER_PADDING, OUTER_PADDING));
@@ -112,19 +122,43 @@ public class OsrsTrackerPanel extends PluginPanel
 		content.add(left(details));
 		content.add(Box.createVerticalStrut(8));
 
-		// Queue (filled in by task 7.3)
+		// Queue
 		JPanel queue = section();
-		JLabel queueTitle = new JLabel("Queue");
+		JLabel queueHeading = new JLabel("Queue");
+		queueHeading.setFont(FontManager.getRunescapeBoldFont());
+		queueHeading.setForeground(Color.WHITE);
+		queue.add(left(queueHeading));
+		queue.add(Box.createVerticalStrut(4));
 		queueTitle.setFont(FontManager.getRunescapeBoldFont());
-		queueTitle.setForeground(Color.WHITE);
 		queue.add(left(queueTitle));
 		queue.add(Box.createVerticalStrut(4));
 		queueMessage.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		queueMessage.setText("No events are collected yet.");
 		queue.add(left(queueMessage));
+		queue.add(Box.createVerticalStrut(4));
+		queue.add(row("Waiting", waitingValue));
+		queue.add(row("Last sent", lastSentValue));
+		rejectedValue.setForeground(WARNING_COLOR);
+		rejectedRow = row("Rejected", rejectedValue);
+		queue.add(rejectedRow);
+		queueWarningsPanel.setLayout(new BoxLayout(queueWarningsPanel, BoxLayout.Y_AXIS));
+		queueWarningsPanel.setOpaque(false);
+		queue.add(left(queueWarningsPanel));
+		queue.add(Box.createVerticalStrut(8));
+		JPanel queueButtons = new JPanel(new GridLayout(1, 2, 4, 0));
+		queueButtons.setOpaque(false);
+		sendNowButton.setFocusPainted(false);
+		sendNowButton.addActionListener(e -> onSendNow.run());
+		openFolderButton.setFocusPainted(false);
+		openFolderButton.setToolTipText("Open the plugin's data folder (queue and error log)");
+		openFolderButton.addActionListener(e -> onOpenFolder.run());
+		queueButtons.add(sendNowButton);
+		queueButtons.add(openFolderButton);
+		queueButtons.setMaximumSize(new Dimension(Integer.MAX_VALUE, queueButtons.getPreferredSize().height));
+		queue.add(left(queueButtons));
 		content.add(left(queue));
 
 		add(content, BorderLayout.NORTH);
+		renderQueue(QueueView.compute(SenderStatus.STARTING_STATUS, ZoneId.systemDefault()));
 	}
 
 	/**
@@ -142,16 +176,7 @@ public class OsrsTrackerPanel extends PluginPanel
 		statusTitle.setForeground(color(view.getLevel()));
 		statusMessage.setText(view.getMessage());
 
-		warningsPanel.removeAll();
-		List<String> warnings = view.getWarnings();
-		for (String warning : warnings)
-		{
-			warningsPanel.add(Box.createVerticalStrut(6));
-			WrappedText text = new WrappedText(TEXT_WIDTH);
-			text.setText("⚠ " + warning);
-			text.setForeground(WARNING_COLOR);
-			warningsPanel.add(left(text));
-		}
+		showWarnings(warningsPanel, view.getWarnings());
 
 		setTruncated(serverValue, serverUrl == null || serverUrl.trim().isEmpty() ? "Not set" : serverUrl.trim());
 		sendingValue.setText(sendingEnabled ? "On" : "Off");
@@ -166,6 +191,37 @@ public class OsrsTrackerPanel extends PluginPanel
 
 		revalidate();
 		repaint();
+	}
+
+	/** Updates the queue section. */
+	public void renderQueue(QueueView view)
+	{
+		queueTitle.setText(view.getTitle());
+		queueTitle.setForeground(color(view.getLevel()));
+		queueMessage.setText(view.getMessage());
+		waitingValue.setText(view.getWaiting());
+		lastSentValue.setText(view.getLastSent());
+		rejectedRow.setVisible(view.getRejected() != null);
+		rejectedValue.setText(view.getRejected() != null ? view.getRejected() : "");
+		showWarnings(queueWarningsPanel, view.getWarnings());
+		sendNowButton.setEnabled(view.isSendNowEnabled());
+		sendNowButton.setToolTipText(view.getSendNowTooltip());
+
+		revalidate();
+		repaint();
+	}
+
+	private static void showWarnings(JPanel panel, List<String> warnings)
+	{
+		panel.removeAll();
+		for (String warning : warnings)
+		{
+			panel.add(Box.createVerticalStrut(6));
+			WrappedText text = new WrappedText(TEXT_WIDTH);
+			text.setText("⚠ " + warning);
+			text.setForeground(WARNING_COLOR);
+			panel.add(left(text));
+		}
 	}
 
 	/** Plain text (cut with "…" if too long) with the full text as tooltip. */

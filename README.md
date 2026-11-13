@@ -7,7 +7,8 @@ counts, sessions, AFK time and world info) and sends it to your own
 self-hosted [OSRS Tracker server](https://github.com/enemyrpg/osrs-tracker).
 Nothing is sent anywhere until you configure a server URL and API key.
 
-This plugin is in early development and does not collect anything yet.
+This plugin is in early development. The queue and sender are in place, but
+it does not collect any game data yet.
 
 ## Configuration
 1. In your dashboard, create an API key under **Settings → API keys**.
@@ -22,6 +23,26 @@ This plugin is in early development and does not collect anything yet.
 
 Under **Data** you can turn off XP, loot, kill counts and raid purples.
 Sessions and AFK time are always sent while sending is on.
+
+## Queue and sending
+Events are written to a queue on disk first and sent in batches: every 30
+seconds, when 50 events are waiting, at logout, and when you press **Send
+now** in the side panel. An event is only removed from the queue once the
+server has confirmed it, so nothing is lost while the server is down; the
+plugin retries with increasing waits (up to 5 minutes).
+
+The queue lives in RuneLite's own folder, in the plugin's data folder
+(`.runelite/plugin-data/osrs-tracker/queue/`). **Open folder** in the side
+panel opens it.
+- `pending.jsonl`: events waiting to be sent, one per line.
+- `rejected.jsonl`: events the server rejected, each with the server's error
+  message and the time. They are not sent again and never deleted
+  automatically. The panel shows how many there are.
+
+Sending stops if the server rejects the API key or answers 404 (usually a
+wrong server URL). The panel says why. Fix the setting, or press **Test
+connection** once it works, and sending resumes. If the server is older than
+the plugin needs, events stay queued until the server is updated.
 
 ## Development
 Requires JDK 11. If your default Java is not 11, add
