@@ -3,6 +3,7 @@ package com.osrstracker;
 import com.google.gson.Gson;
 import com.google.inject.Provides;
 import com.osrstracker.event.EventJson;
+import com.osrstracker.event.UuidV7Generator;
 import com.osrstracker.net.IngestClient;
 import com.osrstracker.net.ServerUrl;
 import com.osrstracker.net.VerifyClient;
@@ -12,6 +13,8 @@ import com.osrstracker.send.Backoff;
 import com.osrstracker.send.EventSender;
 import com.osrstracker.send.SenderSettings;
 import com.osrstracker.send.SenderStatus;
+import com.osrstracker.session.ClientGameView;
+import com.osrstracker.session.SessionTracker;
 import com.osrstracker.ui.OsrsTrackerPanel;
 import com.osrstracker.ui.PanelIcon;
 import com.osrstracker.ui.QueueView;
@@ -19,6 +22,7 @@ import com.osrstracker.ui.StatusView;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.concurrent.RejectedExecutionException;
@@ -26,8 +30,11 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.GameState;
+import net.runelite.api.Client;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GameTick;
+import net.runelite.api.events.StatChanged;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ClientShutdown;
@@ -67,6 +74,18 @@ public class OsrsTrackerPlugin extends Plugin
 	@Inject
 	private Gson gson;
 
+	@Inject
+	private Client client;
+
+	@Inject
+	private ClientThread clientThread;
+
+	@Inject
+	private ClientGameView gameView;
+
+	@Inject
+	private UuidV7Generator eventIds;
+
 	/**
 	 * The plugin's own thread: all queue disk IO and sender state live on it.
 	 * HTTP runs on OkHttp's pool; results come back to this thread.
@@ -75,8 +94,8 @@ public class OsrsTrackerPlugin extends Plugin
 	private EventSender sender;
 	/** {@code .runelite/plugin-data/<internal name>}, from {@link Plugin#getPluginDirectory()}. */
 	private Filepath dataDirectory;
-	/** Only touched on the client thread. */
-	private GameState lastGameState;
+	/** Sessions, heartbeats and AFK. Client thread, except at ClientShutdown. */
+	private SessionTracker sessions;
 
 	// Panel state below is only touched on the Swing event dispatch thread.
 	private OsrsTrackerPanel panel;
@@ -107,6 +126,17 @@ public class OsrsTrackerPlugin extends Plugin
 			EventSender.SEND_INTERVAL, status -> SwingUtilities.invokeLater(() -> renderQueue(status)));
 		sender.start(senderSettings());
 
+		EventSender eventSink = sender;
+		sessions = new SessionTracker(gameView, eventIds, Clock.systemUTC(), eventSink::submit,
+			() -> Duration.ofMinutes(config.afkThresholdMinutes()), PluginVersion.read());
+		SessionTracker tracker = sessions;
+		// Picks up a game that is already logged in (plugin turned on mid-game).
+		clientThread.invoke(() ->
+		{
+			tracker.onGameState(client.getGameState());
+			tracker.setEnabled(config.sendingEnabled());
+		});
+
 		panel = new OsrsTrackerPanel(this::testConnection, this::openDashboard, this::sendNow, this::openFolder);
 		navigationButton = NavigationButton.builder()
 			.tooltip(Branding.DISPLAY_NAME)
@@ -129,13 +159,16 @@ public class OsrsTrackerPlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception
 	{
+		// Queues an open AFK period (cached values only, safe off the client thread) before the
+		// sender stops. No session.end: the server closes the session at its last heartbeat.
+		sessions.stop();
+		sessions = null;
 		// Never waits: queued writes finish on the executor, the request in flight is cancelled.
 		sender.shutdown();
 		executor.shutdown();
 		sender = null;
 		executor = null;
 		dataDirectory = null;
-		lastGameState = null;
 
 		clientToolbar.removeNavigation(navigationButton);
 		SwingUtilities.invokeLater(() ->
@@ -160,6 +193,12 @@ public class OsrsTrackerPlugin extends Plugin
 		{
 			sender.updateSettings(senderSettings());
 		}
+		SessionTracker tracker = sessions;
+		if (tracker != null && OsrsTrackerConfig.SENDING_ENABLED_KEY.equals(event.getKey()))
+		{
+			boolean enabled = config.sendingEnabled();
+			clientThread.invoke(() -> tracker.setEnabled(enabled));
+		}
 		String key = event.getKey();
 		boolean connectionChanged = OsrsTrackerConfig.SERVER_URL_KEY.equals(key)
 			|| OsrsTrackerConfig.API_KEY_KEY.equals(key);
@@ -176,10 +215,14 @@ public class OsrsTrackerPlugin extends Plugin
 		});
 	}
 
-	/** Makes sure every queued event is on disk before the client exits. Never waits for the network. */
+	/** Ends the session and makes sure every queued event is on disk. Never waits for the network. */
 	@Subscribe
 	public void onClientShutdown(ClientShutdown event)
 	{
+		if (sessions != null)
+		{
+			sessions.onClientShutdown();
+		}
 		if (sender != null)
 		{
 			event.waitFor(sender.flush());
@@ -189,12 +232,29 @@ public class OsrsTrackerPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged event)
 	{
-		GameState state = event.getGameState();
-		if (state == GameState.LOGIN_SCREEN && lastGameState == GameState.LOGGED_IN && sender != null)
+		if (sessions != null && sessions.onGameState(event.getGameState()) && sender != null)
 		{
+			// session.end is queued; send it (and the rest) now.
 			sender.onLogout();
 		}
-		lastGameState = state;
+	}
+
+	@Subscribe
+	public void onGameTick(GameTick tick)
+	{
+		if (sessions != null)
+		{
+			sessions.onTick();
+		}
+	}
+
+	@Subscribe
+	public void onStatChanged(StatChanged event)
+	{
+		if (sessions != null)
+		{
+			sessions.onXp(event.getSkill().name(), event.getXp());
+		}
 	}
 
 	private SenderSettings senderSettings()
