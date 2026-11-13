@@ -1,5 +1,5 @@
 /*
- * The kill count and duration patterns and toSeconds() are adapted from
+ * The kill count and duration patterns are adapted from
  * RuneLite's Chat Commands plugin (ChatCommandsPlugin.java):
  *
  * Copyright (c) 2017. l2-
@@ -64,11 +64,21 @@ public final class KillCountParser
 		int killCount;
 	}
 
+	/** Time formats the game uses: {@code m:ss} (minutes may exceed 59) or {@code h:mm:ss}, with precise-timing decimals. */
+	private static final Pattern TIME = Pattern.compile(
+		"(?:(?<h>[0-9]+):(?<hm>[0-5][0-9])|(?<m>[0-9]+)):(?<s>[0-5][0-9])(?:\\.(?<frac>[0-9]{1,2}))?");
+
+	/** The start of the PB value after "Personal best: " (colour tags removed). */
+	private static final Pattern PB_VALUE = Pattern.compile("^[0-9:.]+");
+
 	@Value
 	public static class FightTime
 	{
 		double seconds;
 		boolean personalBest;
+		/** The PB after this kill: the shown PB, or {@link #seconds} when this kill was a new PB. Null if unknown. */
+		@Nullable
+		Double personalBestSeconds;
 	}
 
 	private KillCountParser()
@@ -126,36 +136,73 @@ public final class KillCountParser
 		{
 			return null;
 		}
-		double seconds;
+		Double seconds = toSeconds(matcher.group("time"));
+		if (seconds == null)
+		{
+			return null;
+		}
+		boolean newPersonalBest = matcher.group("pb") != null;
+		Double personalBestSeconds = newPersonalBest
+			? seconds
+			: parsePersonalBest(message.substring(matcher.end()));
+		return new FightTime(seconds, newPersonalBest, personalBestSeconds);
+	}
+
+	/** The PB value at the start of {@code rest} (the text after "Personal best: "), or null if its format is unknown. */
+	@Nullable
+	private static Double parsePersonalBest(String rest)
+	{
+		Matcher matcher = PB_VALUE.matcher(Text.removeTags(rest));
+		if (!matcher.find())
+		{
+			return null;
+		}
+		String value = matcher.group();
+		// A trailing period ends the sentence, e.g. "Personal best: 1:19.20."
+		if (value.endsWith("."))
+		{
+			value = value.substring(0, value.length() - 1);
+		}
+		return toSeconds(value);
+	}
+
+	/**
+	 * Seconds for a game time ({@code m:ss}, {@code h:mm:ss}, each with optional
+	 * one or two decimals), or null if the format is unknown or the time is not
+	 * positive. Never guesses: a wrong value is worse than none.
+	 */
+	@Nullable
+	static Double toSeconds(String time)
+	{
+		Matcher matcher = TIME.matcher(time);
+		if (!matcher.matches())
+		{
+			return null;
+		}
+		long minutes;
 		try
 		{
-			seconds = toSeconds(matcher.group("time"));
+			minutes = matcher.group("h") != null
+				? Long.parseLong(matcher.group("h")) * 60 + Integer.parseInt(matcher.group("hm"))
+				: Long.parseLong(matcher.group("m"));
 		}
 		catch (NumberFormatException e)
 		{
 			return null;
 		}
-		if (!(seconds > 0) || Double.isInfinite(seconds))
+		if (minutes > 1_000_000)
 		{
 			return null;
 		}
-		// Game times have at most two decimals (ticks of 0.6 s); this removes float noise like 126.39999.
-		return new FightTime(Math.round(seconds * 100) / 100.0, matcher.group("pb") != null);
-	}
-
-	/** {@code m:ss}, {@code h:mm:ss}, with optional decimals. */
-	static double toSeconds(String time)
-	{
-		String[] parts = time.split(":");
-		if (parts.length == 2)
+		String frac = matcher.group("frac");
+		int hundredths = frac == null ? 0 : Integer.parseInt(frac.length() == 1 ? frac + "0" : frac);
+		long total = (minutes * 60 + Integer.parseInt(matcher.group("s"))) * 100 + hundredths;
+		if (total <= 0)
 		{
-			return Integer.parseInt(parts[0]) * 60 + Double.parseDouble(parts[1]);
+			return null;
 		}
-		if (parts.length == 3)
-		{
-			return Integer.parseInt(parts[0]) * 3600 + Integer.parseInt(parts[1]) * 60 + Double.parseDouble(parts[2]);
-		}
-		return Double.parseDouble(time);
+		// Exact hundredths, so no float noise like 126.39999.
+		return total / 100.0;
 	}
 
 	private static boolean isEmpty(@Nullable String s)

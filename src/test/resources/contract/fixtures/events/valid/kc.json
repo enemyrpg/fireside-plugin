@@ -9,6 +9,7 @@
     "boss": "Vorkath",
     "killCount": 412,
     "timeSeconds": 74.4,
-    "personalBest": false
+    "personalBest": false,
+    "personalBestSeconds": 63
   }
 }

@@ -17,6 +17,9 @@ public class Kc implements EventPayload
 	Double timeSeconds;
 	@Nullable
 	Boolean personalBest;
+	/** The player's PB after this kill (contract 1.14.0). */
+	@Nullable
+	Double personalBestSeconds;
 	/** 1–100, including yourself. */
 	@Nullable
 	Integer teamSize;

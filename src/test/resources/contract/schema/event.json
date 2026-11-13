@@ -1129,6 +1129,10 @@
             "personalBest": {
               "type": "boolean"
             },
+            "personalBestSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
             "teamSize": {
               "type": "integer",
               "minimum": 1,

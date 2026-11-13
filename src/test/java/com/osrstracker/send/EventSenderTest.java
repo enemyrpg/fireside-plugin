@@ -10,6 +10,7 @@ import static org.junit.Assert.fail;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.networknt.schema.JsonSchema;
+import com.osrstracker.Contract;
 import com.osrstracker.contract.ContractPackage;
 import com.osrstracker.event.Event;
 import com.osrstracker.event.EventJson;
@@ -507,18 +508,18 @@ public class EventSenderTest
 	@Test
 	public void tooOldServerHoldsTheQueue() throws Exception
 	{
-		server.contractVersion = "1.12.0";
+		server.contractVersion = "1.13.0";
 		startSender();
 		List<String> submitted = submit(sender, 60);
 		sender.sendNow();
 		SenderStatus held = await("held", s -> s.getState() == SenderStatus.State.HELD);
-		assertEquals("1.12.0", held.getServerContract());
+		assertEquals("1.13.0", held.getServerContract());
 		assertEquals(60, held.getQueueSize());
 		assertEquals(0, held.getRejectedCount());
 		assertEquals(0, server.batches.size());
 
 		// The server is updated; "Send now" checks again.
-		server.contractVersion = "1.13.0";
+		server.contractVersion = Contract.REQUIRED_VERSION;
 		sender.sendNow();
 		awaitEmptyQueue();
 		assertEquals(submitted, server.stored);

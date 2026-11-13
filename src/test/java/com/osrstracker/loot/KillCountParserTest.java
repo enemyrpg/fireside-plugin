@@ -20,10 +20,10 @@ public class KillCountParserTest
 		assertEquals(message, new KillCountParser.KillCount(boss, killCount), kc);
 	}
 
-	private static void assertTime(String message, double seconds, boolean personalBest)
+	private static void assertTime(String message, double seconds, boolean personalBest, Double personalBestSeconds)
 	{
 		KillCountParser.FightTime time = KillCountParser.parseFightTime(message);
-		assertEquals(message, new KillCountParser.FightTime(seconds, personalBest), time);
+		assertEquals(message, new KillCountParser.FightTime(seconds, personalBest, personalBestSeconds), time);
 	}
 
 	// Kill counts: at least ten bosses and activities
@@ -106,48 +106,98 @@ public class KillCountParserTest
 	// Fight times
 
 	@Test
-	public void fightDurationWithPersonalBest()
+	public void slowerKillSendsTheOlderPersonalBest()
 	{
-		assertTime("Fight duration: <col=ff0000>2:06</col>. Personal best: 1:19.", 126, false);
-		assertTime("Fight duration: <col=ff0000>2:06.40</col>. Personal best: 1:19.20.", 126.4, false);
-		assertTime("Fight duration: <col=ff0000>0:59</col>. Personal best: 0:55", 59, false);
-		assertTime("Fight duration: <col=ff0000>2:41.40</col>. Personal best: 2:14.20", 161.4, false);
+		assertTime("Fight duration: <col=ff0000>1:57</col>. Personal best: 1:03", 117, false, 63.0);
+		assertTime("Fight duration: <col=ff0000>2:06</col>. Personal best: 1:19.", 126, false, 79.0);
+		assertTime("Fight duration: <col=ff0000>0:59</col>. Personal best: 0:55", 59, false, 55.0);
+		assertTime("Subdued in <col=ef1020>7:40</col>. Personal best: 5:38.", 460, false, 338.0);
 	}
 
 	@Test
-	public void newPersonalBest()
+	public void personalBestInColourTags()
 	{
-		assertTime("Fight duration: <col=ff0000>1:36</col> (new personal best)", 96, true);
-		assertTime("Fight duration: <col=ff0000>1:36.40</col> (new personal best)", 96.4, true);
-		assertTime("Subdued in <col=ef1020>5:20.60</col> (new personal best).", 320.6, true);
-		assertTime("Challenge duration: <col=ff0000>1:46.40</col> (new personal best)", 106.4, true);
-		assertTime("Lap duration: @mes_hl_red@1:01.20</col> (new personal best).", 61.2, true);
+		assertTime("Challenge duration: <col=ff0000>1:10</col>. Personal best: <col=ff0000>0:59</col>", 70, false,
+			59.0);
+		assertTime("Duration: <col=ff0000>1:10</col>. Personal best: </col><col=ff0000>0:59.40</col>", 70, false,
+			59.4);
 	}
 
 	@Test
-	public void otherDurationFormats()
+	public void newPersonalBestIsThisKillsTime()
 	{
-		assertTime("Subdued in <col=ef1020>7:40</col>. Personal best: 5:38.", 460, false);
-		assertTime("Challenge duration: <col=ff0000>10:24.20</col>. Personal best: 7:52.40.", 624.2, false);
-		assertTime("Challenge duration: <col=ff0000>1:10</col>. Personal best: <col=ff0000>0:59</col>", 70, false);
-		assertTime("Duration: <col=ff0000>104:31.20</col> (new personal best)", 6271.2, true);
-		assertTime("Duration: <col=ff0000>172:18</col>. Personal best: 134:52", 10338, false);
+		assertTime("Fight duration: <col=ff0000>1:36</col> (new personal best)", 96, true, 96.0);
+		assertTime("Fight duration: <col=ff0000>1:36.40</col> (new personal best)", 96.4, true, 96.4);
+		assertTime("Subdued in <col=ef1020>5:20.60</col> (new personal best).", 320.6, true, 320.6);
+		assertTime("Challenge duration: <col=ff0000>1:46.40</col> (new personal best)", 106.4, true, 106.4);
+		assertTime("Lap duration: @mes_hl_red@1:01.20</col> (new personal best).", 61.2, true, 61.2);
 	}
 
 	@Test
-	public void totalCompletionTimeIsNotAFightTime()
+	public void preciseTimingWithDecimals()
 	{
+		assertTime("Fight duration: <col=ff0000>2:06.40</col>. Personal best: 1:19.20.", 126.4, false, 79.2);
+		assertTime("Fight duration: <col=ff0000>2:41.40</col>. Personal best: 2:14.20", 161.4, false, 134.2);
+		assertTime("Challenge duration: <col=ff0000>10:24.20</col>. Personal best: 7:52.40.", 624.2, false, 472.4);
+		// PB set before precise timing existed: whole seconds.
+		assertTime("Fight duration: <col=ff0000>1:57.60</col>. Personal best: 1:03", 117.6, false, 63.0);
+	}
+
+	@Test
+	public void timesOverAnHour()
+	{
+		// Minutes above 59 (m:ss).
+		assertTime("Duration: <col=ff0000>104:31.20</col> (new personal best)", 6271.2, true, 6271.2);
+		assertTime("Duration: <col=ff0000>172:18</col>. Personal best: 134:52", 10338, false, 8092.0);
+		// Hours (h:mm:ss).
+		assertTime("Duration: <col=ff0000>1:02:03.20</col>. Personal best: 1:00:41.40", 3723.2, false, 3641.4);
+		assertTime("Duration: <col=ff0000>1:02:03</col>. Personal best: 58:12.", 3723, false, 3492.0);
+	}
+
+	@Test
+	public void unknownPersonalBestFormatIsLeftOut()
+	{
+		assertTime("Fight duration: <col=ff0000>1:57</col>. Personal best: 1:75", 117, false, null);
+		assertTime("Fight duration: <col=ff0000>1:57</col>. Personal best: 63", 117, false, null);
+		assertTime("Fight duration: <col=ff0000>1:57</col>. Personal best: 1:3", 117, false, null);
+		assertTime("Fight duration: <col=ff0000>1:57</col>. Personal best: 1:03.123", 117, false, null);
+		assertTime("Fight duration: <col=ff0000>1:57</col>. Personal best: 1:02:03:04", 117, false, null);
+		assertTime("Fight duration: <col=ff0000>1:57</col>. Personal best: ", 117, false, null);
+		assertTime("Fight duration: <col=ff0000>1:57</col>. Personal best: 0:00", 117, false, null);
+	}
+
+	@Test
+	public void unknownFightTimeFormatIsNotSent()
+	{
+		assertNull(KillCountParser.parseFightTime("Fight duration: <col=ff0000>117</col>. Personal best: 1:03"));
+		assertNull(KillCountParser.parseFightTime("Fight duration: <col=ff0000>1:75</col> (new personal best)"));
+		assertNull(KillCountParser.parseFightTime("Fight duration: <col=ff0000>0:00</col>. Personal best: 1:03"));
+	}
+
+	@Test
+	public void messagesWithoutPersonalBestGiveNoFightTime()
+	{
+		assertNull(KillCountParser.parseFightTime("Your Zulrah kill count is: <col=ff0000>4</col>."));
+		// A duration with neither "Personal best" nor "(new personal best)", e.g. a ToB wave.
+		assertNull(KillCountParser.parseFightTime("Duration: <col=ff0000>2:42.60</col><br>"));
 		assertNull(KillCountParser.parseFightTime(
 			"Theatre of Blood total completion time: <col=ff0000>24:40.20</col>. Personal best: 20:45.00"));
-		assertNull(KillCountParser.parseFightTime("Your Zulrah kill count is: <col=ff0000>4</col>."));
 	}
 
 	@Test
 	public void timeStrings()
 	{
-		assertEquals(59, KillCountParser.toSeconds("0:59"), 0);
-		assertEquals(126.4, KillCountParser.toSeconds("2:06.40"), 1e-9);
-		assertEquals(3723.2, KillCountParser.toSeconds("1:02:03.20"), 1e-9);
+		assertEquals(Double.valueOf(59), KillCountParser.toSeconds("0:59"));
+		assertEquals(Double.valueOf(126.4), KillCountParser.toSeconds("2:06.40"));
+		assertEquals(Double.valueOf(126.4), KillCountParser.toSeconds("2:06.4"));
+		assertEquals(Double.valueOf(6271.2), KillCountParser.toSeconds("104:31.20"));
+		assertEquals(Double.valueOf(3723.2), KillCountParser.toSeconds("1:02:03.20"));
+		assertEquals(Double.valueOf(3723), KillCountParser.toSeconds("1:02:03"));
+		for (String bad : new String[]{"", "59", "1:5", "1:60", "1:75", "1:05.", "1:05.123", "1:60:00", "1:2:03",
+			"1:02:03:04", "0:00", "0:00.00", ":05", "1:05.2.3", "99999999999:00"})
+		{
+			assertNull(bad, KillCountParser.toSeconds(bad));
+		}
 	}
 
 	@Test

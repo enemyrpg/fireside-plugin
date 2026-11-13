@@ -1,5 +1,5 @@
 {
-  "contractVersion": "1.13.0",
+  "contractVersion": "1.14.0",
   "eventSchemaVersion": 1,
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "schemas": [

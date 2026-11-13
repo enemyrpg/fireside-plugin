@@ -14,7 +14,7 @@ public final class Contract
 	 * reports an older version in {@code GET /api/v1/ingest/verify} gets a
 	 * warning in the panel, and the queue is held back (7.3).
 	 */
-	public static final String REQUIRED_VERSION = "1.13.0";
+	public static final String REQUIRED_VERSION = "1.14.0";
 
 	private Contract()
 	{
