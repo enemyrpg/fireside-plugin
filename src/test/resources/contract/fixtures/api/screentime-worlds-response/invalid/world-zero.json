@@ -1,0 +1,53 @@
+{
+  "from": "2026-11-01T23:00:00.000Z",
+  "to": "2026-11-08T23:00:00.000Z",
+  "worlds": [
+    {
+      "world": 0,
+      "seconds": 7200,
+      "activeSeconds": 6300,
+      "afkSeconds": 900,
+      "worldTypes": ["MEMBERS"],
+      "location": "GERMANY",
+      "activity": "Trade - Members"
+    },
+    {
+      "world": 301,
+      "seconds": 3600,
+      "activeSeconds": 3600,
+      "afkSeconds": 0,
+      "worldTypes": [],
+      "location": "UNITED_KINGDOM",
+      "activity": ""
+    },
+    {
+      "world": 999,
+      "seconds": 60,
+      "activeSeconds": 60,
+      "afkSeconds": 0,
+      "worldTypes": ["MEMBERS"],
+      "location": null,
+      "activity": null
+    }
+  ],
+  "worldTypes": [
+    {
+      "type": "MEMBERS",
+      "seconds": 7260
+    }
+  ],
+  "locations": [
+    {
+      "location": "GERMANY",
+      "seconds": 7200
+    },
+    {
+      "location": "UNITED_KINGDOM",
+      "seconds": 3600
+    },
+    {
+      "location": null,
+      "seconds": 60
+    }
+  ]
+}

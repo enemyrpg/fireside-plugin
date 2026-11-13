@@ -1,0 +1,24 @@
+{
+  "groupBy": "day",
+  "from": null,
+  "to": null,
+  "totals": {
+    "lootCount": 3,
+    "geValue": 2855700,
+    "haValue": 60000
+  },
+  "groups": [
+    {
+      "date": "2026-11-03",
+      "lootCount": 1,
+      "geValue": 1500,
+      "haValue": 0
+    },
+    {
+      "date": "2026-11-08",
+      "lootCount": 2,
+      "geValue": 2854200,
+      "haValue": 60000
+    }
+  ]
+}

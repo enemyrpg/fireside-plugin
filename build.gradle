@@ -25,6 +25,15 @@ dependencies {
 	testImplementation 'junit:junit:4.12'
 	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
+
+	// Test-only: JSON Schema (draft 2020-12) validation against the pinned
+	// contract, and a mock HTTP server matching RuneLite's OkHttp version.
+	// slf4j is excluded: its 2.x API would replace RuneLite's slf4j 1.7 and
+	// silence logback (also in ./gradlew run, which uses the test classpath).
+	testImplementation('com.networknt:json-schema-validator:1.5.9') {
+		exclude group: 'org.slf4j'
+	}
+	testImplementation 'com.squareup.okhttp3:mockwebserver:3.14.9'
 }
 
 group = 'com.osrstracker'

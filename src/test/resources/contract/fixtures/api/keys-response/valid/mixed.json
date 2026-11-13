@@ -1,0 +1,28 @@
+{
+  "keys": [
+    {
+      "id": 1,
+      "name": "Gaming PC",
+      "prefix": "ost_a1b2",
+      "createdAt": "2026-11-01T18:00:00.000Z",
+      "lastUsedAt": "2026-11-10T19:30:00.000Z",
+      "revokedAt": null
+    },
+    {
+      "id": 2,
+      "name": "Laptop",
+      "prefix": "ost_Zx9q",
+      "createdAt": "2026-11-02T10:00:00.000Z",
+      "lastUsedAt": null,
+      "revokedAt": null
+    },
+    {
+      "id": 3,
+      "name": "Old PC",
+      "prefix": "ost_0f3K",
+      "createdAt": "2026-10-01T10:00:00.000Z",
+      "lastUsedAt": "2026-10-20T12:00:00.000Z",
+      "revokedAt": "2026-11-01T09:00:00.000Z"
+    }
+  ]
+}

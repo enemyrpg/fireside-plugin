@@ -1,0 +1,30 @@
+{
+  "groupBy": "source",
+  "from": "2026-11-01T23:00:00.000Z",
+  "to": "2026-11-08T23:00:00.000Z",
+  "totals": {
+    "lootCount": 3,
+    "geValue": 2855700,
+    "haValue": 60000
+  },
+  "groups": [
+    {
+      "source": {
+        "type": "PLAYER",
+        "name": "Zezima"
+      },
+      "lootCount": 1,
+      "geValue": 1500,
+      "haValue": 0,
+      "items": [
+        {
+          "itemId": 995,
+          "name": "Coins",
+          "quantity": 1500,
+          "geValue": 1500,
+          "haValue": 0
+        }
+      ]
+    }
+  ]
+}

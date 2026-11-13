@@ -1,0 +1,65 @@
+{
+  "bosses": [
+    {
+      "boss": "Tombs of Amascut: Expert Mode",
+      "killCount": 140,
+      "lastObservedAt": "2026-11-08T21:10:00.000Z",
+      "bestTimeSeconds": 1300.2,
+      "gainedLast30Days": 9,
+      "byAccount": [
+        {
+          "accountId": 1,
+          "killCount": 140
+        }
+      ],
+      "category": "raid",
+      "raid": "Tombs of Amascut",
+      "bestTimesByTeamSize": [
+        {
+          "teamSize": 1,
+          "seconds": 1750
+        },
+        {
+          "teamSize": 3,
+          "seconds": 1300.2
+        }
+      ]
+    },
+    {
+      "boss": "Vorkath",
+      "killCount": 412,
+      "lastObservedAt": "2026-11-08T19:42:13.512Z",
+      "bestTimeSeconds": 74.4,
+      "gainedLast30Days": 37,
+      "byAccount": [
+        {
+          "accountId": 1,
+          "killCount": 400
+        },
+        {
+          "accountId": 2,
+          "killCount": 12
+        }
+      ],
+      "category": "boss",
+      "raid": null,
+      "bestTimesByTeamSize": []
+    },
+    {
+      "boss": "Zulrah",
+      "killCount": 5,
+      "lastObservedAt": "2026-11-07T18:00:00.000Z",
+      "bestTimeSeconds": null,
+      "gainedLast30Days": 0,
+      "byAccount": [
+        {
+          "accountId": 2,
+          "killCount": 5
+        }
+      ],
+      "category": "boss",
+      "raid": null,
+      "bestTimesByTeamSize": []
+    }
+  ]
+}

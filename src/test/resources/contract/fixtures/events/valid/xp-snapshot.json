@@ -1,0 +1,109 @@
+{
+  "eventId": "01933c4e-8a2b-7c3d-9e4f-0a1b2c3d4e5f",
+  "schemaVersion": 1,
+  "type": "xp.snapshot",
+  "accountHash": "1234567890123456789",
+  "occurredAt": "2026-11-08T19:42:13.512Z",
+  "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+  "payload": {
+    "reason": "interval",
+    "skills": {
+      "ATTACK": {
+        "xp": 13034431,
+        "level": 99
+      },
+      "DEFENCE": {
+        "xp": 8771558,
+        "level": 95
+      },
+      "STRENGTH": {
+        "xp": 13034431,
+        "level": 99
+      },
+      "HITPOINTS": {
+        "xp": 14514000,
+        "level": 99
+      },
+      "RANGED": {
+        "xp": 13034431,
+        "level": 99
+      },
+      "PRAYER": {
+        "xp": 3258594,
+        "level": 85
+      },
+      "MAGIC": {
+        "xp": 13034431,
+        "level": 99
+      },
+      "COOKING": {
+        "xp": 5346332,
+        "level": 90
+      },
+      "WOODCUTTING": {
+        "xp": 4385776,
+        "level": 88
+      },
+      "FLETCHING": {
+        "xp": 5902831,
+        "level": 91
+      },
+      "FISHING": {
+        "xp": 4842295,
+        "level": 89
+      },
+      "FIREMAKING": {
+        "xp": 6517253,
+        "level": 92
+      },
+      "CRAFTING": {
+        "xp": 3972294,
+        "level": 87
+      },
+      "SMITHING": {
+        "xp": 3258594,
+        "level": 85
+      },
+      "MINING": {
+        "xp": 2951373,
+        "level": 84
+      },
+      "HERBLORE": {
+        "xp": 3258594,
+        "level": 85
+      },
+      "AGILITY": {
+        "xp": 3972294,
+        "level": 87
+      },
+      "THIEVING": {
+        "xp": 4385776,
+        "level": 88
+      },
+      "SLAYER": {
+        "xp": 5346332,
+        "level": 90
+      },
+      "FARMING": {
+        "xp": 8771558,
+        "level": 95
+      },
+      "RUNECRAFT": {
+        "xp": 2192818,
+        "level": 81
+      },
+      "HUNTER": {
+        "xp": 3258594,
+        "level": 85
+      },
+      "CONSTRUCTION": {
+        "xp": 5346332,
+        "level": 90
+      },
+      "SAILING": {
+        "xp": 101333,
+        "level": 50
+      }
+    }
+  }
+}

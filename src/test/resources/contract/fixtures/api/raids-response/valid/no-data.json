@@ -1,0 +1,32 @@
+{
+  "raids": [
+    {
+      "raid": "Chambers of Xeric",
+      "lootCount": 0,
+      "lootGeValue": 0,
+      "specialLootGeValue": 0
+    },
+    {
+      "raid": "Theatre of Blood",
+      "lootCount": 0,
+      "lootGeValue": 0,
+      "specialLootGeValue": 0
+    },
+    {
+      "raid": "Tombs of Amascut",
+      "lootCount": 0,
+      "lootGeValue": 0,
+      "specialLootGeValue": 0
+    },
+    {
+      "raid": "The Fractured Archive",
+      "lootCount": 0,
+      "lootGeValue": 0,
+      "specialLootGeValue": 0
+    }
+  ],
+  "specialLoot": {
+    "items": [],
+    "nextCursor": null
+  }
+}

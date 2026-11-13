@@ -1,0 +1,62 @@
+{
+  "week": "2026-W45",
+  "start": "2026-11-01T23:00:00.000Z",
+  "end": "2026-11-08T23:00:00.000Z",
+  "complete": true,
+  "computedAt": "2026-11-09T00:05:00.000Z",
+  "playtime": {
+    "playedSeconds": 36000,
+    "activeSeconds": 30000,
+    "afkSeconds": 6000,
+    "previousWeekPlayedSeconds": 28000,
+    "mostPlayedWorld": 420
+  },
+  "xp": {
+    "xpGained": 1500000,
+    "levelsGained": 4,
+    "topSkills": [
+      {
+        "skill": "SLAYER",
+        "xpGained": 800000
+      },
+      {
+        "skill": "HITPOINTS",
+        "xpGained": 300000
+      },
+      {
+        "skill": "RANGED",
+        "xpGained": 250000
+      }
+    ]
+  },
+  "loot": {
+    "geValue": 12000000,
+    "topDrops": [
+      {
+        "lootEventId": 17,
+        "accountId": 1,
+        "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+        "occurredAt": "2026-11-08T19:42:13.512Z",
+        "source": {
+          "type": "NPC",
+          "name": "Vorkath"
+        },
+        "itemId": 11286,
+        "name": "Draconic visage",
+        "quantity": 1,
+        "gePriceEach": 2850000,
+        "haPriceEach": 60000,
+        "geValue": 2850000,
+        "haValue": 60000
+      }
+    ]
+  },
+  "kc": {
+    "bosses": [
+      {
+        "boss": "Vorkath",
+        "gained": 18
+      }
+    ]
+  }
+}

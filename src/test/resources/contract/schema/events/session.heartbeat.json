@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Event: session.heartbeat",
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+    },
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "accountHash": {
+      "type": "string",
+      "pattern": "^-?\\d+$",
+      "not": {
+        "const": "-1"
+      }
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+    },
+    "sessionId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+    },
+    "type": {
+      "type": "string",
+      "const": "session.heartbeat"
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "regionId": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "world": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "worldTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          }
+        },
+        "worldLocation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Z][A-Z0-9_]*$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "worldActivity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "idle": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "regionId",
+        "world",
+        "worldTypes",
+        "worldLocation",
+        "worldActivity",
+        "idle"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "eventId",
+    "schemaVersion",
+    "accountHash",
+    "occurredAt",
+    "sessionId",
+    "type",
+    "payload"
+  ],
+  "additionalProperties": false
+}

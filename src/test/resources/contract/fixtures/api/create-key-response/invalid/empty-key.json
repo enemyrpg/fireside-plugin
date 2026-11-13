@@ -1,0 +1,11 @@
+{
+  "apiKey": {
+    "id": 4,
+    "name": "Gaming PC",
+    "prefix": "ost_a1b2",
+    "createdAt": "2026-11-01T18:00:00.000Z",
+    "lastUsedAt": null,
+    "revokedAt": null
+  },
+  "key": ""
+}

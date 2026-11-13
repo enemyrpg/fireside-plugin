@@ -1,0 +1,16 @@
+{
+  "accepted": ["01933c4e-8a2b-7c3d-9e4f-0a1b2c3d4e5f"],
+  "duplicates": ["01933c4d-0000-7000-8000-000000000001"],
+  "rejected": [
+    {
+      "index": 2,
+      "eventId": "01933c4f-0000-7000-8000-000000000003",
+      "error": "payload.items.0.quantity: Too small: expected number to be >0"
+    },
+    {
+      "index": 3,
+      "eventId": null,
+      "error": "eventId: Invalid input"
+    }
+  ]
+}

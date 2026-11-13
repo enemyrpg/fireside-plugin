@@ -9,6 +9,20 @@ Nothing is sent anywhere until you configure a server URL and API key.
 
 This plugin is in early development and does not collect anything yet.
 
+## Configuration
+1. In your dashboard, create an API key under **Settings → API keys**.
+2. In the plugin settings, set **Server URL** to the server's base address,
+   e.g. `http://127.0.0.1:3000` (without `/api/v1`), and paste the **API key**.
+3. Open the plugin's side panel and press **Test connection**. It shows
+   whether the server answers and the key works, and warns if your clock is
+   more than a minute off, if the server is too old for the plugin, or if
+   the key would be sent unencrypted (plain `http` to another machine).
+4. Turn on **Send data**. It is off by default, and nothing is sent until the
+   server URL and API key are set. Data is only sent to the server you set up.
+
+Under **Data** you can turn off XP, loot, kill counts and raid purples.
+Sessions and AFK time are always sent while sending is on.
+
 ## Development
 Requires JDK 11. If your default Java is not 11, add
 `org.gradle.java.home=/path/to/jdk-11` to `~/.gradle/gradle.properties`.
@@ -32,6 +46,11 @@ The development client uses `~/.runelite/`. A client started from a launcher
 such as Bolt may use a different RuneLite folder, so settings and the plugin's
 queue are separate. Do not log in with the same character in both clients at
 the same time.
+
+**Contract:** the event and API contract from the server repo is pinned in
+`src/test/resources/contract/`, and tests validate against it. Update it with
+`./scripts/update-contract.sh <version>` (needs `gh`), then update
+`Contract.REQUIRED_VERSION`.
 
 ## Disclaimer
 Created using intellectual property belonging to Jagex Limited under the terms

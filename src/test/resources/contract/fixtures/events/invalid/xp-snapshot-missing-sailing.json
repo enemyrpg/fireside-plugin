@@ -1,0 +1,105 @@
+{
+  "eventId": "01933c4e-8a2b-7c3d-9e4f-0a1b2c3d4e5f",
+  "schemaVersion": 1,
+  "type": "xp.snapshot",
+  "accountHash": "1234567890123456789",
+  "occurredAt": "2026-11-08T19:42:13.512Z",
+  "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+  "payload": {
+    "reason": "login",
+    "skills": {
+      "ATTACK": {
+        "xp": 0,
+        "level": 1
+      },
+      "DEFENCE": {
+        "xp": 0,
+        "level": 1
+      },
+      "STRENGTH": {
+        "xp": 0,
+        "level": 1
+      },
+      "HITPOINTS": {
+        "xp": 1154,
+        "level": 10
+      },
+      "RANGED": {
+        "xp": 0,
+        "level": 1
+      },
+      "PRAYER": {
+        "xp": 0,
+        "level": 1
+      },
+      "MAGIC": {
+        "xp": 0,
+        "level": 1
+      },
+      "COOKING": {
+        "xp": 0,
+        "level": 1
+      },
+      "WOODCUTTING": {
+        "xp": 0,
+        "level": 1
+      },
+      "FLETCHING": {
+        "xp": 0,
+        "level": 1
+      },
+      "FISHING": {
+        "xp": 0,
+        "level": 1
+      },
+      "FIREMAKING": {
+        "xp": 0,
+        "level": 1
+      },
+      "CRAFTING": {
+        "xp": 0,
+        "level": 1
+      },
+      "SMITHING": {
+        "xp": 0,
+        "level": 1
+      },
+      "MINING": {
+        "xp": 0,
+        "level": 1
+      },
+      "HERBLORE": {
+        "xp": 0,
+        "level": 1
+      },
+      "AGILITY": {
+        "xp": 0,
+        "level": 1
+      },
+      "THIEVING": {
+        "xp": 0,
+        "level": 1
+      },
+      "SLAYER": {
+        "xp": 0,
+        "level": 1
+      },
+      "FARMING": {
+        "xp": 0,
+        "level": 1
+      },
+      "RUNECRAFT": {
+        "xp": 0,
+        "level": 1
+      },
+      "HUNTER": {
+        "xp": 0,
+        "level": 1
+      },
+      "CONSTRUCTION": {
+        "xp": 0,
+        "level": 1
+      }
+    }
+  }
+}
