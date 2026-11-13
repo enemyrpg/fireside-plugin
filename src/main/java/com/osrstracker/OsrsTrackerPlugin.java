@@ -3,7 +3,12 @@ package com.osrstracker;
 import com.google.gson.Gson;
 import com.google.inject.Provides;
 import com.osrstracker.event.EventJson;
+import com.osrstracker.event.LootItem;
+import com.osrstracker.event.LootSource;
 import com.osrstracker.event.UuidV7Generator;
+import com.osrstracker.loot.ClientItemLookup;
+import com.osrstracker.loot.KillTracker;
+import com.osrstracker.loot.LootMapper;
 import com.osrstracker.net.IngestClient;
 import com.osrstracker.net.ServerUrl;
 import com.osrstracker.net.VerifyClient;
@@ -25,12 +30,15 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.GameState;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.StatChanged;
@@ -39,8 +47,12 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ClientShutdown;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.PluginChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.PluginManager;
+import net.runelite.client.plugins.loottracker.LootReceived;
+import net.runelite.client.plugins.loottracker.LootTrackerPlugin;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.util.Filepath;
@@ -86,6 +98,12 @@ public class OsrsTrackerPlugin extends Plugin
 	@Inject
 	private UuidV7Generator eventIds;
 
+	@Inject
+	private ClientItemLookup itemLookup;
+
+	@Inject
+	private PluginManager pluginManager;
+
 	/**
 	 * The plugin's own thread: all queue disk IO and sender state live on it.
 	 * HTTP runs on OkHttp's pool; results come back to this thread.
@@ -96,6 +114,11 @@ public class OsrsTrackerPlugin extends Plugin
 	private Filepath dataDirectory;
 	/** Sessions, heartbeats and AFK. Client thread, except at ClientShutdown. */
 	private SessionTracker sessions;
+	/** Kill counts and loot. Client thread. */
+	private KillTracker kills;
+	private LootMapper lootMapper;
+	/** Whether RuneLite's Loot Tracker (which posts {@code LootReceived}) is running. */
+	private volatile boolean lootTrackerActive;
 
 	// Panel state below is only touched on the Swing event dispatch thread.
 	private OsrsTrackerPanel panel;
@@ -130,6 +153,9 @@ public class OsrsTrackerPlugin extends Plugin
 		sessions = new SessionTracker(gameView, eventIds, Clock.systemUTC(), eventSink::submit,
 			() -> Duration.ofMinutes(config.afkThresholdMinutes()), config::sendXp, PluginVersion.read());
 		SessionTracker tracker = sessions;
+		kills = new KillTracker(payload -> tracker.emitInSession(payload), config::sendLoot, config::sendKillCounts);
+		lootMapper = new LootMapper(itemLookup);
+		lootTrackerActive = isLootTrackerActive();
 		// Picks up a game that is already logged in (plugin turned on mid-game).
 		clientThread.invoke(() ->
 		{
@@ -163,6 +189,8 @@ public class OsrsTrackerPlugin extends Plugin
 		// sender stops. No session.end: the server closes the session at its last heartbeat.
 		sessions.stop();
 		sessions = null;
+		kills = null;
+		lootMapper = null;
 		// Never waits: queued writes finish on the executor, the request in flight is cancelled.
 		sender.shutdown();
 		executor.shutdown();
@@ -232,6 +260,14 @@ public class OsrsTrackerPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged event)
 	{
+		GameState state = event.getGameState();
+		if (kills != null && (state == GameState.HOPPING || state == GameState.LOGIN_SCREEN
+			|| state == GameState.LOGIN_SCREEN_AUTHENTICATOR))
+		{
+			// A kill count from the last tick still belongs to the session that is ending.
+			kills.flush();
+			kills.reset();
+		}
 		if (sessions != null && sessions.onGameState(event.getGameState()) && sender != null)
 		{
 			// session.end is queued; send it (and the rest) now.
@@ -242,6 +278,10 @@ public class OsrsTrackerPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
+		if (kills != null)
+		{
+			kills.onTick(client.getTickCount());
+		}
 		if (sessions != null)
 		{
 			sessions.onTick();
@@ -255,6 +295,56 @@ public class OsrsTrackerPlugin extends Plugin
 		{
 			sessions.onStat(event.getSkill().name(), event.getXp(), event.getLevel());
 		}
+	}
+
+	@Subscribe
+	public void onChatMessage(ChatMessage event)
+	{
+		if (kills != null)
+		{
+			kills.onChatMessage(event.getType(), event.getMessage(), client.getTickCount());
+		}
+	}
+
+	/** From RuneLite's Loot Tracker; only posted while that plugin is on. */
+	@Subscribe
+	public void onLootReceived(LootReceived event)
+	{
+		if (kills == null || lootMapper == null)
+		{
+			return;
+		}
+		// For PLAYER loot the name is another player's: dropped here, never sent or logged.
+		LootSource source = LootMapper.source(event.getType(), event.getName(), event.getCombatLevel(),
+			event.getMetadata());
+		if (source == null)
+		{
+			return;
+		}
+		List<LootItem> items = lootMapper.items(event.getItems());
+		kills.onLoot(source, items, event.getAmount(), client.getTickCount());
+	}
+
+	@Subscribe
+	public void onPluginChanged(PluginChanged event)
+	{
+		if (event.getPlugin() instanceof LootTrackerPlugin)
+		{
+			lootTrackerActive = event.isLoaded();
+			SwingUtilities.invokeLater(this::refreshPanel);
+		}
+	}
+
+	private boolean isLootTrackerActive()
+	{
+		for (Plugin plugin : pluginManager.getPlugins())
+		{
+			if (plugin instanceof LootTrackerPlugin)
+			{
+				return pluginManager.isPluginActive(plugin);
+			}
+		}
+		return false;
 	}
 
 	private SenderSettings senderSettings()
@@ -366,7 +456,8 @@ public class OsrsTrackerPlugin extends Plugin
 			return;
 		}
 		String url = config.serverUrl();
-		StatusView view = StatusView.compute(url, config.apiKey(), testing, lastResult);
+		StatusView view = StatusView.compute(url, config.apiKey(), testing, lastResult,
+			config.sendLoot() && !lootTrackerActive);
 		panel.render(view, url, config.sendingEnabled(),
 			lastResult != null ? lastResult.getResponse() : null,
 			lastTestedAt, testing, ServerUrl.parse(url) != null);

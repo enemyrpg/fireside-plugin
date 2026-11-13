@@ -38,12 +38,29 @@ public final class StatusView
 		this.warnings = Collections.unmodifiableList(warnings);
 	}
 
+	static final String LOOT_TRACKER_OFF_WARNING = "RuneLite's Loot Tracker plugin is off, so no loot is sent. "
+		+ "Turn it on to track loot.";
+
 	public static StatusView compute(@Nullable String rawUrl, @Nullable String rawKey, boolean testing,
 		@Nullable VerifyResult last)
+	{
+		return compute(rawUrl, rawKey, testing, last, false);
+	}
+
+	/**
+	 * @param lootTrackerOff sending loot is on, but RuneLite's Loot Tracker
+	 *     plugin (which posts the loot events) is not running
+	 */
+	public static StatusView compute(@Nullable String rawUrl, @Nullable String rawKey, boolean testing,
+		@Nullable VerifyResult last, boolean lootTrackerOff)
 	{
 		boolean urlSet = rawUrl != null && !rawUrl.trim().isEmpty();
 		boolean keySet = rawKey != null && !rawKey.trim().isEmpty();
 		List<String> warnings = new ArrayList<>();
+		if (lootTrackerOff)
+		{
+			warnings.add(LOOT_TRACKER_OFF_WARNING);
+		}
 
 		if (!urlSet || !keySet)
 		{

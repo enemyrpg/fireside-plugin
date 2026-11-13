@@ -12,6 +12,7 @@ import com.osrstracker.event.AccountType;
 import com.osrstracker.event.Event;
 import com.osrstracker.event.EventJson;
 import com.osrstracker.event.EventType;
+import com.osrstracker.event.Kc;
 import com.osrstracker.event.SessionAfk;
 import com.osrstracker.event.SessionEnd;
 import com.osrstracker.event.SessionHeartbeat;
@@ -522,6 +523,28 @@ public class SessionTrackerTest
 		play(Duration.ofSeconds(30));
 		tracker.stop();
 		assertEquals(1, ofType(EventType.XP_SNAPSHOT).size());
+	}
+
+	@Test
+	public void gameEventsGoIntoTheActiveSession()
+	{
+		Kc kc = Kc.builder().boss("Zulrah").killCount(4).build();
+		assertFalse("No session yet", tracker.emitInSession(kc));
+		assertTrue(events.isEmpty());
+
+		login();
+		play(Duration.ofSeconds(5));
+		assertTrue(tracker.emitInSession(kc));
+		Event event = events.get(events.size() - 1);
+		assertEquals(EventType.KC, event.getType());
+		assertEquals(ACCOUNT, event.getAccountHash());
+		assertEquals(events.get(0).getSessionId(), event.getSessionId());
+		assertEquals(clock.instant(), event.getOccurredAt());
+
+		tracker.setEnabled(false);
+		int before = events.size();
+		assertFalse("Send data off", tracker.emitInSession(kc));
+		assertEquals(before, events.size());
 	}
 
 	private void assertLogoutThenEnd()
