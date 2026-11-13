@@ -1,0 +1,13 @@
+{
+  "skill": null,
+  "bucket": "month",
+  "points": [
+    {
+      "period": "2026-W45",
+      "start": "2026-11-01T23:00:00.000Z",
+      "xp": 123456789,
+      "level": 1850,
+      "gained": 1500000
+    }
+  ]
+}

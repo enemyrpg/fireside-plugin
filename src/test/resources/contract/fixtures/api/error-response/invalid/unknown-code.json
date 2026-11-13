@@ -1,0 +1,12 @@
+{
+  "error": {
+    "code": "TEAPOT",
+    "message": "Invalid query parameters",
+    "details": [
+      {
+        "path": "limit",
+        "message": "Too big: expected number to be <=100"
+      }
+    ]
+  }
+}

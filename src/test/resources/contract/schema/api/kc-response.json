@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "API: kc-response",
+  "type": "object",
+  "properties": {
+    "bosses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "boss": {
+            "type": "string",
+            "minLength": 1
+          },
+          "killCount": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "lastObservedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+          },
+          "bestTimeSeconds": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "gainedLast30Days": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "byAccount": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "accountId": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "killCount": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "accountId",
+                "killCount"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "boss",
+              "raid"
+            ]
+          },
+          "raid": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bestTimesByTeamSize": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "teamSize": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100
+                },
+                "seconds": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              },
+              "required": [
+                "teamSize",
+                "seconds"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "boss",
+          "killCount",
+          "lastObservedAt",
+          "bestTimeSeconds",
+          "gainedLast30Days",
+          "byAccount",
+          "category",
+          "raid",
+          "bestTimesByTeamSize"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "bosses"
+  ],
+  "additionalProperties": false
+}

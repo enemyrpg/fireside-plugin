@@ -1,0 +1,21 @@
+{
+  "year": 2025,
+  "from": "2024-12-31T23:00:00.000Z",
+  "to": "2025-12-31T23:00:00.000Z",
+  "days": [
+    {
+      "date": "2026-11-07",
+      "playedSeconds": 3600,
+      "activeSeconds": 3600,
+      "afkSeconds": 0,
+      "sessionCount": 1
+    },
+    {
+      "date": "2026-11-08",
+      "playedSeconds": 7800,
+      "activeSeconds": 6900,
+      "afkSeconds": 900,
+      "sessionCount": 2
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "The dashboard is only available on localhost",
+    "details": []
+  }
+}

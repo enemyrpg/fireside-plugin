@@ -1,0 +1,55 @@
+{
+  "groupBy": "source",
+  "from": "2026-11-01T23:00:00.000Z",
+  "to": "2026-11-08T23:00:00.000Z",
+  "totals": {
+    "lootCount": 3,
+    "geValue": 2855700,
+    "haValue": 60000
+  },
+  "groups": [
+    {
+      "source": {
+        "type": "NPC",
+        "name": "Vorkath"
+      },
+      "lootCount": 2,
+      "geValue": 2854200,
+      "haValue": 60000,
+      "items": [
+        {
+          "itemId": 11286,
+          "name": "Draconic visage",
+          "quantity": 1,
+          "geValue": 2850000,
+          "haValue": 60000
+        },
+        {
+          "itemId": 536,
+          "name": "Dragon bones",
+          "quantity": 2,
+          "geValue": 4200,
+          "haValue": 0
+        }
+      ]
+    },
+    {
+      "source": {
+        "type": "PLAYER",
+        "name": null
+      },
+      "lootCount": 1,
+      "geValue": 1500,
+      "haValue": 0,
+      "items": [
+        {
+          "itemId": 995,
+          "name": "Coins",
+          "quantity": 1500,
+          "geValue": 1500,
+          "haValue": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "from": "2025-11-01T23:00:00.000Z",
+  "to": "2026-11-08T23:00:00.000Z",
+  "bucket": "day",
+  "buckets": [
+    {
+      "period": "2026-11-02",
+      "start": "2026-11-01T23:00:00.000Z",
+      "activeSeconds": 0,
+      "afkSeconds": 0
+    },
+    {
+      "period": "2026-11-03",
+      "start": "2026-11-02T23:00:00.000Z",
+      "activeSeconds": 0,
+      "afkSeconds": 0
+    },
+    {
+      "period": "2026-11-04",
+      "start": "2026-11-03T23:00:00.000Z",
+      "activeSeconds": 0,
+      "afkSeconds": 0
+    },
+    {
+      "period": "2026-11-05",
+      "start": "2026-11-04T23:00:00.000Z",
+      "activeSeconds": 0,
+      "afkSeconds": 0
+    },
+    {
+      "period": "2026-11-06",
+      "start": "2026-11-05T23:00:00.000Z",
+      "activeSeconds": 0,
+      "afkSeconds": 0
+    },
+    {
+      "period": "2026-11-07",
+      "start": "2026-11-06T23:00:00.000Z",
+      "activeSeconds": 3600,
+      "afkSeconds": 0
+    },
+    {
+      "period": "2026-11-08",
+      "start": "2026-11-07T23:00:00.000Z",
+      "activeSeconds": 6900,
+      "afkSeconds": 900
+    }
+  ],
+  "totals": {
+    "playedSeconds": 11400,
+    "activeSeconds": 10500,
+    "afkSeconds": 900
+  },
+  "previous": {
+    "playedSeconds": 9000,
+    "activeSeconds": 8400,
+    "afkSeconds": 600
+  },
+  "stats": {
+    "sessionCount": 3,
+    "averagePerDaySeconds": 1628,
+    "averageSessionSeconds": 3800,
+    "longestSessionSeconds": 7200,
+    "afkShare": 0.0789
+  }
+}

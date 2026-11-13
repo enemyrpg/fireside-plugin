@@ -1,0 +1,36 @@
+{
+  "bosses": [
+    {
+      "boss": "Vorkath",
+      "killCount": 0,
+      "lastObservedAt": "2026-11-08T19:42:13.512Z",
+      "bestTimeSeconds": 74.4,
+      "gainedLast30Days": 37,
+      "byAccount": [
+        {
+          "accountId": 1,
+          "killCount": 1
+        }
+      ],
+      "category": "boss",
+      "raid": null,
+      "bestTimesByTeamSize": []
+    },
+    {
+      "boss": "Zulrah",
+      "killCount": 5,
+      "lastObservedAt": "2026-11-07T18:00:00.000Z",
+      "bestTimeSeconds": null,
+      "gainedLast30Days": 0,
+      "byAccount": [
+        {
+          "accountId": 2,
+          "killCount": 5
+        }
+      ],
+      "category": "boss",
+      "raid": null,
+      "bestTimesByTeamSize": []
+    }
+  ]
+}

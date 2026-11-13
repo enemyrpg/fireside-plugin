@@ -1,0 +1,20 @@
+{
+  "eventId": "01933c4e-8a2b-7c3d-9e4f-0a1b2c3d4e5f",
+  "schemaVersion": 1,
+  "type": "raid.special_loot",
+  "accountHash": "1234567890123456789",
+  "occurredAt": "2026-11-08T19:42:13.512Z",
+  "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+  "payload": {
+    "raid": "Tombs of Amascut: Expert Mode",
+    "item": {
+      "itemId": 26219,
+      "name": "Osmumten's fang",
+      "quantity": 1,
+      "gePrice": 24500000
+    },
+    "recipient": "SELF",
+    "teamSize": 3,
+    "killCount": 140
+  }
+}

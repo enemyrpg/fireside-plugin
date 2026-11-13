@@ -1,0 +1,1265 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Event",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "schemaVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "accountHash": {
+          "type": "string",
+          "pattern": "^-?\\d+$",
+          "not": {
+            "const": "-1"
+          }
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "type": {
+          "type": "string",
+          "const": "session.start"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "displayName": {
+              "type": "string",
+              "minLength": 1
+            },
+            "accountType": {
+              "type": "string",
+              "enum": [
+                "NORMAL",
+                "IRONMAN",
+                "ULTIMATE_IRONMAN",
+                "HARDCORE_IRONMAN",
+                "GROUP_IRONMAN",
+                "HARDCORE_GROUP_IRONMAN",
+                "UNRANKED_GROUP_IRONMAN"
+              ]
+            },
+            "world": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "pluginVersion": {
+              "type": "string",
+              "pattern": "^\\d+\\.\\d+\\.\\d+([-+][0-9A-Za-z.-]+)?$"
+            }
+          },
+          "required": [
+            "displayName",
+            "accountType",
+            "world",
+            "pluginVersion"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "eventId",
+        "schemaVersion",
+        "accountHash",
+        "occurredAt",
+        "sessionId",
+        "type",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "schemaVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "accountHash": {
+          "type": "string",
+          "pattern": "^-?\\d+$",
+          "not": {
+            "const": "-1"
+          }
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "type": {
+          "type": "string",
+          "const": "session.heartbeat"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "regionId": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "world": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "worldTypes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Z][A-Z0-9_]*$"
+              }
+            },
+            "worldLocation": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Z][A-Z0-9_]*$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "worldActivity": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "idle": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "regionId",
+            "world",
+            "worldTypes",
+            "worldLocation",
+            "worldActivity",
+            "idle"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "eventId",
+        "schemaVersion",
+        "accountHash",
+        "occurredAt",
+        "sessionId",
+        "type",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "schemaVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "accountHash": {
+          "type": "string",
+          "pattern": "^-?\\d+$",
+          "not": {
+            "const": "-1"
+          }
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "type": {
+          "type": "string",
+          "const": "session.afk"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "startedAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+            },
+            "endedAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+            }
+          },
+          "required": [
+            "startedAt",
+            "endedAt"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "eventId",
+        "schemaVersion",
+        "accountHash",
+        "occurredAt",
+        "sessionId",
+        "type",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "schemaVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "accountHash": {
+          "type": "string",
+          "pattern": "^-?\\d+$",
+          "not": {
+            "const": "-1"
+          }
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "type": {
+          "type": "string",
+          "const": "session.end"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "reason": {
+              "type": "string",
+              "enum": [
+                "logout",
+                "client_closed",
+                "hop"
+              ]
+            }
+          },
+          "required": [
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "eventId",
+        "schemaVersion",
+        "accountHash",
+        "occurredAt",
+        "sessionId",
+        "type",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "schemaVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "accountHash": {
+          "type": "string",
+          "pattern": "^-?\\d+$",
+          "not": {
+            "const": "-1"
+          }
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "type": {
+          "type": "string",
+          "const": "xp.snapshot"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "reason": {
+              "type": "string",
+              "enum": [
+                "login",
+                "logout",
+                "interval"
+              ]
+            },
+            "skills": {
+              "type": "object",
+              "properties": {
+                "ATTACK": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "DEFENCE": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "STRENGTH": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "HITPOINTS": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "RANGED": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "PRAYER": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "MAGIC": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "COOKING": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "WOODCUTTING": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "FLETCHING": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "FISHING": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "FIREMAKING": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "CRAFTING": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "SMITHING": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "MINING": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "HERBLORE": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "AGILITY": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "THIEVING": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "SLAYER": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "FARMING": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "RUNECRAFT": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "HUNTER": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "CONSTRUCTION": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                },
+                "SAILING": {
+                  "type": "object",
+                  "properties": {
+                    "xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 200000000
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 99
+                    }
+                  },
+                  "required": [
+                    "xp",
+                    "level"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "ATTACK",
+                "DEFENCE",
+                "STRENGTH",
+                "HITPOINTS",
+                "RANGED",
+                "PRAYER",
+                "MAGIC",
+                "COOKING",
+                "WOODCUTTING",
+                "FLETCHING",
+                "FISHING",
+                "FIREMAKING",
+                "CRAFTING",
+                "SMITHING",
+                "MINING",
+                "HERBLORE",
+                "AGILITY",
+                "THIEVING",
+                "SLAYER",
+                "FARMING",
+                "RUNECRAFT",
+                "HUNTER",
+                "CONSTRUCTION",
+                "SAILING"
+              ],
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "xp": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 200000000
+                  },
+                  "level": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 99
+                  }
+                },
+                "required": [
+                  "xp",
+                  "level"
+                ],
+                "additionalProperties": false
+              },
+              "propertyNames": {
+                "type": "string",
+                "pattern": "^[A-Z][A-Z0-9_]*$"
+              }
+            }
+          },
+          "required": [
+            "reason",
+            "skills"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "eventId",
+        "schemaVersion",
+        "accountHash",
+        "occurredAt",
+        "sessionId",
+        "type",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "schemaVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "accountHash": {
+          "type": "string",
+          "pattern": "^-?\\d+$",
+          "not": {
+            "const": "-1"
+          }
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "type": {
+          "type": "string",
+          "const": "loot"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "NPC"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "npcId": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "combatLevel": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "PLAYER"
+                    },
+                    "name": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "EVENT",
+                        "CLUE",
+                        "OTHER"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "items": {
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "itemId": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "gePrice": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "haPrice": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "itemId",
+                  "name",
+                  "quantity",
+                  "gePrice",
+                  "haPrice"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "killCount": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "source",
+            "items"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "eventId",
+        "schemaVersion",
+        "accountHash",
+        "occurredAt",
+        "sessionId",
+        "type",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "schemaVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "accountHash": {
+          "type": "string",
+          "pattern": "^-?\\d+$",
+          "not": {
+            "const": "-1"
+          }
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "type": {
+          "type": "string",
+          "const": "kc"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "boss": {
+              "type": "string",
+              "minLength": 1
+            },
+            "killCount": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "timeSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "personalBest": {
+              "type": "boolean"
+            },
+            "teamSize": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "boss",
+            "killCount"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "eventId",
+        "schemaVersion",
+        "accountHash",
+        "occurredAt",
+        "sessionId",
+        "type",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "schemaVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "accountHash": {
+          "type": "string",
+          "pattern": "^-?\\d+$",
+          "not": {
+            "const": "-1"
+          }
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+        },
+        "type": {
+          "type": "string",
+          "const": "raid.special_loot"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "raid": {
+              "type": "string",
+              "minLength": 1
+            },
+            "item": {
+              "type": "object",
+              "properties": {
+                "itemId": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "quantity": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "gePrice": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "itemId",
+                "name",
+                "quantity",
+                "gePrice"
+              ],
+              "additionalProperties": false
+            },
+            "recipient": {
+              "type": "string",
+              "enum": [
+                "SELF",
+                "TEAMMATE"
+              ]
+            },
+            "teamSize": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "killCount": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "raid",
+            "item",
+            "recipient"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "eventId",
+        "schemaVersion",
+        "accountHash",
+        "occurredAt",
+        "sessionId",
+        "type",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

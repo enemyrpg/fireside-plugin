@@ -1,0 +1,29 @@
+{
+  "bosses": [
+    {
+      "boss": "Tombs of Amascut: Expert Mode",
+      "killCount": 140,
+      "lastObservedAt": "2026-11-08T21:10:00.000Z",
+      "bestTimeSeconds": 1300.2,
+      "gainedLast30Days": 9,
+      "byAccount": [
+        {
+          "accountId": 1,
+          "killCount": 140
+        }
+      ],
+      "category": "boss",
+      "raid": "Tombs of Amascut",
+      "bestTimesByTeamSize": [
+        {
+          "teamSize": 1,
+          "seconds": 1750
+        },
+        {
+          "teamSize": 3,
+          "seconds": 1300.2
+        }
+      ]
+    }
+  ]
+}

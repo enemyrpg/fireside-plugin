@@ -1,0 +1,24 @@
+{
+  "from": "2026-11-01T23:00:00.000Z",
+  "to": "2026-11-08T23:00:00.000Z",
+  "skills": [
+    {
+      "skill": "SLAYER",
+      "startXp": 5000000,
+      "endXp": 5346332,
+      "xpGained": 346332,
+      "startLevel": 89,
+      "endLevel": 90,
+      "levelsGained": 1
+    },
+    {
+      "skill": "HITPOINTS",
+      "startXp": 13014431,
+      "endXp": 13034431,
+      "xpGained": 20000,
+      "startLevel": 99,
+      "endLevel": 99,
+      "levelsGained": 0
+    }
+  ]
+}

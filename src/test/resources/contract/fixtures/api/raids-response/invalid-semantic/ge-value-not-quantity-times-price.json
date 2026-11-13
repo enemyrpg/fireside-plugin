@@ -1,0 +1,63 @@
+{
+  "raids": [
+    {
+      "raid": "Chambers of Xeric",
+      "lootCount": 12,
+      "lootGeValue": 4200000,
+      "specialLootGeValue": 0
+    },
+    {
+      "raid": "Theatre of Blood",
+      "lootCount": 0,
+      "lootGeValue": 0,
+      "specialLootGeValue": 0
+    },
+    {
+      "raid": "Tombs of Amascut",
+      "lootCount": 30,
+      "lootGeValue": 9800000,
+      "specialLootGeValue": 24500000
+    },
+    {
+      "raid": "The Fractured Archive",
+      "lootCount": 0,
+      "lootGeValue": 0,
+      "specialLootGeValue": 0
+    }
+  ],
+  "specialLoot": {
+    "items": [
+      {
+        "occurredAt": "2026-11-08T19:42:13.512Z",
+        "accountId": 1,
+        "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+        "raid": "Tombs of Amascut: Expert Mode",
+        "raidGroup": "Tombs of Amascut",
+        "itemId": 26219,
+        "name": "Osmumten's fang",
+        "quantity": 1,
+        "gePriceEach": 24500000,
+        "geValue": 1,
+        "recipient": "SELF",
+        "teamSize": 3,
+        "killCount": 140
+      },
+      {
+        "occurredAt": "2026-11-07T21:10:00.000Z",
+        "accountId": 2,
+        "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0002",
+        "raid": "Chambers of Xeric: Challenge Mode",
+        "raidGroup": "Chambers of Xeric",
+        "itemId": 20997,
+        "name": "Twisted bow",
+        "quantity": 1,
+        "gePriceEach": 1500000000,
+        "geValue": 1500000000,
+        "recipient": "TEAMMATE",
+        "teamSize": 4,
+        "killCount": null
+      }
+    ],
+    "nextCursor": "WyIyMDI2LTExLTA3VDIxOjEwOjAwLjAwMFoiXQ"
+  }
+}

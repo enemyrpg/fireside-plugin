@@ -1,0 +1,21 @@
+{
+  "items": [
+    {
+      "lootEventId": 17,
+      "accountId": 1,
+      "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+      "occurredAt": "2026-11-08T19:42:13.512Z",
+      "source": {
+        "type": "NPC",
+        "name": "Vorkath"
+      },
+      "itemId": 11286,
+      "name": "Draconic visage",
+      "quantity": 1,
+      "gePriceEach": 2850000,
+      "haPriceEach": 60000,
+      "geValue": 2850000,
+      "haValue": 60000
+    }
+  ]
+}

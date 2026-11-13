@@ -1,0 +1,23 @@
+{
+  "items": [
+    {
+      "id": "01933c40-3333-7aaa-bbbb-ccccdddd0003",
+      "accountId": 2,
+      "startedAt": "2026-11-08T18:00:00.000Z",
+      "endedAt": "2026-11-08T18:05:00.000Z",
+      "endReason": "timeout",
+      "world": null,
+      "durationSeconds": 300,
+      "activeSeconds": 0,
+      "afkSeconds": 300,
+      "summary": {
+        "xpGainedTotal": 0,
+        "xpGainedBySkill": {},
+        "lootGeValue": 0,
+        "lootCount": 0,
+        "kcGainedByBoss": {}
+      }
+    }
+  ],
+  "nextCursor": null
+}
