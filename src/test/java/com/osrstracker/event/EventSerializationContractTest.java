@@ -85,10 +85,14 @@ public class EventSerializationContractTest
 		examples.put("loot (OTHER)", new Loot(LootSource.other("Herbiboar"), items, null));
 
 		examples.put("kc", Kc.builder().boss("Vorkath").killCount(412).timeSeconds(74.4).personalBest(false)
-			.build());
+			.personalBestSeconds(63.0).build());
+		examples.put("kc (new personal best)", Kc.builder().boss("Zulrah").killCount(5).timeSeconds(96.4)
+			.personalBest(true).personalBestSeconds(96.4).build());
+		examples.put("kc (time without PB value)", Kc.builder().boss("Zulrah").killCount(6).timeSeconds(117.0)
+			.personalBest(false).build());
 		examples.put("kc (minimal)", Kc.builder().boss("Zulrah").killCount(1).build());
 		examples.put("kc (raid)", Kc.builder().boss("Tombs of Amascut: Expert Mode").killCount(140)
-			.timeSeconds(1500.6).personalBest(true).teamSize(3).build());
+			.timeSeconds(1500.6).personalBest(true).personalBestSeconds(1500.6).teamSize(3).build());
 
 		RaidSpecialLoot.Item fang = new RaidSpecialLoot.Item(26219, "Osmumten's fang", 1, 24_500_000);
 		examples.put("raid.special_loot (SELF)", RaidSpecialLoot.builder().raid("Tombs of Amascut: Expert Mode")

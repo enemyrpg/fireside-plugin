@@ -50,7 +50,8 @@ public class KillTrackerTest
 		tracker.onTick(100);
 		assertTrue("Same tick: still waiting", events.isEmpty());
 		tracker.onTick(101);
-		assertEquals(Kc.builder().boss("Zulrah").killCount(4).timeSeconds(59.0).personalBest(false).build(),
+		assertEquals(Kc.builder().boss("Zulrah").killCount(4).timeSeconds(59.0).personalBest(false)
+			.personalBestSeconds(55.0).build(),
 			onlyKc());
 	}
 
@@ -61,7 +62,7 @@ public class KillTrackerTest
 		game(GG_KC, 100);
 		tracker.onTick(101);
 		assertEquals(Kc.builder().boss("Grotesque Guardians").killCount(179).timeSeconds(96.0)
-			.personalBest(true).build(), onlyKc());
+			.personalBest(true).personalBestSeconds(96.0).build(), onlyKc());
 	}
 
 	@Test
@@ -85,6 +86,7 @@ public class KillTrackerTest
 		Kc kc = onlyKc();
 		assertNull(kc.getTimeSeconds());
 		assertNull(kc.getPersonalBest());
+		assertNull(kc.getPersonalBestSeconds());
 	}
 
 	@Test

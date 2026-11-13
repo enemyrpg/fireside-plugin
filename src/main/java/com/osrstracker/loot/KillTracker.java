@@ -168,7 +168,8 @@ public class KillTracker
 		Kc.KcBuilder event = Kc.builder().boss(kc.boss).killCount(kc.killCount);
 		if (kc.time != null)
 		{
-			event.timeSeconds(kc.time.getSeconds()).personalBest(kc.time.isPersonalBest());
+			event.timeSeconds(kc.time.getSeconds()).personalBest(kc.time.isPersonalBest())
+				.personalBestSeconds(kc.time.getPersonalBestSeconds());
 		}
 		log.debug("Kill count{}", kc.time != null ? " with fight time" : "");
 		sink.accept(event.build());
