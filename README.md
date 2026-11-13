@@ -10,7 +10,8 @@ Nothing is sent anywhere until you configure a server URL and API key.
 This plugin is in early development and does not collect anything yet.
 
 ## Development
-Requires JDK 11.
+Requires JDK 11. If your default Java is not 11, add
+`org.gradle.java.home=/path/to/jdk-11` to `~/.gradle/gradle.properties`.
 
 ```sh
 ./gradlew build   # build and run tests
