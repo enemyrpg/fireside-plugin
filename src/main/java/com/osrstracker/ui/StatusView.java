@@ -80,6 +80,12 @@ public final class StatusView
 			warnings.isEmpty() ? "Connected" : "Connected with warnings", last.getMessage(), warnings);
 	}
 
+	/** For layout tests only. */
+	static StatusView forTest(Level level, String title, String message, List<String> warnings)
+	{
+		return new StatusView(level, title, message, new ArrayList<>(warnings));
+	}
+
 	public Level getLevel()
 	{
 		return level;

@@ -13,7 +13,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.annotation.Nullable;
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -33,8 +32,10 @@ import net.runelite.client.ui.PluginPanel;
  */
 public class OsrsTrackerPanel extends PluginPanel
 {
-	/** Text width inside the panel, for wrapping HTML labels. */
-	private static final int TEXT_WIDTH = PANEL_WIDTH - 30;
+	private static final int OUTER_PADDING = 10;
+	private static final int SECTION_PADDING = 8;
+	/** Text width inside a section, used for wrapping before the first layout. */
+	private static final int TEXT_WIDTH = PANEL_WIDTH - 2 * OUTER_PADDING - 2 * SECTION_PADDING;
 	private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
 
 	private static final Color OK_COLOR = new Color(0x5C, 0xC4, 0x5C);
@@ -42,7 +43,7 @@ public class OsrsTrackerPanel extends PluginPanel
 	private static final Color ERROR_COLOR = new Color(0xE0, 0x5A, 0x4F);
 
 	private final JLabel statusTitle = new JLabel();
-	private final JLabel statusMessage = new JLabel();
+	private final WrappedText statusMessage = new WrappedText(TEXT_WIDTH);
 	private final JPanel warningsPanel = new JPanel();
 
 	private final JLabel serverValue = valueLabel();
@@ -55,12 +56,12 @@ public class OsrsTrackerPanel extends PluginPanel
 	private final JButton testButton = new JButton("Test connection");
 	private final JButton dashboardButton = new JButton("Open dashboard");
 
-	private final JLabel queueMessage = new JLabel();
+	private final WrappedText queueMessage = new WrappedText(TEXT_WIDTH);
 
 	public OsrsTrackerPanel(Runnable onTestConnection, Runnable onOpenDashboard)
 	{
 		setLayout(new BorderLayout());
-		setBorder(new EmptyBorder(10, 10, 10, 10));
+		setBorder(new EmptyBorder(OUTER_PADDING, OUTER_PADDING, OUTER_PADDING, OUTER_PADDING));
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
 
 		JPanel content = new JPanel();
@@ -119,7 +120,7 @@ public class OsrsTrackerPanel extends PluginPanel
 		queue.add(left(queueTitle));
 		queue.add(Box.createVerticalStrut(4));
 		queueMessage.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-		queueMessage.setText(wrap("No events are collected yet."));
+		queueMessage.setText("No events are collected yet.");
 		queue.add(left(queueMessage));
 		content.add(left(queue));
 
@@ -139,16 +140,17 @@ public class OsrsTrackerPanel extends PluginPanel
 	{
 		statusTitle.setText(view.getTitle());
 		statusTitle.setForeground(color(view.getLevel()));
-		statusMessage.setText(wrap(view.getMessage()));
+		statusMessage.setText(view.getMessage());
 
 		warningsPanel.removeAll();
 		List<String> warnings = view.getWarnings();
 		for (String warning : warnings)
 		{
-			JLabel label = new JLabel(wrap("⚠ " + warning));
-			label.setForeground(WARNING_COLOR);
-			label.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
-			warningsPanel.add(left(label));
+			warningsPanel.add(Box.createVerticalStrut(6));
+			WrappedText text = new WrappedText(TEXT_WIDTH);
+			text.setText("⚠ " + warning);
+			text.setForeground(WARNING_COLOR);
+			warningsPanel.add(left(text));
 		}
 
 		setTruncated(serverValue, serverUrl == null || serverUrl.trim().isEmpty() ? "Not set" : serverUrl.trim());
@@ -193,7 +195,7 @@ public class OsrsTrackerPanel extends PluginPanel
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		panel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		panel.setBorder(new EmptyBorder(8, 8, 8, 8));
+		panel.setBorder(new EmptyBorder(SECTION_PADDING, SECTION_PADDING, SECTION_PADDING, SECTION_PADDING));
 		return panel;
 	}
 
@@ -231,37 +233,5 @@ public class OsrsTrackerPanel extends PluginPanel
 			((JComponent) component).setAlignmentX(Component.LEFT_ALIGNMENT);
 		}
 		return component;
-	}
-
-	/** Wraps plain text in HTML so long messages break into lines. */
-	static String wrap(String text)
-	{
-		return "<html><div style='width:" + TEXT_WIDTH + "px'>" + escape(text) + "</div></html>";
-	}
-
-	static String escape(String text)
-	{
-		StringBuilder sb = new StringBuilder(text.length());
-		for (char c : text.toCharArray())
-		{
-			switch (c)
-			{
-				case '<':
-					sb.append("&lt;");
-					break;
-				case '>':
-					sb.append("&gt;");
-					break;
-				case '&':
-					sb.append("&amp;");
-					break;
-				case '"':
-					sb.append("&quot;");
-					break;
-				default:
-					sb.append(c);
-			}
-		}
-		return sb.toString();
 	}
 }
