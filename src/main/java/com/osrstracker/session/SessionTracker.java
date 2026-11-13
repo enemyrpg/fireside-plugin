@@ -224,6 +224,22 @@ public class SessionTracker
 		clearSession();
 	}
 
+	/**
+	 * A game event (loot, kill count) in the current session, created now.
+	 *
+	 * @return false if there is no active session (not logged in yet, or
+	 *     "Send data" is off); the event is then dropped
+	 */
+	public synchronized boolean emitInSession(EventPayload payload)
+	{
+		if (!enabled || state != State.ACTIVE)
+		{
+			return false;
+		}
+		emit(clock.instant(), payload);
+		return true;
+	}
+
 	synchronized State state()
 	{
 		return state;
