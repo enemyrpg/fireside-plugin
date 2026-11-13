@@ -172,7 +172,7 @@ public final class KillCountParser
 	 * positive. Never guesses: a wrong value is worse than none.
 	 */
 	@Nullable
-	static Double toSeconds(String time)
+	public static Double toSeconds(String time)
 	{
 		Matcher matcher = TIME.matcher(time);
 		if (!matcher.matches())
