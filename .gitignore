@@ -8,3 +8,14 @@ nbactions.xml
 nb-configuration.xml
 nbproject/
 *.class
+
+# IntelliJ (shared run configurations live in .run/ and are committed)
+out/
+*.iml
+*.ipr
+*.iws
+
+# Other editors and OS files
+bin/
+.vscode/
+.DS_Store

@@ -16,7 +16,9 @@ contract package (JSON Schema + fixtures) lives in
 
 ## Commands
 - `./gradlew build` – build and test
-- `./gradlew run` or run from IntelliJ – start RuneLite in developer mode
+- `./gradlew run` or the shared **RuneLite (dev)** run configuration in
+  IntelliJ (`.run/`) – start RuneLite with the plugin, both with
+  `-ea --developer-mode --debug`
 - `./scripts/update-contract.sh <version>` – update the pinned contract
   (added in task 7.3)
 
