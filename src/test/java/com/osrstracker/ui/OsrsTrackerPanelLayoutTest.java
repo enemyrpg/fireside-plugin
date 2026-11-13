@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.gson.Gson;
 import com.osrstracker.net.VerifyResponse;
+import com.osrstracker.send.SenderStatus;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Graphics2D;
@@ -39,7 +40,7 @@ public class OsrsTrackerPanelLayoutTest
 		{
 			// RuneLite's look and feel and fonts, as in the client.
 			RuneLiteLAF.setup();
-			OsrsTrackerPanel panel = new OsrsTrackerPanel(() -> {}, () -> {});
+			OsrsTrackerPanel panel = new OsrsTrackerPanel(() -> {}, () -> {}, () -> {}, () -> {});
 			VerifyResponse response = VerifyResponse.parse(new Gson(),
 				"{\"ok\":true,\"keyName\":\"My very long development client key name\",\"serverVersion\":\"0.1.0\","
 					+ "\"contractVersion\":\"1.12.0\",\"serverTime\":\"2026-11-13T18:00:00.000Z\"}");
@@ -54,6 +55,11 @@ public class OsrsTrackerPanelLayoutTest
 				warnings);
 			panel.render(connected, "http://192.168.100.200:3100/some/long/prefix", true, response,
 				Instant.parse("2026-11-13T18:00:00Z"), false, true);
+			panel.renderQueue(QueueView.compute(new SenderStatus(SenderStatus.State.STOPPED, 123_456, 1_234,
+				Instant.parse("2026-11-13T18:00:00Z"), 500, null, "ignored",
+				SenderStatus.StopReason.NOT_FOUND, null,
+				"Can't write the event queue (FileSystemException: /home/someone/.runelite/plugin-data/osrs-tracker/"
+					+ "queue/pending.jsonl: No space left on device)."), java.time.ZoneOffset.UTC));
 
 			Container root = panel.getWrappedPanel();
 			root.setSize(SIDEBAR_WIDTH, 1200);
