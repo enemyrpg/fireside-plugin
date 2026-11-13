@@ -2,13 +2,18 @@ package com.osrstracker.session;
 
 import com.osrstracker.event.AccountType;
 import com.osrstracker.event.SessionHeartbeat;
+import com.osrstracker.event.XpSnapshot;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.ToIntFunction;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
+import net.runelite.api.Skill;
 import net.runelite.api.WorldType;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
@@ -95,6 +100,34 @@ public class ClientGameView implements GameView
 			activity = info.getActivity();
 		}
 		return new SessionHeartbeat(regionId(), world, worldTypes, location, activity, idle);
+	}
+
+	@Nullable
+	@Override
+	public Map<String, XpSnapshot.SkillXp> skills()
+	{
+		return skills(client::getSkillExperience, client::getRealSkillLevel);
+	}
+
+	/**
+	 * Every {@link Skill} ({@code values()} leaves out the deprecated overall
+	 * entry). Null while any real level is 0: every skill starts at level 1,
+	 * so 0 means the stats are not loaded yet.
+	 */
+	@Nullable
+	static Map<String, XpSnapshot.SkillXp> skills(ToIntFunction<Skill> xp, ToIntFunction<Skill> realLevel)
+	{
+		Map<String, XpSnapshot.SkillXp> skills = new LinkedHashMap<>();
+		for (Skill skill : Skill.values())
+		{
+			int level = realLevel.applyAsInt(skill);
+			if (level < 1)
+			{
+				return null;
+			}
+			skills.put(skill.name(), new XpSnapshot.SkillXp(xp.applyAsInt(skill), level));
+		}
+		return skills;
 	}
 
 	/** Instance-aware: inside an instance, the region of the template the instance was copied from. */
