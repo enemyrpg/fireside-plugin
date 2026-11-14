@@ -1,14 +1,11 @@
-# OSRS Tracker – RuneLite plugin
-
-> **Working title.** "OSRS Tracker" is a placeholder name until the first release.
+# Fireside – RuneLite plugin
 
 A RuneLite plugin that collects data from Old School RuneScape (XP, loot, kill
-counts, sessions, AFK time and world info) and sends it to your own
-self-hosted [OSRS Tracker server](https://github.com/enemyrpg/osrs-tracker).
+counts, raids, sessions, AFK time and world info) and sends it to your own
+self-hosted [Fireside server](https://github.com/enemyrpg/fireside).
 Nothing is sent anywhere until you configure a server URL and API key.
 
-This plugin is in early development. The queue and sender are in place, but
-it does not collect any game data yet.
+This plugin is in early development.
 
 ## Configuration
 1. In your dashboard, create an API key under **Settings → API keys**.
@@ -32,7 +29,7 @@ server has confirmed it, so nothing is lost while the server is down; the
 plugin retries with increasing waits (up to 5 minutes).
 
 The queue lives in RuneLite's own folder, in the plugin's data folder
-(`.runelite/plugin-data/osrs-tracker/queue/`). **Open folder** in the side
+(`.runelite/plugin-data/fireside/queue/`). **Open folder** in the side
 panel opens it.
 - `pending.jsonl`: events waiting to be sent, one per line.
 - `rejected.jsonl`: events the server rejected, each with the server's error
@@ -56,7 +53,7 @@ Requires JDK 11. If your default Java is not 11, add
 **IntelliJ:** open the project as a Gradle project and set the project SDK to
 11. Pick the shared **RuneLite (dev)** run configuration (from `.run/`) and
 click Run or Debug. It passes the same flags as `./gradlew run`. Do not use the
-▶ next to `main()` in `OsrsTrackerPluginTest`; that starts the client without
+▶ next to `main()` in `FiresidePluginTest`; that starts the client without
 the flags.
 
 **Logging in:** log in with your Jagex account from the development client's
@@ -72,6 +69,10 @@ the same time.
 `src/test/resources/contract/`, and tests validate against it. Update it with
 `./scripts/update-contract.sh <version>` (needs `gh`), then update
 `Contract.REQUIRED_VERSION`.
+
+**Icons:** `icon.png` (Plugin Hub) and the side panel icon are rendered from
+`assets/logo/fireside.svg` with `./scripts/render-icons.sh` (needs
+`rsvg-convert`). See `assets/logo/README.md`.
 
 ## Disclaimer
 Created using intellectual property belonging to Jagex Limited under the terms

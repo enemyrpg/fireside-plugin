@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="RuneLite (dev)" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="com.osrstracker.OsrsTrackerPluginTest" />
-    <module name="osrs-tracker-plugin.test" />
+    <option name="MAIN_CLASS_NAME" value="com.fireside.FiresidePluginTest" />
+    <module name="fireside-plugin.test" />
     <option name="PROGRAM_PARAMETERS" value="--developer-mode --debug" />
     <option name="VM_PARAMETERS" value="-ea" />
     <method v="2">

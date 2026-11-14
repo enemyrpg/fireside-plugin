@@ -14,7 +14,7 @@ repositories {
 }
 
 def runeLiteVersion = 'latest.release'
-def pluginMainClass = 'com.osrstracker.OsrsTrackerPluginTest'
+def pluginMainClass = 'com.fireside.FiresidePluginTest'
 
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
@@ -36,16 +36,9 @@ dependencies {
 	testImplementation 'com.squareup.okhttp3:mockwebserver:3.14.9'
 }
 
-group = 'com.osrstracker'
-// Sent as pluginVersion in session.start (read from version.properties at runtime).
+group = 'com.fireside'
+// Keep equal to PluginVersion.VERSION and version in runelite-plugin.properties (tested).
 version = '0.1.0'
-
-processResources {
-	inputs.property('version', project.version)
-	filesMatching('**/version.properties') {
-		expand(version: project.version)
-	}
-}
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'
