@@ -16,6 +16,12 @@ public interface RaidView
 	int toaPartySize();
 
 	/**
+	 * The Fractured Archive party members (member slots shown in {@code TfaHud});
+	 * 0 if the HUD is not loaded. Counts slots only, never reads names.
+	 */
+	int tfaPartySize();
+
+	/**
 	 * Whether a name from a game message is the logged-in player. The name is
 	 * only compared, never kept or logged.
 	 */

@@ -4,10 +4,15 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.VarbitID;
+import net.runelite.api.widgets.Widget;
 import net.runelite.client.util.Text;
 
-/** {@link RaidView} backed by the client's varbits, as RuneLite's Chat Commands plugin reads them. Client thread only. */
+/**
+ * {@link RaidView} backed by the client's varbits, as RuneLite's Chat Commands
+ * plugin reads them, and for The Fractured Archive by its HUD. Client thread only.
+ */
 @Singleton
 public class ClientRaidView implements RaidView
 {
@@ -18,6 +23,15 @@ public class ClientRaidView implements RaidView
 	private static final int[] TOA_SLOTS = {
 		VarbitID.TOA_CLIENT_P0, VarbitID.TOA_CLIENT_P1, VarbitID.TOA_CLIENT_P2, VarbitID.TOA_CLIENT_P3,
 		VarbitID.TOA_CLIENT_P4, VarbitID.TOA_CLIENT_P5, VarbitID.TOA_CLIENT_P6, VarbitID.TOA_CLIENT_P7,
+	};
+	/**
+	 * The eight member slots of the TFA HUD. Unused slots are hidden themselves
+	 * (#86 step 0A, {@code docs/plan/08-design.md}).
+	 */
+	private static final int[] TFA_SLOTS = {
+		InterfaceID.TfaHud._0_CONTAINER, InterfaceID.TfaHud._1_CONTAINER, InterfaceID.TfaHud._2_CONTAINER,
+		InterfaceID.TfaHud._3_CONTAINER, InterfaceID.TfaHud._4_CONTAINER, InterfaceID.TfaHud._5_CONTAINER,
+		InterfaceID.TfaHud._6_CONTAINER, InterfaceID.TfaHud._7_CONTAINER,
 	};
 
 	private final Client client;
@@ -44,6 +58,23 @@ public class ClientRaidView implements RaidView
 	public int toaPartySize()
 	{
 		return filledSlots(TOA_SLOTS);
+	}
+
+	@Override
+	public int tfaPartySize()
+	{
+		int size = 0;
+		for (int component : TFA_SLOTS)
+		{
+			Widget slot = client.getWidget(component);
+			// isSelfHidden, not isHidden: shortly after the raid the game hides the whole
+			// names layer, which makes used slots hidden too. Names are never read.
+			if (slot != null && !slot.isSelfHidden())
+			{
+				size++;
+			}
+		}
+		return size;
 	}
 
 	@Override

@@ -303,16 +303,36 @@ public class RaidTrackerTest
 
 	// The Fractured Archive
 
-	@Test
-	public void fracturedArchiveHasNoTeamSize()
+	private void fracturedArchive(int count)
 	{
-		view.toa = 3;
-		view.tob = 3;
 		game("Challenge complete: Ocellus. Duration: <col=ef1020>2:54.60</col>. Total: <col=ef1020>2:54.60</col>. "
 			+ "Personal best: 2:25.80", 100);
 		game("The Fractured Archive: Total completion time: <col=ef1020>2:54.60</col>. Personal best: 2:25.80", 100);
-		game(kc("Fractured Archive", 3), 100);
+		game(kc("Fractured Archive", count), 100);
 		tracker.onTick(101);
+	}
+
+	@Test
+	public void fracturedArchiveTeamSizeFromParty()
+	{
+		view.tfa = 3;
+		// Other raids' party varbits are not used for TFA.
+		view.toa = 5;
+		view.tob = 5;
+		fracturedArchive(136);
+		assertEquals(Kc.builder().boss("Fractured Archive").killCount(136).timeSeconds(174.6).personalBest(false)
+			.personalBestSeconds(145.8).teamSize(3).build(), onlyKc());
+		chest("Fractured Archive", 300);
+		assertEquals(new Loot(LootSource.event("Fractured Archive"), CHEST, 136), onlyLoot());
+	}
+
+	@Test
+	public void fracturedArchiveWithoutPartyHasNoTeamSize()
+	{
+		view.tfa = 0;
+		view.toa = 3;
+		view.tob = 3;
+		fracturedArchive(3);
 		assertEquals(Kc.builder().boss("Fractured Archive").killCount(3).timeSeconds(174.6).personalBest(false)
 			.personalBestSeconds(145.8).build(), onlyKc());
 		chest("Fractured Archive", 300);
@@ -482,6 +502,7 @@ public class RaidTrackerTest
 		int cox;
 		int tob;
 		int toa;
+		int tfa;
 
 		@Override
 		public int coxPartySize()
@@ -499,6 +520,12 @@ public class RaidTrackerTest
 		public int toaPartySize()
 		{
 			return toa;
+		}
+
+		@Override
+		public int tfaPartySize()
+		{
+			return tfa;
 		}
 
 		@Override
