@@ -29,8 +29,8 @@ server has confirmed it, so nothing is lost while the server is down; the
 plugin retries with increasing waits (up to 5 minutes).
 
 The queue lives in RuneLite's own folder, in the plugin's data folder
-(`.runelite/plugin-data/fireside/queue/`). **Open folder** in the side
-panel opens it.
+(`.runelite/plugin-data/fireside/queue/`). The side panel shows the full
+path.
 - `pending.jsonl`: events waiting to be sent, one per line.
 - `rejected.jsonl`: events the server rejected, each with the server's error
   message and the time. They are not sent again and never deleted

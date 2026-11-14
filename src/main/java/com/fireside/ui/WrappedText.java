@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
+import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.View;
 
 /**
@@ -30,6 +31,14 @@ final class WrappedText extends JTextArea
 		setMargin(new Insets(0, 0, 0, 0));
 		// Same font as labels (RuneLite sets it in the look and feel).
 		setFont(UIManager.getFont("Label.font"));
+	}
+
+	/** Lets the user select and copy the text (still read-only). */
+	WrappedText selectable()
+	{
+		setFocusable(true);
+		setHighlighter(new DefaultHighlighter());
+		return this;
 	}
 
 	@Override

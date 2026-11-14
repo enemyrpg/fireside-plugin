@@ -26,14 +26,12 @@ import com.fireside.ui.FiresidePanel;
 import com.fireside.ui.PanelIcon;
 import com.fireside.ui.QueueView;
 import com.fireside.ui.StatusView;
-import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
@@ -115,8 +113,6 @@ public class FiresidePlugin extends Plugin
 	 */
 	private ScheduledThreadPoolExecutor executor;
 	private EventSender sender;
-	/** {@code .runelite/plugin-data/<internal name>}, from {@link Plugin#getPluginDirectory()}. */
-	private Filepath dataDirectory;
 	/** Sessions, heartbeats and AFK. Client thread, except at ClientShutdown. */
 	private SessionTracker sessions;
 	/** Kill counts and loot. Client thread. */
@@ -139,7 +135,8 @@ public class FiresidePlugin extends Plugin
 	protected void startUp() throws Exception
 	{
 		// Only resolves the folder (and creates plugin-data/ if missing); the queue is opened on the executor.
-		dataDirectory = getPluginDirectory();
+		// .runelite/plugin-data/<internal name>, from Plugin#getPluginDirectory().
+		Filepath dataDirectory = getPluginDirectory();
 		executor = new ScheduledThreadPoolExecutor(1, r ->
 		{
 			Thread thread = new Thread(r, Branding.DISPLAY_NAME + " events");
@@ -147,8 +144,8 @@ public class FiresidePlugin extends Plugin
 			return thread;
 		});
 		executor.setRemoveOnCancelPolicy(true);
-		EventQueue queue = new EventQueue(dataDirectory.joinSegment(Branding.QUEUE_DIR_NAME), gson,
-			Clock.systemUTC());
+		Filepath queueDir = dataDirectory.joinSegment(Branding.QUEUE_DIR_NAME);
+		EventQueue queue = new EventQueue(queueDir, gson, Clock.systemUTC());
 		sender = new EventSender(executor, queue, eventJson, ingestClient, verifyClient,
 			new Backoff(Backoff.DEFAULT_BASE, Backoff.DEFAULT_MAX, new SecureRandom()), Clock.systemUTC(),
 			EventSender.SEND_INTERVAL, status -> SwingUtilities.invokeLater(() -> renderQueue(status)));
@@ -170,7 +167,8 @@ public class FiresidePlugin extends Plugin
 			tracker.setEnabled(config.sendingEnabled());
 		});
 
-		panel = new FiresidePanel(this::testConnection, this::openDashboard, this::sendNow, this::openFolder);
+		panel = new FiresidePanel(this::testConnection, this::openDashboard, this::sendNow,
+			queueDir.toString());
 		navigationButton = NavigationButton.builder()
 			.tooltip(Branding.DISPLAY_NAME)
 			.icon(PanelIcon.create())
@@ -203,7 +201,6 @@ public class FiresidePlugin extends Plugin
 		executor.shutdown();
 		sender = null;
 		executor = null;
-		dataDirectory = null;
 
 		clientToolbar.removeNavigation(navigationButton);
 		SwingUtilities.invokeLater(() ->
@@ -365,36 +362,6 @@ public class FiresidePlugin extends Plugin
 		if (sender != null)
 		{
 			sender.sendNow();
-		}
-	}
-
-	/** "Open folder" button, on the EDT. Creates the folder on the executor, then opens it like RuneLite's screenshot folder. */
-	private void openFolder()
-	{
-		Filepath dir = dataDirectory;
-		if (dir == null || executor == null)
-		{
-			return;
-		}
-		try
-		{
-			executor.execute(() ->
-			{
-				try
-				{
-					dir.createDirectories();
-				}
-				catch (IOException e)
-				{
-					log.warn("Could not create the plugin data folder", e);
-					return;
-				}
-				LinkBrowser.open(dir.toString());
-			});
-		}
-		catch (RejectedExecutionException e)
-		{
-			log.debug("Plugin is stopping; not opening the folder");
 		}
 	}
 

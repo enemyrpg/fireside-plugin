@@ -142,7 +142,7 @@ public class QueueView
 			rejected = String.format("%,d", status.getRejectedCount());
 			warnings.add(rejected + (status.getRejectedCount() == 1 ? " event was" : " events were")
 				+ " rejected by the server. They are saved with the server's error in "
-				+ EventQueue.REJECTED_FILE + " (\"Open folder\").");
+				+ EventQueue.REJECTED_FILE + " in the queue folder shown below.");
 		}
 
 		return new QueueView(level, title, message, String.format("%,d", status.getQueueSize()),

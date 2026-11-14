@@ -27,7 +27,7 @@ import net.runelite.client.ui.PluginPanel;
 
 /**
  * Side panel: connection status, versions, "Test connection" and
- * "Open dashboard", and the event queue with "Send now" and "Open folder".
+ * "Open dashboard", and the event queue with "Send now" and the queue folder path.
  * <p>
  * All methods must be called on the Swing event dispatch thread.
  */
@@ -65,10 +65,13 @@ public class FiresidePanel extends PluginPanel
 	private final JPanel rejectedRow;
 	private final JPanel queueWarningsPanel = new JPanel();
 	private final JButton sendNowButton = new JButton("Send now");
-	private final JButton openFolderButton = new JButton("Open folder");
 
+	/**
+	 * @param queueFolder full path of the queue folder, shown as selectable text. RuneLite has no
+	 *                    approved API for opening a local folder, so the user copies the path.
+	 */
 	public FiresidePanel(Runnable onTestConnection, Runnable onOpenDashboard, Runnable onSendNow,
-		Runnable onOpenFolder)
+		String queueFolder)
 	{
 		setLayout(new BorderLayout());
 		setBorder(new EmptyBorder(OUTER_PADDING, OUTER_PADDING, OUTER_PADDING, OUTER_PADDING));
@@ -144,17 +147,22 @@ public class FiresidePanel extends PluginPanel
 		queueWarningsPanel.setOpaque(false);
 		queue.add(left(queueWarningsPanel));
 		queue.add(Box.createVerticalStrut(8));
-		JPanel queueButtons = new JPanel(new GridLayout(1, 2, 4, 0));
+		JPanel queueButtons = new JPanel(new GridLayout(1, 1));
 		queueButtons.setOpaque(false);
 		sendNowButton.setFocusPainted(false);
 		sendNowButton.addActionListener(e -> onSendNow.run());
-		openFolderButton.setFocusPainted(false);
-		openFolderButton.setToolTipText("Open the plugin's data folder (queue and error log)");
-		openFolderButton.addActionListener(e -> onOpenFolder.run());
 		queueButtons.add(sendNowButton);
-		queueButtons.add(openFolderButton);
 		queueButtons.setMaximumSize(new Dimension(Integer.MAX_VALUE, queueButtons.getPreferredSize().height));
 		queue.add(left(queueButtons));
+		queue.add(Box.createVerticalStrut(8));
+		JLabel folderHeading = new JLabel("Folder (queue and error log)");
+		folderHeading.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		queue.add(left(folderHeading));
+		queue.add(Box.createVerticalStrut(2));
+		WrappedText folderPath = new WrappedText(TEXT_WIDTH).selectable();
+		folderPath.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		folderPath.setText(queueFolder);
+		queue.add(left(folderPath));
 		content.add(left(queue));
 
 		add(content, BorderLayout.NORTH);

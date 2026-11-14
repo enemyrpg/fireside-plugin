@@ -40,7 +40,8 @@ public class FiresidePanelLayoutTest
 		{
 			// RuneLite's look and feel and fonts, as in the client.
 			RuneLiteLAF.setup();
-			FiresidePanel panel = new FiresidePanel(() -> {}, () -> {}, () -> {}, () -> {});
+			FiresidePanel panel = new FiresidePanel(() -> {}, () -> {}, () -> {},
+				"/home/someone-with-a-long-name/.runelite/plugin-data/fireside/queue");
 			VerifyResponse response = VerifyResponse.parse(new Gson(),
 				"{\"ok\":true,\"keyName\":\"My very long development client key name\",\"serverVersion\":\"0.1.0\","
 					+ "\"contractVersion\":\"1.12.0\",\"serverTime\":\"2026-11-13T18:00:00.000Z\"}");
