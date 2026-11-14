@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Downloads a published contract package from the osrs-tracker repo, verifies
+# Downloads a published contract package from the fireside repo, verifies
 # its SHA-256 checksum and pins it in src/test/resources/contract/.
 #
 # Usage: ./scripts/update-contract.sh <version>    (e.g. 1.13.0)
@@ -7,7 +7,7 @@
 # Requires: gh (logged in), sha256sum, unzip.
 set -euo pipefail
 
-REPO="enemyrpg/osrs-tracker"
+REPO="enemyrpg/fireside"
 
 if [[ $# -ne 1 ]]; then
 	echo "Usage: $0 <version>   (e.g. 1.13.0)" >&2
