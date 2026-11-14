@@ -65,8 +65,8 @@ import okhttp3.Call;
 @PluginDescriptor(
 	name = Branding.DISPLAY_NAME,
 	internalName = Branding.INTERNAL_NAME,
-	description = "Sends XP, loot, kill counts and session data to your self-hosted tracker server",
-	tags = {"tracker", "xp", "loot", "sessions", "self-hosted"}
+	description = "Self-hosted tracker for your own accounts: sessions, screen time, XP, loot and KC on your own dashboard.",
+	tags = {"tracker", "sessions", "screen time", "loot", "self-hosted"}
 )
 public class FiresidePlugin extends Plugin
 {

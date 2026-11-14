@@ -58,7 +58,7 @@ public class FiresidePanelLayoutTest
 			panel.renderQueue(QueueView.compute(new SenderStatus(SenderStatus.State.STOPPED, 123_456, 1_234,
 				Instant.parse("2026-11-13T18:00:00Z"), 500, null, "ignored",
 				SenderStatus.StopReason.NOT_FOUND, null,
-				"Can't write the event queue (FileSystemException: /home/someone/.runelite/plugin-data/osrs-tracker/"
+				"Can't write the event queue (FileSystemException: /home/someone/.runelite/plugin-data/fireside/"
 					+ "queue/pending.jsonl: No space left on device)."), java.time.ZoneOffset.UTC));
 
 			Container root = panel.getWrappedPanel();

@@ -13,7 +13,7 @@ import net.runelite.api.gameval.ItemID;
 
 /**
  * Raids, their Loot Tracker chest names and their purples. The purple item IDs
- * must match {@code RAIDS} in {@code osrs-tracker/shared/src/game/raids.ts}: the
+ * must match {@code RAIDS} in {@code fireside/shared/src/game/raids.ts}: the
  * server pairs your own purples with the chest's items by ID.
  */
 public final class Raids

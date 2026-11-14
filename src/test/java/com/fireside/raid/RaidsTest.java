@@ -13,7 +13,7 @@ import org.junit.Test;
 public class RaidsTest
 {
 	/**
-	 * The purple item IDs per raid in {@code osrs-tracker/shared/src/game/raids.ts}.
+	 * The purple item IDs per raid in {@code fireside/shared/src/game/raids.ts}.
 	 * The server pairs SELF purples with chest items by these IDs, so the plugin
 	 * must use the same ones. Update both together.
 	 */
