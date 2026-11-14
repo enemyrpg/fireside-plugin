@@ -37,15 +37,8 @@ dependencies {
 }
 
 group = 'com.fireside'
-// Sent as pluginVersion in session.start (read from version.properties at runtime).
+// Keep equal to PluginVersion.VERSION and version in runelite-plugin.properties (tested).
 version = '0.1.0'
-
-processResources {
-	inputs.property('version', project.version)
-	filesMatching('**/version.properties') {
-		expand(version: project.version)
-	}
-}
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'

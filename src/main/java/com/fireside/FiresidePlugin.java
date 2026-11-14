@@ -156,7 +156,7 @@ public class FiresidePlugin extends Plugin
 
 		EventSender eventSink = sender;
 		sessions = new SessionTracker(gameView, eventIds, Clock.systemUTC(), eventSink::submit,
-			() -> Duration.ofMinutes(config.afkThresholdMinutes()), config::sendXp, PluginVersion.read());
+			() -> Duration.ofMinutes(config.afkThresholdMinutes()), config::sendXp, PluginVersion.VERSION);
 		SessionTracker tracker = sessions;
 		RaidTracker raids = new RaidTracker(tracker::emitInSession, raidView, itemLookup, config::sendRaidPurples,
 			config::sendKillCounts);

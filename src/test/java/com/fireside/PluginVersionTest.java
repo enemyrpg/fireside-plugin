@@ -1,27 +1,47 @@
 package com.fireside;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.Test;
 
 public class PluginVersionTest
 {
+	/** Same pattern as {@code pluginVersion} in the contract. */
+	private static final Pattern CONTRACT_PATTERN = Pattern.compile("^\\d+\\.\\d+\\.\\d+([-+][0-9A-Za-z.-]+)?$");
+	private static final Pattern GRADLE_VERSION = Pattern.compile("(?m)^version = '([^']*)'");
+
 	@Test
-	public void buildVersionIsReadAndMatchesTheContract()
+	public void versionMatchesTheContractPattern()
 	{
-		String version = PluginVersion.read();
-		assertNotEquals("version.properties is expanded by Gradle", PluginVersion.UNKNOWN, version);
-		assertTrue(version, PluginVersion.PATTERN.matcher(version).matches());
+		assertTrue(PluginVersion.VERSION, CONTRACT_PATTERN.matcher(PluginVersion.VERSION).matches());
 	}
 
 	@Test
-	public void unexpandedOrInvalidVersionFallsBack()
+	public void versionMatchesBuildGradle() throws IOException
 	{
-		assertEquals(PluginVersion.UNKNOWN, PluginVersion.orUnknown("${version}"));
-		assertEquals(PluginVersion.UNKNOWN, PluginVersion.orUnknown(null));
-		assertEquals(PluginVersion.UNKNOWN, PluginVersion.orUnknown("1.0"));
-		assertEquals("1.2.3-beta.1", PluginVersion.orUnknown(" 1.2.3-beta.1 "));
+		String gradle = new String(Files.readAllBytes(Paths.get("build.gradle")), StandardCharsets.UTF_8);
+		Matcher m = GRADLE_VERSION.matcher(gradle);
+		assertTrue("No version in build.gradle", m.find());
+		assertEquals("build.gradle", PluginVersion.VERSION, m.group(1));
+	}
+
+	@Test
+	public void versionMatchesRunelitePluginProperties() throws IOException
+	{
+		Properties properties = new Properties();
+		try (Reader in = Files.newBufferedReader(Paths.get("runelite-plugin.properties"), StandardCharsets.UTF_8))
+		{
+			properties.load(in);
+		}
+		assertEquals("runelite-plugin.properties", PluginVersion.VERSION, properties.getProperty("version"));
 	}
 }
