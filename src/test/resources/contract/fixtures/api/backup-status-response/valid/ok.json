@@ -1,0 +1,12 @@
+{
+  "enabled": true,
+  "latest": {
+    "fileName": "fireside-20261114-030000Z.db",
+    "createdAt": "2026-11-14T03:00:00.000Z",
+    "sizeBytes": 18874368
+  },
+  "count": 12,
+  "totalSizeBytes": 213909504,
+  "nextRunAt": "2026-11-15T03:00:00.000Z",
+  "lastError": null
+}

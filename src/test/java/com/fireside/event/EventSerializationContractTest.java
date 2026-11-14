@@ -99,6 +99,11 @@ public class EventSerializationContractTest
 			.item(fang).recipient(RaidSpecialLoot.Recipient.SELF).teamSize(3).killCount(140).build());
 		examples.put("raid.special_loot (TEAMMATE minimal)", RaidSpecialLoot.builder().raid("Chambers of Xeric")
 			.item(fang).recipient(RaidSpecialLoot.Recipient.TEAMMATE).build());
+
+		examples.put("pb.records", new PbRecords("Fractured Archive", Arrays.asList(
+			new PbRecords.Record(PbRecords.OVERALL, 1, 1905.2),
+			new PbRecords.Record(PbRecords.OVERALL, 3, 1088.4),
+			new PbRecords.Record("The Dagon'hai", 3, 105.0))));
 		return examples;
 	}
 
@@ -159,6 +164,21 @@ public class EventSerializationContractTest
 		JsonObject npc = payloadOf(new Loot(LootSource.npc("Goblin", null, null),
 			Collections.singletonList(new LootItem(526, "Bones", 1, 100, 0)), null));
 		assertEquals("{\"type\":\"NPC\",\"name\":\"Goblin\"}", npc.get("source").toString());
+	}
+
+	@Test
+	public void pbRecordsHaveOnlyScopeTeamSizeAndSeconds()
+	{
+		JsonObject payload = payloadOf(new PbRecords("Fractured Archive",
+			Collections.singletonList(new PbRecords.Record(PbRecords.OVERALL, 3, 1088.4))));
+		assertEquals("{\"boss\":\"Fractured Archive\",\"records\":[{\"scope\":\"overall\",\"teamSize\":3,"
+			+ "\"seconds\":1088.4}]}", payload.toString());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void pbRecordsNeedARecord()
+	{
+		new PbRecords("Fractured Archive", Collections.emptyList());
 	}
 
 	@Test

@@ -15,7 +15,9 @@ import com.fireside.net.VerifyClient;
 import com.fireside.net.VerifyResult;
 import com.fireside.queue.EventQueue;
 import com.fireside.raid.ClientRaidView;
+import com.fireside.raid.ClientTfaRecordsView;
 import com.fireside.raid.RaidTracker;
+import com.fireside.raid.TfaRecordsReader;
 import com.fireside.send.Backoff;
 import com.fireside.send.EventSender;
 import com.fireside.send.SenderSettings;
@@ -42,6 +44,9 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.StatChanged;
+import net.runelite.api.events.WidgetClosed;
+import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -107,6 +112,9 @@ public class FiresidePlugin extends Plugin
 	@Inject
 	private ClientRaidView raidView;
 
+	@Inject
+	private ClientTfaRecordsView tfaRecordsView;
+
 	/**
 	 * The plugin's own thread: all queue disk IO and sender state live on it.
 	 * HTTP runs on OkHttp's pool; results come back to this thread.
@@ -117,6 +125,8 @@ public class FiresidePlugin extends Plugin
 	private SessionTracker sessions;
 	/** Kill counts and loot. Client thread. */
 	private KillTracker kills;
+	/** TFA's records table into {@code pb.records}. Client thread. */
+	private TfaRecordsReader tfaRecords;
 	private LootMapper lootMapper;
 	/** Whether RuneLite's Loot Tracker (which posts {@code LootReceived}) is running. */
 	private volatile boolean lootTrackerActive;
@@ -158,6 +168,7 @@ public class FiresidePlugin extends Plugin
 		RaidTracker raids = new RaidTracker(tracker::emitInSession, raidView, itemLookup, config::sendRaidPurples,
 			config::sendKillCounts);
 		kills = new KillTracker(tracker::emitInSession, config::sendLoot, config::sendKillCounts, raids);
+		tfaRecords = new TfaRecordsReader(tfaRecordsView, tracker::emitInSession, config::sendKillCounts);
 		lootMapper = new LootMapper(itemLookup);
 		lootTrackerActive = isLootTrackerActive();
 		// Picks up a game that is already logged in (plugin turned on mid-game).
@@ -195,6 +206,7 @@ public class FiresidePlugin extends Plugin
 		sessions.stop();
 		sessions = null;
 		kills = null;
+		tfaRecords = null;
 		lootMapper = null;
 		// Never waits: queued writes finish on the executor, the request in flight is cancelled.
 		sender.shutdown();
@@ -272,6 +284,11 @@ public class FiresidePlugin extends Plugin
 			kills.flush();
 			kills.reset();
 		}
+		if (tfaRecords != null && (state == GameState.HOPPING || state == GameState.LOGIN_SCREEN
+			|| state == GameState.LOGIN_SCREEN_AUTHENTICATOR))
+		{
+			tfaRecords.reset();
+		}
 		if (sessions != null && sessions.onGameState(event.getGameState()) && sender != null)
 		{
 			// session.end is queued; send it (and the rest) now.
@@ -285,6 +302,10 @@ public class FiresidePlugin extends Plugin
 		if (kills != null)
 		{
 			kills.onTick(client.getTickCount());
+		}
+		if (tfaRecords != null)
+		{
+			tfaRecords.onTick();
 		}
 		if (sessions != null)
 		{
@@ -307,6 +328,24 @@ public class FiresidePlugin extends Plugin
 		if (kills != null)
 		{
 			kills.onChatMessage(event.getType(), event.getMessage(), client.getTickCount());
+		}
+	}
+
+	@Subscribe
+	public void onWidgetLoaded(WidgetLoaded event)
+	{
+		if (tfaRecords != null && event.getGroupId() == InterfaceID.TFA_STATS)
+		{
+			tfaRecords.onTableOpened();
+		}
+	}
+
+	@Subscribe
+	public void onWidgetClosed(WidgetClosed event)
+	{
+		if (tfaRecords != null && event.getGroupId() == InterfaceID.TFA_STATS)
+		{
+			tfaRecords.onTableClosed();
 		}
 	}
 
