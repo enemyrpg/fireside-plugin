@@ -508,12 +508,13 @@ public class EventSenderTest
 	@Test
 	public void tooOldServerHoldsTheQueue() throws Exception
 	{
-		server.contractVersion = "1.13.0";
+		// The version just below Contract.REQUIRED_VERSION (1.17.0, pb.records).
+		server.contractVersion = "1.16.0";
 		startSender();
 		List<String> submitted = submit(sender, 60);
 		sender.sendNow();
 		SenderStatus held = await("held", s -> s.getState() == SenderStatus.State.HELD);
-		assertEquals("1.13.0", held.getServerContract());
+		assertEquals("1.16.0", held.getServerContract());
 		assertEquals(60, held.getQueueSize());
 		assertEquals(0, held.getRejectedCount());
 		assertEquals(0, server.batches.size());

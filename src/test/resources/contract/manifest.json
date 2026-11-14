@@ -1,10 +1,11 @@
 {
-  "contractVersion": "1.15.0",
+  "contractVersion": "1.17.0",
   "eventSchemaVersion": 1,
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "schemas": [
     "schema/api/account-detail-response.json",
     "schema/api/accounts-response.json",
+    "schema/api/backup-status-response.json",
     "schema/api/calendar-response.json",
     "schema/api/create-key-request.json",
     "schema/api/create-key-response.json",
@@ -30,6 +31,7 @@
     "schema/event.json",
     "schema/events/kc.json",
     "schema/events/loot.json",
+    "schema/events/pb.records.json",
     "schema/events/raid.special_loot.json",
     "schema/events/session.afk.json",
     "schema/events/session.end.json",

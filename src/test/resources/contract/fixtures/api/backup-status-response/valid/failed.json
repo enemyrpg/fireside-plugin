@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "latest": {
+    "fileName": "fireside-20261113-030000Z.db",
+    "createdAt": "2026-11-13T03:00:00.000Z",
+    "sizeBytes": 18350080
+  },
+  "count": 11,
+  "totalSizeBytes": 195035136,
+  "nextRunAt": "2026-11-15T03:00:00.000Z",
+  "lastError": {
+    "at": "2026-11-14T03:00:00.412Z",
+    "message": "ENOSPC: no space left on device"
+  }
+}
