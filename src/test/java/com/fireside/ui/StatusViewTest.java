@@ -75,11 +75,11 @@ public class StatusViewTest
 	}
 
 	@Test
-	public void panelIconIsSixteenPixelsAndDrawn()
+	public void panelIconIsSixteenPixelsAndNotEmpty()
 	{
 		BufferedImage icon = PanelIcon.create();
 		assertEquals(PanelIcon.SIZE, icon.getWidth());
 		assertEquals(PanelIcon.SIZE, icon.getHeight());
-		assertTrue("Icon is empty", (icon.getRGB(12, 13) >>> 24) != 0);
+		assertTrue("Icon is empty", (icon.getRGB(8, 8) >>> 24) != 0);
 	}
 }
