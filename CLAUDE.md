@@ -1,20 +1,21 @@
-# OSRS Tracker (working title) – RuneLite plugin
+# Fireside – RuneLite plugin
 
 Collects data from Old School RuneScape (XP, loot, kill counts, sessions,
 AFK time, world info, later bank, quests and diaries) and sends it to a
-self-hosted server (repo: `osrs-tracker`, cloned next to this repo in
-`../osrs-tracker`). License: BSD-2.
+self-hosted server (repo: `fireside`, cloned next to this repo in
+`../fireside`). License: BSD-2.
 
-Plans and decisions: `../osrs-tracker/docs/plan/` (Norwegian).
-`../osrs-tracker/docs/plan/07-byggeplan.md` lists tasks, acceptance criteria
-and the decisions for M7. `../osrs-tracker/docs/plan/10-m7-gjennomforing.md`
-describes how each M7 task is carried out.
+Plans and decisions: `../fireside/docs/plan/` (Norwegian).
+`../fireside/docs/plan/07-byggeplan.md` lists tasks, acceptance criteria
+and decisions. `../fireside/docs/plan/10-m7-gjennomforing.md` describes how
+each M7 task was carried out, and `../fireside/docs/plan/11-m8-gjennomforing.md`
+how each M8 task is carried out.
 
-The event format is defined in `osrs-tracker` (`shared/` and
-`../osrs-tracker/docs/plan/03-datamodell-og-api.md`). A pinned copy of the
+The event format is defined in `fireside` (`shared/` and
+`../fireside/docs/plan/03-datamodell-og-api.md`). A pinned copy of the
 contract package (JSON Schema + fixtures) lives in
 `src/test/resources/contract/`. Legal constraints:
-`../osrs-tracker/docs/plan/09-juridisk.md`.
+`../fireside/docs/plan/09-juridisk.md`.
 
 ## Commands
 - `./gradlew build` – build and test
@@ -22,6 +23,8 @@ contract package (JSON Schema + fixtures) lives in
   IntelliJ (`.run/`) – start RuneLite with the plugin in developer mode
   (`-ea`, `--developer-mode`, `--debug`); see README "Development"
 - `./scripts/update-contract.sh <version>` – update the pinned contract
+- `./scripts/render-icons.sh` – render `icon.png` and the panel icon from
+  `assets/logo/fireside.svg`
 
 ## Environment
 - Developer machine: Arch Linux, fish shell, JDK 11, IntelliJ. The developer
@@ -31,15 +34,17 @@ contract package (JSON Schema + fixtures) lives in
 - Default branch: `master`.
 
 ## Rules
-- "OSRS Tracker" is a placeholder name (and already taken on the Plugin Hub).
-  Keep the display name, config group name and queue folder name in one
-  constants class: `src/main/java/com/osrstracker/Branding.java`. Never
-  hardcode them elsewhere. The config group name is set for good before the
-  first public release and must never change after that (users would lose
-  their settings).
-- Files that cannot read `Branding` and must be renamed by hand (task 8.0):
-  `runelite-plugin.properties`, `settings.gradle`, `group` in `build.gradle`,
-  the Java package name and class names, `README.md`.
+- The plugin is called "Fireside". Display name, internal name (`fireside`,
+  also the plugin data folder), config group name (`fireside`) and queue
+  folder name live in one constants class:
+  `src/main/java/com/fireside/Branding.java`. Never hardcode them elsewhere.
+  The config group name is final and must never change (users would lose
+  their settings). The old working title is taken on the Plugin Hub and must
+  not appear anywhere in the repo: `git grep -i -E "osrs[- ]?tracker"` must
+  find nothing.
+- Files that cannot read `Branding`: `runelite-plugin.properties`,
+  `settings.gradle`, `group` in `build.gradle`, the Java package name and
+  class names, `README.md`. Keep them consistent with `Branding`.
 - No runtime dependencies beyond what runelite-client provides. Use the
   injected `OkHttpClient` and `Gson`. Test-only dependencies (e.g. a JSON
   Schema validator, a mock HTTP server) are allowed.
@@ -79,14 +84,15 @@ contract package (JSON Schema + fixtures) lives in
   Loot Tracker (loot sources), Raids (CoX), Bank plugin (bank value, potion
   storage). Keep the BSD-2 copyright notice if code is copied. Check the
   license of any Plugin Hub plugin (e.g. Raid Data Tracker) before copying.
-- No Jagex graphics in the repo, including the panel icon.
+- No Jagex graphics in the repo. The panel icon is the Fireside logo
+  (our own SVG, exported to PNG).
 - README and Plugin Hub description include the Jagex Fan Content Policy
   disclaimer and state that data is only sent to a server the user sets up.
   The repo must be public before Plugin Hub submission.
 - Code, comments and commit messages in English.
 
 ## Workflow
-- One task per branch and PR (e.g. `m7/event-queue`).
+- One task per branch and PR (e.g. `m8/rename-fireside`).
 - Start with a plan, then tests, then implementation.
 - Features must be tested in-game before merge (the developer does this).
 
