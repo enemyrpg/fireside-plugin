@@ -75,7 +75,8 @@ public class QueueViewTest
 		assertEquals("2", some.getRejected());
 		assertEquals(1, some.getWarnings().size());
 		assertTrue(some.getWarnings().get(0).contains("rejected.jsonl"));
-		assertTrue(some.getWarnings().get(0).contains("Open folder"));
+		assertTrue(some.getWarnings().get(0).contains("queue folder shown below"));
+		assertFalse(some.getWarnings().get(0).contains("Open folder"));
 	}
 
 	@Test
