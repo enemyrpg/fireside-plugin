@@ -19,6 +19,9 @@ This plugin is in early development.
    server URL and API key are set. Data is only sent to the server you set up.
 
 Under **Data** you can turn off XP, loot, kill counts and raid purples.
+**Kill counts** also covers raid PBs: when you open The Fractured Archive's
+records table yourself, your own PBs per team size are sent. The plugin
+never opens the table for you.
 Sessions and AFK time are always sent while sending is on.
 
 ## Queue and sending

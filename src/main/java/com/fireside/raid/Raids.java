@@ -35,6 +35,12 @@ public final class Raids
 			this.chestName = chestName;
 			this.kcPrefix = kcPrefix;
 		}
+
+		/** The start of every kill count name of the raid (the whole name for a raid with one mode). */
+		public String kcPrefix()
+		{
+			return kcPrefix;
+		}
 	}
 
 	@Value

@@ -10,7 +10,8 @@ public enum EventType
 	XP_SNAPSHOT("xp.snapshot"),
 	LOOT("loot"),
 	KC("kc"),
-	RAID_SPECIAL_LOOT("raid.special_loot");
+	RAID_SPECIAL_LOOT("raid.special_loot"),
+	PB_RECORDS("pb.records");
 
 	private final String wireName;
 

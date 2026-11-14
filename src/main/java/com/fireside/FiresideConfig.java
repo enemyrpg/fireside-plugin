@@ -97,7 +97,7 @@ public interface FiresideConfig extends Config
 	@ConfigItem(
 		keyName = "sendKillCounts",
 		name = "Kill counts",
-		description = "Send boss and raid kill counts",
+		description = "Send boss and raid kill counts and raid PBs",
 		position = 2,
 		section = dataSection
 	)
