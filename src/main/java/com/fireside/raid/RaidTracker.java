@@ -102,8 +102,9 @@ public class RaidTracker
 				return validSize(view.tobPartySize());
 			case TOMBS_OF_AMASCUT:
 				return validSize(view.toaPartySize());
+			case FRACTURED_ARCHIVE:
+				return validSize(view.tfaPartySize());
 			default:
-				// The Fractured Archive: no known party varbit yet.
 				return null;
 		}
 	}
