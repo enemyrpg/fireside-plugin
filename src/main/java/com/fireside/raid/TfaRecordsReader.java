@@ -36,7 +36,7 @@ public class TfaRecordsReader
 	static final String BOSS = Raids.Group.FRACTURED_ARCHIVE.kcPrefix();
 
 	private static final String OVERALL_TITLE = "Overall";
-	private static final String PERSONAL_HEADER = "Personal";
+	static final String PERSONAL_HEADER = "Personal";
 	private static final Pattern TEAM_SIZE = Pattern.compile("(\\d{1,3}) Players?", Pattern.CASE_INSENSITIVE);
 
 	private final TfaRecordsView view;
