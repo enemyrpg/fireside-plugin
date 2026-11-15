@@ -67,6 +67,18 @@ public final class ContractPackage
 		}
 	}
 
+	public static JsonNode readJsonString(String json)
+	{
+		try
+		{
+			return MAPPER.readTree(json);
+		}
+		catch (IOException e)
+		{
+			throw new UncheckedIOException(e);
+		}
+	}
+
 	public static String readString(Path file)
 	{
 		try

@@ -24,6 +24,13 @@ records table yourself, your own PBs per team size are sent. The plugin
 never opens the table for you.
 Sessions and AFK time are always sent while sending is on.
 
+**Upload item icons** (on by default) uploads the icons of the items in your
+loot, taken from your own RuneLite client, so the dashboard can show them.
+They are only sent to your own server, which stores them in its own
+database. The plugin asks the server which icons it lacks and uploads only
+those, at a lower priority than your data. A server too old for icons still
+gets all your data.
+
 ## Queue and sending
 Events are written to a queue on disk first and sent in batches: every 30
 seconds, when 50 events are waiting, at logout, and when you press **Send

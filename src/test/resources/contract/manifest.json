@@ -1,5 +1,5 @@
 {
-  "contractVersion": "1.17.0",
+  "contractVersion": "1.18.0",
   "eventSchemaVersion": 1,
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "schemas": [
@@ -13,6 +13,11 @@
     "schema/api/error-response.json",
     "schema/api/gains-response.json",
     "schema/api/health-response.json",
+    "schema/api/ingest-icon.json",
+    "schema/api/ingest-icons-request.json",
+    "schema/api/ingest-icons-response.json",
+    "schema/api/ingest-icons-wanted-request.json",
+    "schema/api/ingest-icons-wanted-response.json",
     "schema/api/ingest-request.json",
     "schema/api/ingest-response.json",
     "schema/api/ingest-verify-response.json",
@@ -45,6 +50,7 @@
     "invalid-semantic": "Rejected by the server, but accepted by the JSON Schema: the rule (e.g. \"endedAt >= startedAt\") cannot be expressed in JSON Schema."
   },
   "notes": [
-    "schema/api/ingest-request.json does not check the events in a batch. Validate each event against schema/event.json."
+    "schema/api/ingest-request.json does not check the events in a batch. Validate each event against schema/event.json.",
+    "schema/api/ingest-icons-request.json does not check the icons in a request. Validate each icon against schema/api/ingest-icon.json. The PNG structure (IHDR, at most 64x64, CRCs, IEND, no APNG) is only checked by the server; see the invalid-semantic fixtures of ingest-icon."
   ]
 }

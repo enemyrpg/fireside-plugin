@@ -5,10 +5,14 @@ import com.google.inject.Provides;
 import com.fireside.event.EventJson;
 import com.fireside.event.LootItem;
 import com.fireside.event.LootSource;
+import com.fireside.event.Event;
 import com.fireside.event.UuidV7Generator;
+import com.fireside.icons.ClientIconImages;
+import com.fireside.icons.IconUploader;
 import com.fireside.loot.ClientItemLookup;
 import com.fireside.loot.KillTracker;
 import com.fireside.loot.LootMapper;
+import com.fireside.net.IconClient;
 import com.fireside.net.IngestClient;
 import com.fireside.net.ServerUrl;
 import com.fireside.net.VerifyClient;
@@ -35,6 +39,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import lombok.extern.slf4j.Slf4j;
@@ -86,6 +91,12 @@ public class FiresidePlugin extends Plugin
 	private IngestClient ingestClient;
 
 	@Inject
+	private IconClient iconClient;
+
+	@Inject
+	private ClientIconImages iconImages;
+
+	@Inject
 	private EventJson eventJson;
 
 	@Inject
@@ -121,6 +132,9 @@ public class FiresidePlugin extends Plugin
 	 */
 	private ScheduledThreadPoolExecutor executor;
 	private EventSender sender;
+	/** Item icons: its own thread, so it never delays the event queue. */
+	private ScheduledThreadPoolExecutor iconExecutor;
+	private IconUploader icons;
 	/** Sessions, heartbeats and AFK. Client thread, except at ClientShutdown. */
 	private SessionTracker sessions;
 	/** Kill counts and loot. Client thread. */
@@ -159,10 +173,30 @@ public class FiresidePlugin extends Plugin
 		sender = new EventSender(executor, queue, eventJson, ingestClient, verifyClient,
 			new Backoff(Backoff.DEFAULT_BASE, Backoff.DEFAULT_MAX, new SecureRandom()), Clock.systemUTC(),
 			EventSender.SEND_INTERVAL, status -> SwingUtilities.invokeLater(() -> renderQueue(status)));
+		iconExecutor = new ScheduledThreadPoolExecutor(1, r ->
+		{
+			Thread thread = new Thread(r, Branding.DISPLAY_NAME + " icons");
+			thread.setDaemon(true);
+			return thread;
+		});
+		iconExecutor.setRemoveOnCancelPolicy(true);
+		iconExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+		icons = new IconUploader(iconExecutor, iconClient, iconImages,
+			new Backoff(Backoff.DEFAULT_BASE, Backoff.DEFAULT_MAX, new SecureRandom()), Clock.systemUTC(),
+			IconUploader.Timing.DEFAULT);
+		icons.updateSettings(senderSettings(), config.uploadIcons());
+		sender.setContractListener(icons::onServerContract);
 		sender.start(senderSettings());
 
-		EventSender eventSink = sender;
-		sessions = new SessionTracker(gameView, eventIds, Clock.systemUTC(), eventSink::submit,
+		EventSender queueSink = sender;
+		IconUploader iconSink = icons;
+		// Icons are collected only from events that are actually queued, with their exact item IDs.
+		Consumer<Event> eventSink = event ->
+		{
+			queueSink.submit(event);
+			iconSink.collect(event);
+		};
+		sessions = new SessionTracker(gameView, eventIds, Clock.systemUTC(), eventSink,
 			() -> Duration.ofMinutes(config.afkThresholdMinutes()), config::sendXp, PluginVersion.VERSION);
 		SessionTracker tracker = sessions;
 		RaidTracker raids = new RaidTracker(tracker::emitInSession, raidView, itemLookup, config::sendRaidPurples,
@@ -213,6 +247,10 @@ public class FiresidePlugin extends Plugin
 		executor.shutdown();
 		sender = null;
 		executor = null;
+		icons.shutdown();
+		iconExecutor.shutdown();
+		icons = null;
+		iconExecutor = null;
 
 		clientToolbar.removeNavigation(navigationButton);
 		SwingUtilities.invokeLater(() ->
@@ -236,6 +274,10 @@ public class FiresidePlugin extends Plugin
 		if (sender != null)
 		{
 			sender.updateSettings(senderSettings());
+		}
+		if (icons != null)
+		{
+			icons.updateSettings(senderSettings(), config.uploadIcons());
 		}
 		SessionTracker tracker = sessions;
 		if (tracker != null && FiresideConfig.SENDING_ENABLED_KEY.equals(event.getKey()))

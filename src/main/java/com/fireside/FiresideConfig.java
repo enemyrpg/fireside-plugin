@@ -17,6 +17,7 @@ public interface FiresideConfig extends Config
 	String SERVER_URL_KEY = "serverUrl";
 	String API_KEY_KEY = "apiKey";
 	String SENDING_ENABLED_KEY = "sendingEnabled";
+	String UPLOAD_ICONS_KEY = "uploadIcons";
 
 	@ConfigSection(
 		name = "Server",
@@ -118,13 +119,26 @@ public interface FiresideConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = UPLOAD_ICONS_KEY,
+		name = "Upload item icons",
+		description = "Upload the icons of items in your loot, so the dashboard can show them. "
+			+ "Sent only to your own server above.",
+		position = 4,
+		section = dataSection
+	)
+	default boolean uploadIcons()
+	{
+		return true;
+	}
+
 	@Range(min = 1, max = 60)
 	@Units(Units.MINUTES)
 	@ConfigItem(
 		keyName = "afkThresholdMinutes",
 		name = "AFK threshold",
 		description = "Minutes without input or XP before time counts as AFK (statistics only)",
-		position = 4,
+		position = 5,
 		section = dataSection
 	)
 	default int afkThresholdMinutes()

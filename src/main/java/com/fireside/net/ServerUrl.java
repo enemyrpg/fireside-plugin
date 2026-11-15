@@ -70,6 +70,18 @@ public final class ServerUrl
 		return api("ingest");
 	}
 
+	/** {@code POST /api/v1/ingest/icons/wanted} on this server. */
+	public HttpUrl iconsWantedUrl()
+	{
+		return api("ingest/icons/wanted");
+	}
+
+	/** {@code POST /api/v1/ingest/icons} on this server. */
+	public HttpUrl iconsUrl()
+	{
+		return api("ingest/icons");
+	}
+
 	/** The dashboard, served from the server's base URL. */
 	public HttpUrl dashboardUrl()
 	{

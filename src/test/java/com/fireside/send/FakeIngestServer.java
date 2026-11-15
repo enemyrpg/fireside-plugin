@@ -56,6 +56,9 @@ class FakeIngestServer extends Dispatcher
 	volatile String contractVersion = Contract.REQUIRED_VERSION;
 	volatile int verifyCalls;
 	volatile MockResponse verifyOverride;
+	/** Status for both icon endpoints (404 = a server without them). */
+	volatile int iconStatus = 404;
+	final List<String> iconCalls = new CopyOnWriteArrayList<>();
 
 	FakeIngestServer()
 	{
@@ -110,6 +113,11 @@ class FakeIngestServer extends Dispatcher
 			batches.add(batch);
 			Function<Batch, MockResponse> next = script.poll();
 			return next != null ? next.apply(batch) : acceptAll(batch);
+		}
+		if ("POST".equals(request.getMethod()) && path != null && path.startsWith("/api/v1/ingest/icons"))
+		{
+			iconCalls.add(path);
+			return json(iconStatus, "{\"error\":{\"code\":\"X\",\"message\":\"icon endpoint failed\"}}");
 		}
 		return new MockResponse().setResponseCode(404);
 	}
