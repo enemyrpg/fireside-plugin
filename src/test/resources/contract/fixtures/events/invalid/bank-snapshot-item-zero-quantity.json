@@ -1,0 +1,112 @@
+{
+  "eventId": "01933c4e-8a2b-7c3d-9e4f-0a1b2c3d4e5f",
+  "schemaVersion": 1,
+  "type": "bank.snapshot",
+  "accountHash": "1234567890123456789",
+  "occurredAt": "2026-11-08T19:42:13.512Z",
+  "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+  "payload": {
+    "tabSizes": [3, 2, 0, 0, 0, 0, 0, 0, 0],
+    "items": [
+      {
+        "itemId": 11802,
+        "name": "Armadyl godsword",
+        "quantity": 0,
+        "placeholder": false,
+        "gePrice": 9800000,
+        "haPrice": 750000
+      },
+      {
+        "itemId": 11832,
+        "name": "Bandos chestplate",
+        "quantity": 1,
+        "placeholder": false,
+        "gePrice": 14500000,
+        "haPrice": 159000
+      },
+      {
+        "itemId": 20997,
+        "name": "Twisted bow",
+        "quantity": 0,
+        "placeholder": true,
+        "gePrice": 1450000000,
+        "haPrice": 720000
+      },
+      {
+        "itemId": 2434,
+        "name": "Prayer potion(4)",
+        "quantity": 48,
+        "placeholder": false,
+        "gePrice": 9200,
+        "haPrice": 456
+      },
+      {
+        "itemId": 385,
+        "name": "Shark",
+        "quantity": 320,
+        "placeholder": false,
+        "gePrice": 780,
+        "haPrice": 90
+      },
+      {
+        "itemId": 995,
+        "name": "Coins",
+        "quantity": 12500000,
+        "placeholder": false,
+        "gePrice": 1,
+        "haPrice": 1
+      },
+      {
+        "itemId": 13204,
+        "name": "Platinum token",
+        "quantity": 4200,
+        "placeholder": false,
+        "gePrice": 1000,
+        "haPrice": 1000
+      },
+      {
+        "itemId": 1755,
+        "name": "Chisel",
+        "quantity": 1,
+        "placeholder": false,
+        "gePrice": 10,
+        "haPrice": 1
+      }
+    ],
+    "inventory": [
+      {
+        "itemId": 995,
+        "name": "Coins",
+        "quantity": 125000,
+        "gePrice": 1,
+        "haPrice": 1
+      },
+      {
+        "itemId": 2435,
+        "name": "Prayer potion(4)",
+        "quantity": 12,
+        "gePrice": 9200,
+        "haPrice": 456
+      }
+    ],
+    "equipment": [
+      {
+        "slot": "WEAPON",
+        "itemId": 4151,
+        "name": "Abyssal whip",
+        "quantity": 1,
+        "gePrice": 1500000,
+        "haPrice": 72000
+      },
+      {
+        "slot": "AMMO",
+        "itemId": 892,
+        "name": "Rune arrow",
+        "quantity": 450,
+        "gePrice": 110,
+        "haPrice": 240
+      }
+    ],
+    "contentHash": "sha256:3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f"
+  }
+}
