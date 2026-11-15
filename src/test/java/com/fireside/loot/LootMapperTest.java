@@ -20,7 +20,6 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -162,10 +161,14 @@ public class LootMapperTest
 	}
 
 	@Test
-	public void untradeablesHaveNoGePrice()
+	public void untradeablesGetRuneLitesPrice()
 	{
-		items.price.put(CLUE, 5_000L);
+		// No price in RuneLite: 0.
 		assertEquals(Collections.singletonList(new LootItem(CLUE, "Clue scroll (hard)", 1, 0, 0)),
+			mapper.items(Collections.singletonList(new ItemStack(CLUE, 1))));
+		// RuneLite maps some untradeables to tradeable parts; that price is used as it is.
+		items.price.put(CLUE, 5_000L);
+		assertEquals(Collections.singletonList(new LootItem(CLUE, "Clue scroll (hard)", 1, 5_000, 0)),
 			mapper.items(Collections.singletonList(new ItemStack(CLUE, 1))));
 	}
 
@@ -213,7 +216,6 @@ public class LootMapperTest
 		final Map<Integer, String> names = new HashMap<>();
 		final Map<Integer, Long> price = new HashMap<>();
 		final Map<Integer, Integer> ha = new HashMap<>();
-		final Set<Integer> untradeable = new HashSet<>();
 
 		FakeItems()
 		{
@@ -227,7 +229,6 @@ public class LootMapperTest
 			names.put(ItemID.COINS, "Coins");
 			names.put(ItemID.PLATINUM, "Platinum token");
 			names.put(CLUE, "Clue scroll (hard)");
-			untradeable.add(CLUE);
 		}
 
 		@Override
@@ -236,11 +237,6 @@ public class LootMapperTest
 			return names.getOrDefault(itemId, "Unknown");
 		}
 
-		@Override
-		public boolean tradeable(int itemId)
-		{
-			return !untradeable.contains(itemId);
-		}
 
 		@Override
 		public long gePrice(int itemId)

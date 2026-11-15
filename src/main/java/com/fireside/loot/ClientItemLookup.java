@@ -24,12 +24,6 @@ public class ClientItemLookup implements ItemLookup
 	}
 
 	@Override
-	public boolean tradeable(int itemId)
-	{
-		return unnoted(itemId).isTradeable();
-	}
-
-	@Override
 	public long gePrice(int itemId)
 	{
 		return itemManager.getItemPrice(itemId);

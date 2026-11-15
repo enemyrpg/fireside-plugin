@@ -7,7 +7,10 @@ import net.runelite.api.gameval.ItemID;
  * Client thread only (through {@link ItemLookup}).
  * <ul>
  * <li>Coins: GE and HA 1. Platinum tokens: GE and HA 1000.</li>
- * <li>GE price from RuneLite's item manager, 0 for untradeable items.</li>
+ * <li>GE price from RuneLite's item manager ({@code getItemPrice}), as RuneLite's
+ * own Bank plugin shows it: an untradeable item RuneLite maps to tradeable
+ * parts (a charged item, an imbued ring, degraded Barrows) gets their price,
+ * any other untradeable item 0.</li>
  * <li>HA price from the item composition (of the unnoted form).</li>
  * </ul>
  */
@@ -32,7 +35,7 @@ public final class ItemPrices
 		{
 			return PLATINUM_VALUE;
 		}
-		return items.tradeable(itemId) ? clamp(items.gePrice(itemId)) : 0;
+		return clamp(items.gePrice(itemId));
 	}
 
 	public int haPrice(int itemId)

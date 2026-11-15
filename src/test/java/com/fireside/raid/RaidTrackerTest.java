@@ -545,11 +545,6 @@ public class RaidTrackerTest
 				.map(Raids.Purple::getName).orElse("Unknown");
 		}
 
-		@Override
-		public boolean tradeable(int itemId)
-		{
-			return true;
-		}
 
 		@Override
 		public long gePrice(int itemId)

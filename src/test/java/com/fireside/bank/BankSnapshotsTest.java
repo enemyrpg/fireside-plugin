@@ -167,10 +167,12 @@ public class BankSnapshotsTest
 	public void pricesFollowTheLootRules()
 	{
 		BankSnapshot snapshot = bank(Arrays.asList(slot(FIRE_CAPE, 1), slot(ItemID.COINS, 10),
-			slot(ItemID.PLATINUM, 3)), tabs());
+			slot(ItemID.PLATINUM, 3), slot(FakeBankItems.TENTACLE, 1)), tabs());
 		BankSnapshot.Item cape = snapshot.getItems().get(0);
-		assertEquals("untradeable", 0, cape.getGePrice());
+		assertEquals("untradeable without a RuneLite price", 0, cape.getGePrice());
 		assertEquals(25_000, cape.getHaPrice());
+		assertEquals("untradeable with RuneLite's mapped price, as the Bank plugin shows it", 1_600_000,
+			snapshot.getItems().get(3).getGePrice());
 		assertEquals(1, snapshot.getItems().get(1).getGePrice());
 		assertEquals(1, snapshot.getItems().get(1).getHaPrice());
 		assertEquals(1000, snapshot.getItems().get(2).getGePrice());

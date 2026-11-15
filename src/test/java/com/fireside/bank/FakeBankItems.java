@@ -2,9 +2,7 @@ package com.fireside.bank;
 
 import com.fireside.loot.ItemLookup;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import net.runelite.api.gameval.ItemID;
 
 /** Item facts for the bank tests, as RuneLite's item manager would give them. */
@@ -18,6 +16,8 @@ final class FakeBankItems implements ItemLookup
 	static final int SHARKS = 385;
 	static final int SHARKS_NOTED = 386;
 	static final int FIRE_CAPE = 6570;
+	/** Untradeable, but RuneLite maps it to a kraken tentacle and a whip. */
+	static final int TENTACLE = 12006;
 	static final int SUPER_COMBAT_4 = 12695;
 	static final int SUPER_COMBAT_3 = 12697;
 	static final int SUPER_COMBAT_2 = 12699;
@@ -27,7 +27,6 @@ final class FakeBankItems implements ItemLookup
 	final Map<Integer, String> names = new HashMap<>();
 	final Map<Integer, Long> ge = new HashMap<>();
 	final Map<Integer, Integer> ha = new HashMap<>();
-	final Set<Integer> untradeable = new HashSet<>();
 	final Map<Integer, Integer> placeholders = new HashMap<>();
 
 	FakeBankItems()
@@ -39,9 +38,9 @@ final class FakeBankItems implements ItemLookup
 		placeholders.put(TBOW_PLACEHOLDER, TBOW);
 		item(SHARKS, "Shark", 900, 300);
 		item(SHARKS_NOTED, "Shark", 900, 300);
-		item(FIRE_CAPE, "Fire cape", 0, 0);
-		untradeable.add(FIRE_CAPE);
-		ha.put(FIRE_CAPE, 25_000);
+		// Untradeable without a RuneLite mapping: no GE price.
+		item(FIRE_CAPE, "Fire cape", 0, 25_000);
+		item(TENTACLE, "Abyssal tentacle", 1_600_000, 173_880);
 		item(SUPER_COMBAT_4, "Super combat potion(4)", 12_400, 0);
 		item(SUPER_COMBAT_3, "Super combat potion(3)", 9_000, 0);
 		item(SUPER_COMBAT_2, "Super combat potion(2)", 6_000, 0);
@@ -67,11 +66,6 @@ final class FakeBankItems implements ItemLookup
 		return names.getOrDefault(itemId, "null");
 	}
 
-	@Override
-	public boolean tradeable(int itemId)
-	{
-		return !untradeable.contains(itemId);
-	}
 
 	@Override
 	public long gePrice(int itemId)
