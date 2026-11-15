@@ -1,0 +1,61 @@
+{
+  "accountId": 1,
+  "updatedAt": "2026-11-08T19:42:13Z",
+  "questPoints": 3,
+  "totals": {
+    "total": 4,
+    "finished": 2,
+    "inProgress": 1,
+    "notStarted": 1
+  },
+  "miniquestTotals": {
+    "total": 2,
+    "finished": 1,
+    "inProgress": 0,
+    "notStarted": 1
+  },
+  "quests": [
+    {
+      "quest": "ALFRED_GRIMHANDS_BARCRAWL",
+      "name": "Alfred Grimhand's Barcrawl",
+      "kind": "MINIQUEST",
+      "state": "FINISHED",
+      "finishedAt": null
+    },
+    {
+      "quest": "BEAR_YOUR_SOUL",
+      "name": "Bear Your Soul",
+      "kind": "MINIQUEST",
+      "state": "NOT_STARTED",
+      "finishedAt": null
+    },
+    {
+      "quest": "COOKS_ASSISTANT",
+      "name": "Cook's Assistant",
+      "kind": "QUEST",
+      "state": "FINISHED",
+      "finishedAt": null
+    },
+    {
+      "quest": "DESERT_TREASURE_II__THE_FALLEN_EMPIRE",
+      "name": "Desert Treasure II - The Fallen Empire",
+      "kind": "QUEST",
+      "state": "NOT_STARTED",
+      "finishedAt": null
+    },
+    {
+      "quest": "DRAGON_SLAYER_I",
+      "name": "Dragon Slayer I",
+      "kind": "QUEST",
+      "state": "FINISHED",
+      "finishedAt": "2026-10-20T18:05:00.000Z"
+    },
+    {
+      "quest": "DRAGON_SLAYER_II",
+      "name": "Dragon Slayer II",
+      "kind": "QUEST",
+      "state": "IN_PROGRESS",
+      "finishedAt": null
+    }
+  ]
+}

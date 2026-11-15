@@ -12,7 +12,9 @@
       "equipmentGeValue": 20000,
       "cashValue": 250000,
       "bankHaValue": 400000,
-      "potionStorageHaValue": 0
+      "potionStorageHaValue": 0,
+      "inventoryHaValue": 2500,
+      "equipmentHaValue": 10000
     },
     {
       "date": "2026-10-25",
@@ -24,7 +26,9 @@
       "equipmentGeValue": 20000,
       "cashValue": 250000,
       "bankHaValue": 400000,
-      "potionStorageHaValue": 600
+      "potionStorageHaValue": 600,
+      "inventoryHaValue": 2500,
+      "equipmentHaValue": 10000
     },
     {
       "date": "2026-10-26",
@@ -36,7 +40,9 @@
       "equipmentGeValue": 20000,
       "cashValue": 300000,
       "bankHaValue": 410000,
-      "potionStorageHaValue": 600
+      "potionStorageHaValue": 600,
+      "inventoryHaValue": 0,
+      "equipmentHaValue": 10000
     },
     {
       "date": "2026-10-27",
@@ -48,7 +54,9 @@
       "equipmentGeValue": 20000,
       "cashValue": 300000,
       "bankHaValue": 410000,
-      "potionStorageHaValue": 600
+      "potionStorageHaValue": 600,
+      "inventoryHaValue": 0,
+      "equipmentHaValue": 10000
     }
   ]
 }

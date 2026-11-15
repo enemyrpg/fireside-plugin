@@ -1,0 +1,25 @@
+{
+  "eventId": "01933c4e-8a2b-7c3d-9e4f-0a1b2c3d4e5f",
+  "schemaVersion": 1,
+  "type": "quests.snapshot",
+  "accountHash": "1234567890123456789",
+  "occurredAt": "2026-11-08T19:42:13.512Z",
+  "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+  "payload": {
+    "questPoints": 1,
+    "quests": [
+      {
+        "quest": "COOKS_ASSISTANT",
+        "name": "Cook's Assistant",
+        "state": "FINISHED",
+        "kind": "QUEST"
+      },
+      {
+        "quest": "SOME_NEW_QUEST_2",
+        "name": "Some New Quest 2",
+        "state": "IN_PROGRESS",
+        "kind": "QUEST"
+      }
+    ]
+  }
+}

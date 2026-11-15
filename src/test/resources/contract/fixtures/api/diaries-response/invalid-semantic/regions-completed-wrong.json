@@ -1,0 +1,119 @@
+{
+  "accountId": 1,
+  "updatedAt": "2026-11-08T19:42:13.512Z",
+  "totals": {
+    "tiers": 16,
+    "completed": 8,
+    "regionsCompleted": 2
+  },
+  "regions": [
+    {
+      "region": "ARDOUGNE",
+      "name": "Ardougne",
+      "completed": 3,
+      "tiers": [
+        {
+          "tier": "EASY",
+          "completed": true,
+          "completedAt": null
+        },
+        {
+          "tier": "MEDIUM",
+          "completed": true,
+          "completedAt": null
+        },
+        {
+          "tier": "HARD",
+          "completed": true,
+          "completedAt": "2026-10-20T18:05:00.000Z"
+        },
+        {
+          "tier": "ELITE",
+          "completed": false,
+          "completedAt": null
+        }
+      ]
+    },
+    {
+      "region": "FALADOR",
+      "name": "Falador",
+      "completed": 4,
+      "tiers": [
+        {
+          "tier": "EASY",
+          "completed": true,
+          "completedAt": null
+        },
+        {
+          "tier": "MEDIUM",
+          "completed": true,
+          "completedAt": null
+        },
+        {
+          "tier": "HARD",
+          "completed": true,
+          "completedAt": null
+        },
+        {
+          "tier": "ELITE",
+          "completed": true,
+          "completedAt": null
+        }
+      ]
+    },
+    {
+      "region": "KOUREND",
+      "name": "Kourend & Kebos",
+      "completed": 1,
+      "tiers": [
+        {
+          "tier": "EASY",
+          "completed": true,
+          "completedAt": null
+        },
+        {
+          "tier": "MEDIUM",
+          "completed": false,
+          "completedAt": null
+        },
+        {
+          "tier": "HARD",
+          "completed": false,
+          "completedAt": null
+        },
+        {
+          "tier": "ELITE",
+          "completed": false,
+          "completedAt": null
+        }
+      ]
+    },
+    {
+      "region": "WILDERNESS",
+      "name": "Wilderness",
+      "completed": 0,
+      "tiers": [
+        {
+          "tier": "EASY",
+          "completed": false,
+          "completedAt": null
+        },
+        {
+          "tier": "MEDIUM",
+          "completed": false,
+          "completedAt": null
+        },
+        {
+          "tier": "HARD",
+          "completed": false,
+          "completedAt": null
+        },
+        {
+          "tier": "ELITE",
+          "completed": false,
+          "completedAt": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "accountId": 1,
+  "updatedAt": null,
+  "totals": {
+    "tiers": 0,
+    "completed": 0,
+    "regionsCompleted": 0
+  },
+  "regions": []
+}
