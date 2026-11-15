@@ -23,6 +23,11 @@ public interface FiresideConfig extends Config
 	String BANK_HASH_KEY = "bankContentHash";
 	/** Per RS profile (account), not shown in the panel: hash of the last queued potion storage snapshot. */
 	String POTION_STORAGE_HASH_KEY = "potionStorageContentHash";
+	String SEND_QUESTS_KEY = "sendQuests";
+	/** Per RS profile (account), not shown in the panel: hash of the last queued quests snapshot. */
+	String QUESTS_HASH_KEY = "questsContentHash";
+	/** Per RS profile (account), not shown in the panel: hash of the last queued diaries snapshot. */
+	String DIARIES_HASH_KEY = "diariesContentHash";
 
 	@ConfigSection(
 		name = "Server",
@@ -137,11 +142,23 @@ public interface FiresideConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = SEND_QUESTS_KEY,
+		name = "Quests and diaries",
+		description = "Send quest states, quest points and completed achievement diary tiers after login and when they change",
+		position = 5,
+		section = dataSection
+	)
+	default boolean sendQuests()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = UPLOAD_ICONS_KEY,
 		name = "Upload item icons",
 		description = "Upload the icons of items in your loot, so the dashboard can show them. "
 			+ "Sent only to your own server above.",
-		position = 5,
+		position = 6,
 		section = dataSection
 	)
 	default boolean uploadIcons()
@@ -155,7 +172,7 @@ public interface FiresideConfig extends Config
 		keyName = "afkThresholdMinutes",
 		name = "AFK threshold",
 		description = "Minutes without input or XP before time counts as AFK (statistics only)",
-		position = 6,
+		position = 7,
 		section = dataSection
 	)
 	default int afkThresholdMinutes()
