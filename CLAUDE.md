@@ -22,6 +22,9 @@ contract package (JSON Schema + fixtures) lives in
 - `./gradlew run` or the shared **RuneLite (dev)** run configuration in
   IntelliJ (`.run/`) – start RuneLite with the plugin in developer mode
   (`-ea`, `--developer-mode`, `--debug`); see README "Development"
+- `./gradlew runIsolated` or **RuneLite (dev, isolated)** – the same with a
+  separate RuneLite directory (`user.home` = `~/.runelite-fireside-dev`), so
+  config, queue and plugin data are separate from `./gradlew run`
 - `./scripts/update-contract.sh <version>` – update the pinned contract
 - `./scripts/render-icons.sh` – render `icon.png` and the panel icon from
   `assets/logo/fireside.svg`
@@ -95,6 +98,10 @@ contract package (JSON Schema + fixtures) lives in
 - One task per branch and PR (e.g. `m8/rename-fireside`).
 - Start with a plan, then tests, then implementation.
 - Features must be tested in-game before merge (the developer does this).
+- `../fireside-plugin-test` is the developer's test worktree. Never change,
+  build or run anything there.
+- Never change the default `./gradlew run` so it uses a different RuneLite
+  directory; the test client depends on it.
 
 ## RuneLite plugin guidelines
 

@@ -45,12 +45,31 @@ tasks.withType(JavaCompile).configureEach {
 	options.release.set(11)
 }
 
-tasks.register('run', JavaExec) {
-	classpath = sourceSets.test.runtimeClasspath
-	mainClass = pluginMainClass
+// Settings shared by both ways to start the dev client, so they cannot drift.
+def configureDevClient = { JavaExec task ->
+	task.group = 'application'
+	task.classpath = sourceSets.test.runtimeClasspath
+	task.mainClass = pluginMainClass
 
-	jvmArgs "-ea"
-	args "--developer-mode", "--debug"
+	task.jvmArgs "-ea"
+	task.args "--developer-mode", "--debug"
+}
+
+// Uses the normal RuneLite directory (~/.runelite). The developer's test
+// client depends on this: never give this task a different user.home.
+tasks.register('run', JavaExec) {
+	configureDevClient(it)
+	description = 'Starts RuneLite with the plugin, using the normal RuneLite directory.'
+}
+
+// RuneLite.RUNELITE_DIR is user.home/.runelite, so a separate user.home gives
+// this client its own config, queue, plugin data, logs and game cache.
+def isolatedDevHome = new File(System.getProperty('user.home'), '.runelite-fireside-dev').absolutePath
+
+tasks.register('runIsolated', JavaExec) {
+	configureDevClient(it)
+	description = "Starts RuneLite with the plugin, using a separate RuneLite directory under ${isolatedDevHome}."
+	systemProperty 'user.home', isolatedDevHome
 }
 
 tasks.register('shadowJar', Jar) {
