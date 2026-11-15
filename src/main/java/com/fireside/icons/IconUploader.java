@@ -116,6 +116,9 @@ public class IconUploader
 	private final Map<Integer, ScheduledFuture<?>> loading = new HashMap<>();
 	/** Encoded icons waiting for upload. */
 	private final Deque<IconClient.Icon> ready = new ArrayDeque<>();
+	/** When the oldest icon in {@link #ready} got there; null when it is empty (or after a failed upload). */
+	@Nullable
+	private Instant firstReadyAt;
 
 	@Nullable
 	private Call call;
@@ -276,6 +279,14 @@ public class IconUploader
 		}
 		if (!ready.isEmpty())
 		{
+			if (ready.size() < IconClient.MAX_ICONS_PER_REQUEST && (!toLoad.isEmpty() || !loading.isEmpty())
+				&& firstReadyAt != null && now.isBefore(firstReadyAt.plus(timing.getGatherDelay())))
+			{
+				// More icons are loading or start on the next game ticks: wait for a fuller batch,
+				// but never longer than the gather delay, so an image that never loads holds nothing up.
+				schedulePump(Duration.between(now, firstReadyAt.plus(timing.getGatherDelay())));
+				return;
+			}
 			startUpload();
 		}
 		else
@@ -403,6 +414,10 @@ public class IconUploader
 			checked.remove(itemId);
 			return;
 		}
+		if (ready.isEmpty())
+		{
+			firstReadyAt = clock.instant();
+		}
 		ready.add(new IconClient.Icon(itemId, png));
 		schedulePump(ready.size() >= IconClient.MAX_ICONS_PER_REQUEST ? Duration.ZERO : timing.getGatherDelay());
 	}
@@ -420,6 +435,10 @@ public class IconUploader
 			}
 			bytes += next.jsonSize();
 			batch.add(ready.pollFirst());
+		}
+		if (ready.isEmpty())
+		{
+			firstReadyAt = null;
 		}
 		int gen = generation;
 		busy = true;
@@ -544,6 +563,7 @@ public class IconUploader
 			checked.remove(icon.getItemId());
 		}
 		ready.clear();
+		firstReadyAt = null;
 		for (Map.Entry<Integer, ScheduledFuture<?>> entry : loading.entrySet())
 		{
 			checked.remove(entry.getKey());

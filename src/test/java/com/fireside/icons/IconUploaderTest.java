@@ -120,13 +120,12 @@ public class IconUploaderTest
 				return new MockResponse().setResponseCode(404);
 			}
 			Received r = new Received(path, auth, ids);
-			received.add(r);
 			Function<Received, MockResponse> next = script.poll();
-			if (next != null)
-			{
-				return next.apply(r);
-			}
-			return r.isWanted() ? answerWanted(ids) : answerUpload(ids);
+			MockResponse response = next != null ? next.apply(r)
+				: r.isWanted() ? answerWanted(ids) : answerUpload(ids);
+			// Recorded after the answer (and what it stores), so a test that sees the request sees its effect.
+			received.add(r);
+			return response;
 		}
 
 		MockResponse answerWanted(List<Integer> ids)
@@ -305,7 +304,9 @@ public class IconUploaderTest
 		{
 			server.stored.add(id);
 		}
-		start().collect(loot(range(0, 650)));
+		// A long gather delay: loads are spread over game ticks, and a slow machine must not split batches.
+		start(new IconUploader.Timing(Duration.ofMillis(50), Duration.ofSeconds(2), Duration.ofMillis(10),
+			Duration.ofSeconds(5)), "1.18.0").collect(loot(range(0, 650)));
 
 		assertEquals(range(0, 500), nextWanted().ids);
 		// Uploads of the first chunk's icons may go before the second wanted.
@@ -327,7 +328,7 @@ public class IconUploaderTest
 		assertEquals(Collections.singletonList(range(500, 650)), wanted);
 		assertEquals(new TreeSet<>(range(400, 650)), uploaded);
 		assertEquals(250, sizes.stream().mapToInt(Integer::intValue).sum());
-		assertEquals("as few batches as possible", 3, sizes.size());
+		assertEquals("as few batches as possible: " + sizes, 3, sizes.size());
 		// Only the missing ones were loaded.
 		assertEquals(new HashSet<>(range(400, 650)), new HashSet<>(images.loads));
 		assertQuiet();
