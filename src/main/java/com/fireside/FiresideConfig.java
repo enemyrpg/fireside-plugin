@@ -18,6 +18,11 @@ public interface FiresideConfig extends Config
 	String API_KEY_KEY = "apiKey";
 	String SENDING_ENABLED_KEY = "sendingEnabled";
 	String UPLOAD_ICONS_KEY = "uploadIcons";
+	String SEND_BANK_KEY = "sendBank";
+	/** Per RS profile (account), not shown in the panel: hash of the last queued bank snapshot. */
+	String BANK_HASH_KEY = "bankContentHash";
+	/** Per RS profile (account), not shown in the panel: hash of the last queued potion storage snapshot. */
+	String POTION_STORAGE_HASH_KEY = "potionStorageContentHash";
 
 	@ConfigSection(
 		name = "Server",
@@ -120,11 +125,23 @@ public interface FiresideConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = SEND_BANK_KEY,
+		name = "Bank",
+		description = "Send bank, potion storage, inventory and equipment when the bank closes and something changed",
+		position = 4,
+		section = dataSection
+	)
+	default boolean sendBank()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = UPLOAD_ICONS_KEY,
 		name = "Upload item icons",
 		description = "Upload the icons of items in your loot, so the dashboard can show them. "
 			+ "Sent only to your own server above.",
-		position = 4,
+		position = 5,
 		section = dataSection
 	)
 	default boolean uploadIcons()
@@ -138,7 +155,7 @@ public interface FiresideConfig extends Config
 		keyName = "afkThresholdMinutes",
 		name = "AFK threshold",
 		description = "Minutes without input or XP before time counts as AFK (statistics only)",
-		position = 5,
+		position = 6,
 		section = dataSection
 	)
 	default int afkThresholdMinutes()

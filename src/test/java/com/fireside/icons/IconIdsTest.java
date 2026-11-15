@@ -3,12 +3,14 @@ package com.fireside.icons;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.fireside.event.BankSnapshot;
 import com.fireside.event.Event;
 import com.fireside.event.EventPayload;
 import com.fireside.event.Kc;
 import com.fireside.event.Loot;
 import com.fireside.event.LootItem;
 import com.fireside.event.LootSource;
+import com.fireside.event.PotionStorageSnapshot;
 import com.fireside.event.RaidSpecialLoot;
 import com.fireside.event.UuidV7Generator;
 import java.time.Instant;
@@ -73,5 +75,28 @@ public class IconIdsTest
 	public void eventsWithoutItemsGiveNothing()
 	{
 		assertTrue(IconIds.of(event(Kc.builder().boss("Zulrah").killCount(1).build())).isEmpty());
+	}
+
+	@Test
+	public void bankItemsInventoryAndEquipmentWithoutFillers()
+	{
+		BankSnapshot bank = new BankSnapshot(Collections.nCopies(BankSnapshot.TAB_COUNT, 0), Arrays.asList(
+			new BankSnapshot.Item(11802, "Armadyl godsword", 1, false, 9_800_000, 750_000),
+			new BankSnapshot.Item(20594, "Bank filler", 1, false, 0, 0),
+			new BankSnapshot.Item(20997, "Twisted bow", 0, true, 1_450_000_000, 720_000)),
+			Collections.singletonList(new BankSnapshot.InventoryItem(386, "Shark", 500, 900, 300)),
+			Collections.singletonList(new BankSnapshot.WornItem("WEAPON", 4151, "Abyssal whip", 1, 1, 1)),
+			"sha256:x");
+		// The placeholder's ID is the real item's, as in the event; the filler is drawn as an empty slot.
+		assertEquals(Arrays.asList(11802, 20997, 386, 4151), new ArrayList<>(IconIds.of(event(bank))));
+	}
+
+	@Test
+	public void potionStorageItems()
+	{
+		PotionStorageSnapshot potions = new PotionStorageSnapshot(Arrays.asList(
+			new PotionStorageSnapshot.Potion(12695, "Super combat potion", 312, 4, 12_400, 0),
+			new PotionStorageSnapshot.Potion(229, "Vial", 12, 1, 4, 1)), "sha256:x");
+		assertEquals(Arrays.asList(12695, 229), new ArrayList<>(IconIds.of(event(potions))));
 	}
 }

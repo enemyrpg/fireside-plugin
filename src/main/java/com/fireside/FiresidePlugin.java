@@ -2,6 +2,10 @@ package com.fireside;
 
 import com.google.gson.Gson;
 import com.google.inject.Provides;
+import com.fireside.bank.BankSnapshots;
+import com.fireside.bank.BankTracker;
+import com.fireside.bank.ClientBankView;
+import com.fireside.bank.RsProfileHashStore;
 import com.fireside.event.EventJson;
 import com.fireside.event.LootItem;
 import com.fireside.event.LootSource;
@@ -14,6 +18,7 @@ import com.fireside.loot.KillTracker;
 import com.fireside.loot.LootMapper;
 import com.fireside.net.IconClient;
 import com.fireside.net.IngestClient;
+import com.fireside.net.SemVer;
 import com.fireside.net.ServerUrl;
 import com.fireside.net.VerifyClient;
 import com.fireside.net.VerifyResult;
@@ -73,8 +78,8 @@ import okhttp3.Call;
 @PluginDescriptor(
 	name = Branding.DISPLAY_NAME,
 	internalName = Branding.INTERNAL_NAME,
-	description = "Self-hosted tracker for your own accounts: sessions, screen time, XP, loot and KC on your own dashboard.",
-	tags = {"tracker", "sessions", "screen time", "loot", "self-hosted"}
+	description = "Self-hosted tracker for your own accounts: sessions, screen time, XP, loot, KC and bank on your own dashboard.",
+	tags = {"tracker", "sessions", "screen time", "loot", "bank", "self-hosted"}
 )
 public class FiresidePlugin extends Plugin
 {
@@ -126,6 +131,12 @@ public class FiresidePlugin extends Plugin
 	@Inject
 	private ClientTfaRecordsView tfaRecordsView;
 
+	@Inject
+	private ClientBankView bankView;
+
+	@Inject
+	private RsProfileHashStore bankHashes;
+
 	/**
 	 * The plugin's own thread: all queue disk IO and sender state live on it.
 	 * HTTP runs on OkHttp's pool; results come back to this thread.
@@ -142,6 +153,12 @@ public class FiresidePlugin extends Plugin
 	/** TFA's records table into {@code pb.records}. Client thread. */
 	private TfaRecordsReader tfaRecords;
 	private LootMapper lootMapper;
+	/** Bank and potion storage snapshots. Reads on the client thread; synchronized. */
+	private volatile BankTracker bank;
+	/** Panel line about a skipped bank snapshot; null when there is none. */
+	private volatile String bankStatus;
+	/** The last server contract the sender reported, for a bank tracker created after it. */
+	private volatile SemVer serverContract;
 	/** Whether RuneLite's Loot Tracker (which posts {@code LootReceived}) is running. */
 	private volatile boolean lootTrackerActive;
 
@@ -185,7 +202,17 @@ public class FiresidePlugin extends Plugin
 			new Backoff(Backoff.DEFAULT_BASE, Backoff.DEFAULT_MAX, new SecureRandom()), Clock.systemUTC(),
 			IconUploader.Timing.DEFAULT);
 		icons.updateSettings(senderSettings(), config.uploadIcons());
-		sender.setContractListener(icons::onServerContract);
+		IconUploader contractIcons = icons;
+		sender.setContractListener(version ->
+		{
+			serverContract = version;
+			contractIcons.onServerContract(version);
+			BankTracker bankTracker = bank;
+			if (bankTracker != null)
+			{
+				bankTracker.onServerContract(version);
+			}
+		});
 		sender.start(senderSettings());
 
 		EventSender queueSink = sender;
@@ -204,6 +231,14 @@ public class FiresidePlugin extends Plugin
 		kills = new KillTracker(tracker::emitInSession, config::sendLoot, config::sendKillCounts, raids);
 		tfaRecords = new TfaRecordsReader(tfaRecordsView, tracker::emitInSession, config::sendKillCounts);
 		lootMapper = new LootMapper(itemLookup);
+		bank = new BankTracker(bankView, new BankSnapshots(itemLookup), bankHashes, tracker::createInSession,
+			eventSink, Clock.systemUTC(), () -> config.sendBank() && config.sendingEnabled(), status ->
+		{
+			bankStatus = status;
+			SwingUtilities.invokeLater(this::refreshPanel);
+		});
+		// The sender may have verified the server before the tracker existed.
+		bank.onServerContract(serverContract);
 		lootTrackerActive = isLootTrackerActive();
 		// Picks up a game that is already logged in (plugin turned on mid-game).
 		clientThread.invoke(() ->
@@ -235,6 +270,15 @@ public class FiresidePlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception
 	{
+		BankTracker stoppingBank = bank;
+		if (stoppingBank != null)
+		{
+			// Held snapshots belong to the session that is still running.
+			stoppingBank.flush();
+		}
+		bank = null;
+		serverContract = null;
+		bankStatus = null;
 		// Queues an open AFK period (cached values only, safe off the client thread) before the
 		// sender stops. No session.end: the server closes the session at its last heartbeat.
 		sessions.stop();
@@ -267,8 +311,11 @@ public class FiresidePlugin extends Plugin
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
 	{
-		if (!Branding.CONFIG_GROUP.equals(event.getGroup()))
+		if (!Branding.CONFIG_GROUP.equals(event.getGroup())
+			|| FiresideConfig.BANK_HASH_KEY.equals(event.getKey())
+			|| FiresideConfig.POTION_STORAGE_HASH_KEY.equals(event.getKey()))
 		{
+			// The stored bank hashes are bookkeeping, not settings.
 			return;
 		}
 		if (sender != null)
@@ -284,6 +331,11 @@ public class FiresidePlugin extends Plugin
 		{
 			boolean enabled = config.sendingEnabled();
 			clientThread.invoke(() -> tracker.setEnabled(enabled));
+		}
+		BankTracker bankTracker = bank;
+		if (bankTracker != null)
+		{
+			bankTracker.onSettingsChanged();
 		}
 		String key = event.getKey();
 		boolean connectionChanged = FiresideConfig.SERVER_URL_KEY.equals(key)
@@ -305,6 +357,12 @@ public class FiresidePlugin extends Plugin
 	@Subscribe
 	public void onClientShutdown(ClientShutdown event)
 	{
+		BankTracker bankTracker = bank;
+		if (bankTracker != null)
+		{
+			// Before session.end, and before the queue is flushed to disk.
+			bankTracker.flush();
+		}
 		if (sessions != null)
 		{
 			sessions.onClientShutdown();
@@ -331,6 +389,13 @@ public class FiresidePlugin extends Plugin
 		{
 			tfaRecords.reset();
 		}
+		BankTracker bankTracker = bank;
+		if (bankTracker != null && (state == GameState.HOPPING || state == GameState.LOGIN_SCREEN
+			|| state == GameState.LOGIN_SCREEN_AUTHENTICATOR))
+		{
+			// The held snapshots go in the session that is ending, before session.end.
+			bankTracker.flush();
+		}
 		if (sessions != null && sessions.onGameState(event.getGameState()) && sender != null)
 		{
 			// session.end is queued; send it (and the rest) now.
@@ -352,6 +417,15 @@ public class FiresidePlugin extends Plugin
 		if (sessions != null)
 		{
 			sessions.onTick();
+		}
+		BankTracker bankTracker = bank;
+		if (bankTracker != null)
+		{
+			bankTracker.onTick();
+		}
+		if (icons != null)
+		{
+			icons.onGameTick();
 		}
 	}
 
@@ -385,6 +459,12 @@ public class FiresidePlugin extends Plugin
 	@Subscribe
 	public void onWidgetClosed(WidgetClosed event)
 	{
+		BankTracker bankTracker = bank;
+		if (bankTracker != null && event.getGroupId() == InterfaceID.BANKMAIN)
+		{
+			// Read after the close, outside the script that closed the bank.
+			clientThread.invokeLater(bankTracker::onBankClosed);
+		}
 		if (tfaRecords != null && event.getGroupId() == InterfaceID.TFA_STATS)
 		{
 			tfaRecords.onTableClosed();
@@ -512,7 +592,7 @@ public class FiresidePlugin extends Plugin
 		}
 		String url = config.serverUrl();
 		StatusView view = StatusView.compute(url, config.apiKey(), testing, lastResult,
-			config.sendLoot() && !lootTrackerActive);
+			config.sendLoot() && !lootTrackerActive, bankStatus);
 		panel.render(view, url, config.sendingEnabled(),
 			lastResult != null ? lastResult.getResponse() : null,
 			lastTestedAt, testing, ServerUrl.parse(url) != null);

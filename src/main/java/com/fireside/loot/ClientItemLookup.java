@@ -41,6 +41,13 @@ public class ClientItemLookup implements ItemLookup
 		return unnoted(itemId).getHaPrice();
 	}
 
+	@Override
+	public int placeholderOf(int itemId)
+	{
+		ItemComposition composition = itemManager.getItemComposition(itemId);
+		return composition.getPlaceholderTemplateId() != -1 ? composition.getPlaceholderId() : -1;
+	}
+
 	private ItemComposition unnoted(int itemId)
 	{
 		ItemComposition composition = itemManager.getItemComposition(itemId);

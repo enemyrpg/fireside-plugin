@@ -232,12 +232,29 @@ public class SessionTracker
 	 */
 	public synchronized boolean emitInSession(EventPayload payload)
 	{
-		if (!enabled || state != State.ACTIVE)
+		Event event = createInSession(payload);
+		if (event == null)
 		{
 			return false;
 		}
-		emit(clock.instant(), payload);
+		sink.accept(event);
 		return true;
+	}
+
+	/**
+	 * An event in the current session, created now (its ID in game order),
+	 * but not queued: for snapshots that are held and queued later.
+	 *
+	 * @return null if there is no active session
+	 */
+	@Nullable
+	public synchronized Event createInSession(EventPayload payload)
+	{
+		if (!enabled || state != State.ACTIVE)
+		{
+			return null;
+		}
+		return Event.create(ids, accountHash, clock.instant(), sessionId, payload);
 	}
 
 	synchronized State state()

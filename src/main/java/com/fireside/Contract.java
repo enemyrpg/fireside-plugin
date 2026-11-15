@@ -10,7 +10,7 @@ package com.fireside;
 public final class Contract
 {
 	/** Version of the pinned contract package the tests validate against. */
-	public static final String PINNED_VERSION = "1.18.0";
+	public static final String PINNED_VERSION = "1.19.0";
 
 	/**
 	 * Lowest server contract version the plugin sends events to. A server that
@@ -24,6 +24,14 @@ public final class Contract
 	 * older server still gets events; the plugin just skips icons.
 	 */
 	public static final String ICONS_VERSION = "1.18.0";
+
+	/**
+	 * Lowest server contract version with {@code bank.snapshot} and
+	 * {@code potion_storage.snapshot} (10.1, 10.2). An older server gets no
+	 * bank snapshots, and the stored bank hashes are cleared so the bank is
+	 * sent again once the server is upgraded.
+	 */
+	public static final String BANK_VERSION = "1.19.0";
 
 	private Contract()
 	{

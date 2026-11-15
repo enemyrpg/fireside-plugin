@@ -1,7 +1,7 @@
 # Fireside – RuneLite plugin
 
 A RuneLite plugin that collects data from Old School RuneScape (XP, loot, kill
-counts, raids, sessions, AFK time and world info) and sends it to your own
+counts, raids, bank, sessions, AFK time and world info) and sends it to your own
 self-hosted [Fireside server](https://github.com/enemyrpg/fireside).
 Nothing is sent anywhere until you configure a server URL and API key.
 
@@ -18,14 +18,26 @@ This plugin is in early development.
 4. Turn on **Send data**. It is off by default, and nothing is sent until the
    server URL and API key are set. Data is only sent to the server you set up.
 
-Under **Data** you can turn off XP, loot, kill counts and raid purples.
+Under **Data** you can turn off XP, loot, kill counts, raid purples and bank.
 **Kill counts** also covers raid PBs: when you open The Fractured Archive's
 records table yourself, your own PBs per team size are sent. The plugin
 never opens the table for you.
 Sessions and AFK time are always sent while sending is on.
 
+**Bank** (on by default) sends your bank, potion storage, inventory and
+equipment when you close the bank, but only if something changed since the
+last time for that account. The bank is sent as the game has it: tabs, order,
+placeholders and bank fillers. A full bank is about 160 KB, so at most one
+snapshot per account is sent every 15 minutes; a change inside that time is
+sent when the 15 minutes are up, or when you log out, hop or close the
+client. The plugin only reads the game's item containers and bank tab
+settings, never the bank layout of other plugins such as Bank Tags. It only
+runs on normal worlds (not Leagues, Deadman or beta worlds). If the bank looks
+different from what the plugin expects, nothing is sent and the side panel
+says so.
+
 **Upload item icons** (on by default) uploads the icons of the items in your
-loot, taken from your own RuneLite client, so the dashboard can show them.
+loot and bank, taken from your own RuneLite client, so the dashboard can show them.
 They are only sent to your own server, which stores them in its own
 database. The plugin asks the server which icons it lacks and uploads only
 those, at a lower priority than your data. A server too old for icons still

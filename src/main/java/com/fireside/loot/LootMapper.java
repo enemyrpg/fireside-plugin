@@ -9,7 +9,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
-import net.runelite.api.gameval.ItemID;
 import net.runelite.client.game.ItemStack;
 import net.runelite.http.api.loottracker.LootRecordType;
 
@@ -26,13 +25,13 @@ import net.runelite.http.api.loottracker.LootRecordType;
 public class LootMapper
 {
 	static final String CLUE_PREFIX = "Clue Scroll (";
-	private static final int PLATINUM_VALUE = 1000;
-
 	private final ItemLookup items;
+	private final ItemPrices prices;
 
 	public LootMapper(ItemLookup items)
 	{
 		this.items = items;
+		this.prices = new ItemPrices(items);
 	}
 
 	/**
@@ -81,11 +80,7 @@ public class LootMapper
 	 * Items with names and per-item prices. Invalid stacks are skipped and
 	 * stacks of the same item merged, in first-seen order. Empty if nothing
 	 * is left. Client thread only.
-	 * <ul>
-	 * <li>Coins: GE and HA 1. Platinum tokens: GE and HA 1000.</li>
-	 * <li>GE price from RuneLite's item manager, 0 for untradeable items.</li>
-	 * <li>HA price from the item composition.</li>
-	 * </ul>
+	 * Prices follow {@link ItemPrices}.
 	 */
 	public List<LootItem> items(@Nullable Collection<ItemStack> stacks)
 	{
@@ -106,40 +101,10 @@ public class LootMapper
 		for (Map.Entry<Integer, Long> entry : quantities.entrySet())
 		{
 			int itemId = entry.getKey();
-			int quantity = clamp(entry.getValue());
-			result.add(new LootItem(itemId, items.name(itemId), quantity, gePrice(itemId), haPrice(itemId)));
+			int quantity = ItemPrices.clamp(entry.getValue());
+			result.add(new LootItem(itemId, items.name(itemId), quantity, prices.gePrice(itemId),
+				prices.haPrice(itemId)));
 		}
 		return result;
-	}
-
-	private int gePrice(int itemId)
-	{
-		if (itemId == ItemID.COINS)
-		{
-			return 1;
-		}
-		if (itemId == ItemID.PLATINUM)
-		{
-			return PLATINUM_VALUE;
-		}
-		return items.tradeable(itemId) ? clamp(items.gePrice(itemId)) : 0;
-	}
-
-	private int haPrice(int itemId)
-	{
-		if (itemId == ItemID.COINS)
-		{
-			return 1;
-		}
-		if (itemId == ItemID.PLATINUM)
-		{
-			return PLATINUM_VALUE;
-		}
-		return Math.max(0, items.haPrice(itemId));
-	}
-
-	private static int clamp(long value)
-	{
-		return (int) Math.max(0, Math.min(Integer.MAX_VALUE, value));
 	}
 }

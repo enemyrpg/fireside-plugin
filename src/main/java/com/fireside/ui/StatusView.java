@@ -47,12 +47,20 @@ public final class StatusView
 		return compute(rawUrl, rawKey, testing, last, false);
 	}
 
+	public static StatusView compute(@Nullable String rawUrl, @Nullable String rawKey, boolean testing,
+		@Nullable VerifyResult last, boolean lootTrackerOff)
+	{
+		return compute(rawUrl, rawKey, testing, last, lootTrackerOff, null);
+	}
+
 	/**
 	 * @param lootTrackerOff sending loot is on, but RuneLite's Loot Tracker
 	 *     plugin (which posts the loot events) is not running
+	 * @param dataWarning a line about data that was not sent (e.g. a skipped
+	 *     bank snapshot), or null
 	 */
 	public static StatusView compute(@Nullable String rawUrl, @Nullable String rawKey, boolean testing,
-		@Nullable VerifyResult last, boolean lootTrackerOff)
+		@Nullable VerifyResult last, boolean lootTrackerOff, @Nullable String dataWarning)
 	{
 		boolean urlSet = rawUrl != null && !rawUrl.trim().isEmpty();
 		boolean keySet = rawKey != null && !rawKey.trim().isEmpty();
@@ -60,6 +68,10 @@ public final class StatusView
 		if (lootTrackerOff)
 		{
 			warnings.add(LOOT_TRACKER_OFF_WARNING);
+		}
+		if (dataWarning != null)
+		{
+			warnings.add(dataWarning);
 		}
 
 		if (!urlSet || !keySet)
