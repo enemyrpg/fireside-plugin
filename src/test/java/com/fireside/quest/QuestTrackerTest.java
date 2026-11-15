@@ -209,6 +209,25 @@ public class QuestTrackerTest
 	}
 
 	@Test
+	public void aBurstOfTicksAfterLoginDoesNotShortenTheWait()
+	{
+		// The client catches up: many game ticks in the same moment.
+		for (int i = 0; i < 50; i++)
+		{
+			tracker.onTick();
+		}
+		assertEquals(0, view.questReads);
+		assertTrue(queued.isEmpty());
+		pass(QuestTracker.SETTLE_TIME.minus(TICK));
+		assertEquals(0, view.questReads);
+		ticks(1);
+		assertEquals(view.quests.size(), view.questReads);
+		assertTrue(queued.isEmpty());
+		ticks(QuestTracker.CONFIRM_TICKS);
+		assertEquals(2, queued.size());
+	}
+
+	@Test
 	public void nothingWithoutAnActiveSession()
 	{
 		inSession = false;

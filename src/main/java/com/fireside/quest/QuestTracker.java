@@ -31,8 +31,9 @@ import net.runelite.api.gameval.VarbitID;
  * <b>Never before the login data is complete.</b> The server treats an
  * account's first snapshot as the baseline ("finished before tracking"), so
  * an empty or partial one would put a false date on everything in the next.
- * After login nothing is read until a session is active and the stats are
- * loaded for {@link #SETTLE_TICKS} game ticks. Then everything is read twice,
+ * After login nothing is read until a session is active and the stats have
+ * been loaded for {@link #SETTLE_TICKS} game ticks and {@link #SETTLE_TIME}
+ * (game ticks can come in a burst right after login). Then everything is read twice,
  * {@link #CONFIRM_TICKS} apart, and only when both reads are identical and
  * the quest points fit the quest states are the snapshots offered. Until then
  * the reads repeat.
@@ -60,6 +61,8 @@ public class QuestTracker
 {
 	/** Game ticks with the stats loaded before the first read after login. */
 	public static final int SETTLE_TICKS = 5;
+	/** Time with the stats loaded before the first read after login: what the settle ticks normally take. */
+	public static final Duration SETTLE_TIME = Duration.ofMillis(600L * (SETTLE_TICKS - 1));
 	/** Game ticks between the reads that must agree. */
 	public static final int CONFIRM_TICKS = 3;
 	/** At most one snapshot of each kind per account in this time. */
@@ -113,6 +116,9 @@ public class QuestTracker
 	private boolean serverTooOld;
 	private Phase phase = Phase.WAITING;
 	private int settledTicks;
+	/** When the stats were first seen loaded in this wait. */
+	@Nullable
+	private Instant settledSince;
 	/** Ticks until the next confirming read. */
 	private int confirmWait;
 	@Nullable
@@ -175,9 +181,14 @@ public class QuestTracker
 				if (!view.statsLoaded())
 				{
 					settledTicks = 0;
+					settledSince = null;
 					return;
 				}
-				if (++settledTicks < SETTLE_TICKS)
+				if (settledSince == null)
+				{
+					settledSince = now;
+				}
+				if (++settledTicks < SETTLE_TICKS || now.isBefore(settledSince.plus(SETTLE_TIME)))
 				{
 					return;
 				}
@@ -302,6 +313,7 @@ public class QuestTracker
 	{
 		phase = Phase.WAITING;
 		settledTicks = 0;
+		settledSince = null;
 		confirmWait = 0;
 		firstQuestsHash = null;
 		firstDiariesHash = null;
