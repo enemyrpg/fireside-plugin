@@ -11,7 +11,9 @@ public enum EventType
 	LOOT("loot"),
 	KC("kc"),
 	RAID_SPECIAL_LOOT("raid.special_loot"),
-	PB_RECORDS("pb.records");
+	PB_RECORDS("pb.records"),
+	BANK_SNAPSHOT("bank.snapshot"),
+	POTION_STORAGE_SNAPSHOT("potion_storage.snapshot");
 
 	private final String wireName;
 

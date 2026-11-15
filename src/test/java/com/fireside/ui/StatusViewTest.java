@@ -61,6 +61,17 @@ public class StatusViewTest
 	}
 
 	@Test
+	public void aSkippedBankIsShownAsAWarning()
+	{
+		String line = "Bank not sent: unexpected bank layout. The next bank close tries again.";
+		StatusView notTested = StatusView.compute("http://127.0.0.1:3000", KEY, false, null, false, line);
+		assertEquals(StatusView.Level.WARNING, notTested.getLevel());
+		assertEquals(Collections.singletonList(line), notTested.getWarnings());
+		StatusView cleared = StatusView.compute("http://127.0.0.1:3000", KEY, false, null, false, null);
+		assertTrue(cleared.getWarnings().isEmpty());
+	}
+
+	@Test
 	public void noLootTrackerWarningWhenItIsOn()
 	{
 		assertTrue(StatusView.compute("http://127.0.0.1:3000", KEY, false, null, false).getWarnings().isEmpty());

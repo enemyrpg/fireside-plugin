@@ -41,7 +41,10 @@ import okhttp3.Call;
  * {@code icons/wanted} a short while later, so a loot burst becomes one
  * request. Every ID the server answers for is remembered for the session and
  * never asked about again. Missing icons are loaded in parallel, each with its
- * own timeout, so an image that never loads does not hold back the others. They
+ * own timeout, so an image that never loads does not hold back the others. At
+ * most {@link #MAX_LOADS_PER_TICK} loads start per game tick ({@link #onGameTick}),
+ * because each one draws a sprite on the client thread and a first bank can
+ * bring well over a thousand new IDs at once. They
  * are encoded to PNG in memory and uploaded with {@code icons} in batches.
  * <p>
  * <b>Lower priority than events.</b> Runs on its own thread, separate from the
@@ -78,6 +81,9 @@ public class IconUploader
 	/** Encoded icons waiting for upload, at most (about 1.5 KB each). */
 	static final int MAX_READY = 2000;
 
+	/** Icon loads started per game tick at most (about 40 per second), so the client thread never hitches. */
+	static final int MAX_LOADS_PER_TICK = 25;
+
 	private static final SemVer ICONS_VERSION = SemVer.parse(Contract.ICONS_VERSION);
 
 	private final ScheduledExecutorService executor;
@@ -104,10 +110,15 @@ public class IconUploader
 	private final Set<Integer> checked = new HashSet<>();
 	/** New IDs to ask about. */
 	private final Set<Integer> pending = new LinkedHashSet<>();
+	/** IDs the server lacks, waiting for a game tick to start loading. */
+	private final Set<Integer> toLoad = new LinkedHashSet<>();
 	/** IDs whose image is loading, with their timeout. */
 	private final Map<Integer, ScheduledFuture<?>> loading = new HashMap<>();
 	/** Encoded icons waiting for upload. */
 	private final Deque<IconClient.Icon> ready = new ArrayDeque<>();
+	/** When the oldest icon in {@link #ready} got there; null when it is empty (or after a failed upload). */
+	@Nullable
+	private Instant firstReadyAt;
 
 	@Nullable
 	private Call call;
@@ -173,6 +184,15 @@ public class IconUploader
 		}
 	}
 
+	/**
+	 * Every game tick (on the client thread): lets the next
+	 * {@link #MAX_LOADS_PER_TICK} icon loads start. Never blocks.
+	 */
+	public void onGameTick()
+	{
+		post(this::startLoads);
+	}
+
 	/** Cancels timers, loads and the request in flight. The owner shuts the executor down (without waiting). */
 	public void shutdown()
 	{
@@ -229,7 +249,7 @@ public class IconUploader
 		boolean added = false;
 		for (Integer id : ids)
 		{
-			if (!checked.contains(id) && !loading.containsKey(id) && pending.add(id))
+			if (!checked.contains(id) && !loading.containsKey(id) && !toLoad.contains(id) && pending.add(id))
 			{
 				added = true;
 			}
@@ -259,6 +279,14 @@ public class IconUploader
 		}
 		if (!ready.isEmpty())
 		{
+			if (ready.size() < IconClient.MAX_ICONS_PER_REQUEST && (!toLoad.isEmpty() || !loading.isEmpty())
+				&& firstReadyAt != null && now.isBefore(firstReadyAt.plus(timing.getGatherDelay())))
+			{
+				// More icons are loading or start on the next game ticks: wait for a fuller batch,
+				// but never longer than the gather delay, so an image that never loads holds nothing up.
+				schedulePump(Duration.between(now, firstReadyAt.plus(timing.getGatherDelay())));
+				return;
+			}
 			startUpload();
 		}
 		else
@@ -308,7 +336,7 @@ public class IconUploader
 				// Only what we asked about; the server answers in the same order.
 				if (asked.remove(id))
 				{
-					startLoad(id);
+					toLoad.add(id);
 				}
 			}
 			log.debug("Server lacks {} of {} item icon(s)", result.getMissing().size(), ids.size());
@@ -323,6 +351,22 @@ public class IconUploader
 		failed(result);
 	}
 
+	private void startLoads()
+	{
+		if (!active() || toLoad.isEmpty())
+		{
+			return;
+		}
+		int started = 0;
+		for (Iterator<Integer> it = toLoad.iterator(); it.hasNext() && started < MAX_LOADS_PER_TICK; started++)
+		{
+			int itemId = it.next();
+			it.remove();
+			startLoad(itemId);
+		}
+	}
+
+	/** Starts one load; its timeout counts from now. */
 	private void startLoad(int itemId)
 	{
 		int gen = generation;
@@ -370,6 +414,10 @@ public class IconUploader
 			checked.remove(itemId);
 			return;
 		}
+		if (ready.isEmpty())
+		{
+			firstReadyAt = clock.instant();
+		}
 		ready.add(new IconClient.Icon(itemId, png));
 		schedulePump(ready.size() >= IconClient.MAX_ICONS_PER_REQUEST ? Duration.ZERO : timing.getGatherDelay());
 	}
@@ -387,6 +435,10 @@ public class IconUploader
 			}
 			bytes += next.jsonSize();
 			batch.add(ready.pollFirst());
+		}
+		if (ready.isEmpty())
+		{
+			firstReadyAt = null;
 		}
 		int gen = generation;
 		busy = true;
@@ -504,11 +556,14 @@ public class IconUploader
 	private void dropWork()
 	{
 		pending.clear();
+		checked.removeAll(toLoad);
+		toLoad.clear();
 		for (IconClient.Icon icon : ready)
 		{
 			checked.remove(icon.getItemId());
 		}
 		ready.clear();
+		firstReadyAt = null;
 		for (Map.Entry<Integer, ScheduledFuture<?>> entry : loading.entrySet())
 		{
 			checked.remove(entry.getKey());

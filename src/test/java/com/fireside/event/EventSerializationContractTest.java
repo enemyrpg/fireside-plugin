@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
+import com.fireside.bank.ContentHash;
 import com.fireside.contract.ContractPackage;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -104,6 +105,39 @@ public class EventSerializationContractTest
 			new PbRecords.Record(PbRecords.OVERALL, 1, 1905.2),
 			new PbRecords.Record(PbRecords.OVERALL, 3, 1088.4),
 			new PbRecords.Record("The Dagon'hai", 3, 105.0))));
+
+		List<Integer> tabs = Arrays.asList(2, 0, 1, 0, 0, 0, 0, 0, 0);
+		List<BankSnapshot.Item> bankItems = Arrays.asList(
+			new BankSnapshot.Item(11802, "Armadyl godsword", 1, false, 9_800_000, 750_000),
+			new BankSnapshot.Item(20997, "Twisted bow", 0, true, 1_450_000_000, 720_000),
+			new BankSnapshot.Item(20594, "Bank filler", 1, false, 0, 0),
+			new BankSnapshot.Item(995, "Coins", 2_147_000_000, false, 1, 1));
+		List<BankSnapshot.InventoryItem> inventory = Arrays.asList(
+			new BankSnapshot.InventoryItem(995, "Coins", 125_000, 1, 1),
+			new BankSnapshot.InventoryItem(386, "Shark", 500, 900, 300));
+		List<BankSnapshot.WornItem> equipment = Arrays.asList(
+			new BankSnapshot.WornItem("WEAPON", 4151, "Abyssal whip", 1, 1_500_000, 72_000),
+			new BankSnapshot.WornItem("AMMO", 11212, "Dragon arrow", 3000, 1200, 120));
+		examples.put("bank.snapshot", new BankSnapshot(tabs, bankItems, inventory, equipment,
+			ContentHash.bank(tabs, bankItems, inventory, equipment)));
+		List<Integer> noTabs = Collections.nCopies(BankSnapshot.TAB_COUNT, 0);
+		examples.put("bank.snapshot (empty)", new BankSnapshot(noTabs, Collections.emptyList(),
+			Collections.emptyList(), Collections.emptyList(), ContentHash.bank(noTabs,
+				Collections.emptyList(), Collections.emptyList(), Collections.emptyList())));
+		List<BankSnapshot.Item> placeholders = Collections.singletonList(
+			new BankSnapshot.Item(20997, "Twisted bow", 0, true, 1_450_000_000, 720_000));
+		examples.put("bank.snapshot (only placeholders)", new BankSnapshot(noTabs, placeholders,
+			Collections.emptyList(), Collections.emptyList(), ContentHash.bank(noTabs,
+				placeholders, Collections.emptyList(), Collections.emptyList())));
+
+		List<PotionStorageSnapshot.Potion> potions = Arrays.asList(
+			new PotionStorageSnapshot.Potion(12695, "Super combat potion", 312, 4, 12_400, 0),
+			new PotionStorageSnapshot.Potion(99, "Ranarr potion (unf)", 20, 1, 7000, 3),
+			new PotionStorageSnapshot.Potion(229, "Vial", 120, 1, 4, 1));
+		examples.put("potion_storage.snapshot", new PotionStorageSnapshot(potions,
+			ContentHash.potions(potions)));
+		examples.put("potion_storage.snapshot (empty)", new PotionStorageSnapshot(Collections.emptyList(),
+			ContentHash.potions(Collections.emptyList())));
 		return examples;
 	}
 
@@ -129,6 +163,25 @@ public class EventSerializationContractTest
 		}
 		assertTrue(String.join("\n", problems), problems.isEmpty());
 		assertEquals("Every event type has an example", EnumSet.allOf(EventType.class), covered);
+	}
+
+	@Test
+	public void bankItemsHaveExactlyTheContractFields()
+	{
+		BankSnapshot.Item filler = new BankSnapshot.Item(20594, "Bank filler", 1, false, 0, 0);
+		List<Integer> tabs = Collections.nCopies(BankSnapshot.TAB_COUNT, 0);
+		String line = json.toJson(new Event(ids.next(), ACCOUNT, AT, sessionId, new BankSnapshot(tabs,
+			Collections.singletonList(filler), Collections.emptyList(), Collections.emptyList(), "sha256:x")));
+		assertTrue(line, line.contains("\"items\":[{\"itemId\":20594,\"name\":\"Bank filler\",\"quantity\":1,"
+			+ "\"placeholder\":false,\"gePrice\":0,\"haPrice\":0}]"));
+		assertTrue(line, line.contains("\"tabSizes\":[0,0,0,0,0,0,0,0,0]"));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void bankNeedsNineTabSizes()
+	{
+		new BankSnapshot(Arrays.asList(1, 2), Collections.emptyList(), Collections.emptyList(),
+			Collections.emptyList(), "sha256:x");
 	}
 
 	@Test

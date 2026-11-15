@@ -1,0 +1,40 @@
+{
+  "storages": [
+    {
+      "accountId": 1,
+      "takenAt": "2026-11-08T19:42:13.512Z",
+      "totals": {
+        "geValue": 984876,
+        "haValue": 315
+      },
+      "potions": [
+        {
+          "position": 0,
+          "itemId": 12695,
+          "name": "Super combat potion",
+          "doses": 312,
+          "itemDoses": 5,
+          "gePriceEach": 12400,
+          "haPriceEach": 0,
+          "geValue": 967200,
+          "haValue": 0
+        },
+        {
+          "position": 1,
+          "itemId": 3024,
+          "name": "Super restore",
+          "doses": 7,
+          "itemDoses": 4,
+          "gePriceEach": 10101,
+          "haPriceEach": 180,
+          "geValue": 17676,
+          "haValue": 315
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "geValue": 984876,
+    "haValue": 315
+  }
+}

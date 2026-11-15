@@ -1,0 +1,37 @@
+{
+  "banks": [
+    {
+      "accountId": 1,
+      "takenAt": "2026-11-08T19:42:13.512Z",
+      "totals": {
+        "geValue": 0,
+        "haValue": 0,
+        "cashValue": 0
+      },
+      "tabs": [
+        {
+          "tab": 0,
+          "itemCount": 0,
+          "geValue": 0,
+          "haValue": 0
+        }
+      ],
+      "items": [],
+      "inventory": {
+        "geValue": 0,
+        "haValue": 0,
+        "items": []
+      },
+      "equipment": {
+        "geValue": 0,
+        "haValue": 0,
+        "items": []
+      }
+    }
+  ],
+  "totals": {
+    "geValue": 0,
+    "haValue": 0,
+    "cashValue": 0
+  }
+}

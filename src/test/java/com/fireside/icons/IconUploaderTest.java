@@ -120,13 +120,12 @@ public class IconUploaderTest
 				return new MockResponse().setResponseCode(404);
 			}
 			Received r = new Received(path, auth, ids);
-			received.add(r);
 			Function<Received, MockResponse> next = script.poll();
-			if (next != null)
-			{
-				return next.apply(r);
-			}
-			return r.isWanted() ? answerWanted(ids) : answerUpload(ids);
+			MockResponse response = next != null ? next.apply(r)
+				: r.isWanted() ? answerWanted(ids) : answerUpload(ids);
+			// Recorded after the answer (and what it stores), so a test that sees the request sees its effect.
+			received.add(r);
+			return response;
 		}
 
 		MockResponse answerWanted(List<Integer> ids)
@@ -194,6 +193,9 @@ public class IconUploaderTest
 	private final FakeIconServer server = new FakeIconServer();
 	private final FakeImages images = new FakeImages();
 	private ScheduledThreadPoolExecutor executor;
+	/** Game ticks, every few ms, unless a test drives them by hand. */
+	private ScheduledThreadPoolExecutor ticker;
+	private boolean autoTick = true;
 	private IconUploader uploader;
 	private SenderSettings settings;
 
@@ -205,6 +207,7 @@ public class IconUploaderTest
 		settings = new SenderSettings(true, server.server.url("/").toString(), KEY);
 		executor = new ScheduledThreadPoolExecutor(1);
 		executor.setRemoveOnCancelPolicy(true);
+		ticker = new ScheduledThreadPoolExecutor(1);
 	}
 
 	@After
@@ -214,6 +217,7 @@ public class IconUploaderTest
 		{
 			uploader.shutdown();
 		}
+		ticker.shutdownNow();
 		executor.shutdown();
 		server.server.shutdown();
 	}
@@ -226,6 +230,11 @@ public class IconUploaderTest
 		if (contract != null)
 		{
 			uploader.onServerContract(SemVer.parse(contract));
+		}
+		if (autoTick)
+		{
+			IconUploader u = uploader;
+			ticker.scheduleAtFixedRate(u::onGameTick, 1, 1, TimeUnit.MILLISECONDS);
 		}
 		return uploader;
 	}
@@ -295,7 +304,9 @@ public class IconUploaderTest
 		{
 			server.stored.add(id);
 		}
-		start().collect(loot(range(0, 650)));
+		// A long gather delay: loads are spread over game ticks, and a slow machine must not split batches.
+		start(new IconUploader.Timing(Duration.ofMillis(50), Duration.ofSeconds(2), Duration.ofMillis(10),
+			Duration.ofSeconds(5)), "1.18.0").collect(loot(range(0, 650)));
 
 		assertEquals(range(0, 500), nextWanted().ids);
 		// Uploads of the first chunk's icons may go before the second wanted.
@@ -317,9 +328,80 @@ public class IconUploaderTest
 		assertEquals(Collections.singletonList(range(500, 650)), wanted);
 		assertEquals(new TreeSet<>(range(400, 650)), uploaded);
 		assertEquals(250, sizes.stream().mapToInt(Integer::intValue).sum());
-		assertEquals("as few batches as possible", 3, sizes.size());
+		assertEquals("as few batches as possible: " + sizes, 3, sizes.size());
 		// Only the missing ones were loaded.
 		assertEquals(new HashSet<>(range(400, 650)), new HashSet<>(images.loads));
+		assertQuiet();
+	}
+
+	/** Waits until {@code images.loads} has {@code count} entries (loads are started on the executor). */
+	private void awaitLoads(int count) throws InterruptedException
+	{
+		long deadline = System.nanoTime() + WAIT.toNanos();
+		while (images.loads.size() < count && System.nanoTime() < deadline)
+		{
+			TimeUnit.MILLISECONDS.sleep(5);
+		}
+		assertEquals(count, images.loads.size());
+	}
+
+	/** Lets the executor run everything posted so far. */
+	private void drainExecutor() throws Exception
+	{
+		executor.submit(() ->
+		{
+		}).get(WAIT.toMillis(), TimeUnit.MILLISECONDS);
+	}
+
+	@Test
+	public void startsAtMost25IconLoadsPerGameTick() throws Exception
+	{
+		autoTick = false;
+		IconUploader u = start();
+		u.collect(loot(range(0, 500)));
+		assertEquals(500, nextWanted().ids.size());
+		TimeUnit.MILLISECONDS.sleep(QUIET_MS);
+		drainExecutor();
+		assertTrue("loads started without a game tick", images.loads.isEmpty());
+
+		u.onGameTick();
+		awaitLoads(IconUploader.MAX_LOADS_PER_TICK);
+		TimeUnit.MILLISECONDS.sleep(100);
+		drainExecutor();
+		assertEquals(IconUploader.MAX_LOADS_PER_TICK, images.loads.size());
+
+		u.onGameTick();
+		awaitLoads(2 * IconUploader.MAX_LOADS_PER_TICK);
+		assertEquals("in the order the server listed them", range(0, 2 * IconUploader.MAX_LOADS_PER_TICK),
+			new ArrayList<>(images.loads));
+	}
+
+	@Test
+	public void theLoadTimeoutCountsFromTheTickThatStartsTheLoad() throws Exception
+	{
+		autoTick = false;
+		IconUploader u = start(new IconUploader.Timing(Duration.ofMillis(50), Duration.ofMillis(50),
+			Duration.ofMillis(10), Duration.ofMillis(100)), "1.18.0");
+		u.collect(loot(7));
+		nextWanted();
+		// Much longer than the load timeout before the first tick: the icon must still load and upload.
+		TimeUnit.MILLISECONDS.sleep(400);
+		u.onGameTick();
+		assertEquals(Collections.singletonList(7), nextUpload().ids);
+	}
+
+	@Test
+	public void queuedLoadsAreDroppedWhenIconsAreTurnedOff() throws Exception
+	{
+		autoTick = false;
+		IconUploader u = start();
+		u.collect(loot(range(0, 30)));
+		nextWanted();
+		drainExecutor();
+		u.updateSettings(settings, false);
+		u.onGameTick();
+		drainExecutor();
+		assertTrue(images.loads.isEmpty());
 		assertQuiet();
 	}
 

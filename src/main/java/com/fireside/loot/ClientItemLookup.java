@@ -24,12 +24,6 @@ public class ClientItemLookup implements ItemLookup
 	}
 
 	@Override
-	public boolean tradeable(int itemId)
-	{
-		return unnoted(itemId).isTradeable();
-	}
-
-	@Override
 	public long gePrice(int itemId)
 	{
 		return itemManager.getItemPrice(itemId);
@@ -39,6 +33,13 @@ public class ClientItemLookup implements ItemLookup
 	public int haPrice(int itemId)
 	{
 		return unnoted(itemId).getHaPrice();
+	}
+
+	@Override
+	public int placeholderOf(int itemId)
+	{
+		ItemComposition composition = itemManager.getItemComposition(itemId);
+		return composition.getPlaceholderTemplateId() != -1 ? composition.getPlaceholderId() : -1;
 	}
 
 	private ItemComposition unnoted(int itemId)

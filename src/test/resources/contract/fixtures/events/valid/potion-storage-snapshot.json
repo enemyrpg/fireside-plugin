@@ -1,0 +1,29 @@
+{
+  "eventId": "01933c4e-8a2b-7c3d-9e4f-0a1b2c3d4e5f",
+  "schemaVersion": 1,
+  "type": "potion_storage.snapshot",
+  "accountHash": "1234567890123456789",
+  "occurredAt": "2026-11-08T19:42:13.512Z",
+  "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+  "payload": {
+    "potions": [
+      {
+        "itemId": 12695,
+        "name": "Super combat potion",
+        "doses": 312,
+        "itemDoses": 4,
+        "gePrice": 12400,
+        "haPrice": 0
+      },
+      {
+        "itemId": 3024,
+        "name": "Super restore",
+        "doses": 7,
+        "itemDoses": 4,
+        "gePrice": 10101,
+        "haPrice": 180
+      }
+    ],
+    "contentHash": "sha256:3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f"
+  }
+}
