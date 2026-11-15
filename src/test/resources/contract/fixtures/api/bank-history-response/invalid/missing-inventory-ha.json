@@ -1,0 +1,61 @@
+{
+  "from": "2026-10-23T22:00:00.000Z",
+  "to": "2026-10-27T23:00:00.000Z",
+  "days": [
+    {
+      "date": "2026-10-24",
+      "start": "2026-10-23T22:00:00.000Z",
+      "geValue": 1025000,
+      "bankGeValue": 1000000,
+      "potionStorageGeValue": 0,
+      "inventoryGeValue": 5000,
+      "equipmentGeValue": 20000,
+      "cashValue": 250000,
+      "bankHaValue": 400000,
+      "potionStorageHaValue": 0,
+      "equipmentHaValue": 10000
+    },
+    {
+      "date": "2026-10-25",
+      "start": "2026-10-24T22:00:00.000Z",
+      "geValue": 1056000,
+      "bankGeValue": 1000000,
+      "potionStorageGeValue": 31000,
+      "inventoryGeValue": 5000,
+      "equipmentGeValue": 20000,
+      "cashValue": 250000,
+      "bankHaValue": 400000,
+      "potionStorageHaValue": 600,
+      "inventoryHaValue": 2500,
+      "equipmentHaValue": 10000
+    },
+    {
+      "date": "2026-10-26",
+      "start": "2026-10-25T23:00:00.000Z",
+      "geValue": 1251000,
+      "bankGeValue": 1200000,
+      "potionStorageGeValue": 31000,
+      "inventoryGeValue": 0,
+      "equipmentGeValue": 20000,
+      "cashValue": 300000,
+      "bankHaValue": 410000,
+      "potionStorageHaValue": 600,
+      "inventoryHaValue": 0,
+      "equipmentHaValue": 10000
+    },
+    {
+      "date": "2026-10-27",
+      "start": "2026-10-26T23:00:00.000Z",
+      "geValue": 1251000,
+      "bankGeValue": 1200000,
+      "potionStorageGeValue": 31000,
+      "inventoryGeValue": 0,
+      "equipmentGeValue": 20000,
+      "cashValue": 300000,
+      "bankHaValue": 410000,
+      "potionStorageHaValue": 600,
+      "inventoryHaValue": 0,
+      "equipmentHaValue": 10000
+    }
+  ]
+}

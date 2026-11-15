@@ -10,7 +10,7 @@ package com.fireside;
 public final class Contract
 {
 	/** Version of the pinned contract package the tests validate against. */
-	public static final String PINNED_VERSION = "1.19.0";
+	public static final String PINNED_VERSION = "1.21.0";
 
 	/**
 	 * Lowest server contract version the plugin sends events to. A server that
@@ -32,6 +32,13 @@ public final class Contract
 	 * sent again once the server is upgraded.
 	 */
 	public static final String BANK_VERSION = "1.19.0";
+
+	/**
+	 * Lowest server contract version with {@code quests.snapshot} and
+	 * {@code diaries.snapshot} (10.8). An older server gets neither, and the
+	 * stored hashes are cleared so both are sent once the server is upgraded.
+	 */
+	public static final String QUESTS_VERSION = "1.21.0";
 
 	private Contract()
 	{

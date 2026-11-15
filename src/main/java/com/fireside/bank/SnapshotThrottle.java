@@ -11,8 +11,8 @@ import javax.annotation.Nullable;
 import lombok.Value;
 
 /**
- * Change detection and throttling for one kind of snapshot (bank, or potion
- * storage), per account.
+ * Change detection and throttling for one kind of snapshot (bank, potion
+ * storage, quests or diaries), per account.
  * <ul>
  * <li>A snapshot whose hash equals the last <i>queued</i> one (stored per
  * account) is never sent.</li>
@@ -20,12 +20,12 @@ import lombok.Value;
  * inside the window is held; a newer change replaces it, and the held one is
  * queued when the window ends, or at {@link #flush} (logout, hop, client
  * close, plugin stop), so the last state is never lost.</li>
- * <li>The event is created when the bank closes (its ID and time are the
+ * <li>The event is created when the snapshot is read (its ID and time are the
  * capture's), even when it is queued later.</li>
  * </ul>
- * Not thread-safe: {@link BankTracker} synchronizes.
+ * Not thread-safe: the tracker that owns it synchronizes.
  */
-final class SnapshotThrottle
+public final class SnapshotThrottle
 {
 	@Value
 	private static class Pending
@@ -44,7 +44,7 @@ final class SnapshotThrottle
 	@Nullable
 	private Pending pending;
 
-	SnapshotThrottle(String key, HashStore store, Duration window, Consumer<Event> sink)
+	public SnapshotThrottle(String key, HashStore store, Duration window, Consumer<Event> sink)
 	{
 		this.key = key;
 		this.store = store;
@@ -56,7 +56,7 @@ final class SnapshotThrottle
 	 * A snapshot with {@code hash} was just read. {@code create} makes its
 	 * event (null without an active session) and is only called if it is new.
 	 */
-	void offer(String profile, String hash, Supplier<Event> create, Instant now)
+	public void offer(String profile, String hash, Supplier<Event> create, Instant now)
 	{
 		if (pending != null && !pending.getProfile().equals(profile))
 		{
@@ -90,7 +90,7 @@ final class SnapshotThrottle
 	}
 
 	/** Every game tick: queues the held snapshot once its window is over. */
-	void onTick(Instant now)
+	public void onTick(Instant now)
 	{
 		if (pending != null && windowOver(pending.getEvent().getAccountHash(), now))
 		{
@@ -99,7 +99,7 @@ final class SnapshotThrottle
 	}
 
 	/** Queues the held snapshot now. */
-	void flush(Instant now)
+	public void flush(Instant now)
 	{
 		if (pending != null)
 		{
@@ -108,7 +108,7 @@ final class SnapshotThrottle
 	}
 
 	/** Forgets the held snapshot (sending turned off). */
-	void drop()
+	public void drop()
 	{
 		pending = null;
 	}
@@ -118,14 +118,14 @@ final class SnapshotThrottle
 	 * windows and every account's stored hash, so the next bank close after
 	 * an upgrade sends again (also a snapshot the server rejected).
 	 */
-	void forget()
+	public void forget()
 	{
 		pending = null;
 		queuedAt.clear();
 		store.clearAll(key);
 	}
 
-	boolean hasPending()
+	public boolean hasPending()
 	{
 		return pending != null;
 	}

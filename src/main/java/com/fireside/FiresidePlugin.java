@@ -23,6 +23,8 @@ import com.fireside.net.ServerUrl;
 import com.fireside.net.VerifyClient;
 import com.fireside.net.VerifyResult;
 import com.fireside.queue.EventQueue;
+import com.fireside.quest.ClientQuestView;
+import com.fireside.quest.QuestTracker;
 import com.fireside.raid.ClientRaidView;
 import com.fireside.raid.ClientTfaRecordsView;
 import com.fireside.raid.RaidTracker;
@@ -54,6 +56,7 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.StatChanged;
+import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.InterfaceID;
@@ -78,7 +81,7 @@ import okhttp3.Call;
 @PluginDescriptor(
 	name = Branding.DISPLAY_NAME,
 	internalName = Branding.INTERNAL_NAME,
-	description = "Self-hosted tracker for your own accounts: sessions, screen time, XP, loot, KC and bank on your own dashboard.",
+	description = "Self-hosted tracker for your own accounts: sessions, screen time, XP, loot, KC, bank and quests on your own dashboard.",
 	tags = {"tracker", "sessions", "screen time", "loot", "bank", "self-hosted"}
 )
 public class FiresidePlugin extends Plugin
@@ -137,6 +140,9 @@ public class FiresidePlugin extends Plugin
 	@Inject
 	private RsProfileHashStore bankHashes;
 
+	@Inject
+	private ClientQuestView questView;
+
 	/**
 	 * The plugin's own thread: all queue disk IO and sender state live on it.
 	 * HTTP runs on OkHttp's pool; results come back to this thread.
@@ -155,9 +161,11 @@ public class FiresidePlugin extends Plugin
 	private LootMapper lootMapper;
 	/** Bank and potion storage snapshots. Reads on the client thread; synchronized. */
 	private volatile BankTracker bank;
+	/** Quest and diary snapshots. Reads on the client thread; synchronized. */
+	private volatile QuestTracker quests;
 	/** Panel line about a skipped bank snapshot; null when there is none. */
 	private volatile String bankStatus;
-	/** The last server contract the sender reported, for a bank tracker created after it. */
+	/** The last server contract the sender reported, for trackers created after it. */
 	private volatile SemVer serverContract;
 	/** Whether RuneLite's Loot Tracker (which posts {@code LootReceived}) is running. */
 	private volatile boolean lootTrackerActive;
@@ -212,6 +220,11 @@ public class FiresidePlugin extends Plugin
 			{
 				bankTracker.onServerContract(version);
 			}
+			QuestTracker questTracker = quests;
+			if (questTracker != null)
+			{
+				questTracker.onServerContract(version);
+			}
 		});
 		sender.start(senderSettings());
 
@@ -239,6 +252,9 @@ public class FiresidePlugin extends Plugin
 		});
 		// The sender may have verified the server before the tracker existed.
 		bank.onServerContract(serverContract);
+		quests = new QuestTracker(questView, bankHashes, tracker::createInSession, tracker::isActive, eventSink,
+			Clock.systemUTC(), () -> config.sendQuests() && config.sendingEnabled(), System::nanoTime);
+		quests.onServerContract(serverContract);
 		lootTrackerActive = isLootTrackerActive();
 		// Picks up a game that is already logged in (plugin turned on mid-game).
 		clientThread.invoke(() ->
@@ -277,6 +293,12 @@ public class FiresidePlugin extends Plugin
 			stoppingBank.flush();
 		}
 		bank = null;
+		QuestTracker stoppingQuests = quests;
+		if (stoppingQuests != null)
+		{
+			stoppingQuests.flush();
+		}
+		quests = null;
 		serverContract = null;
 		bankStatus = null;
 		// Queues an open AFK period (cached values only, safe off the client thread) before the
@@ -313,9 +335,11 @@ public class FiresidePlugin extends Plugin
 	{
 		if (!Branding.CONFIG_GROUP.equals(event.getGroup())
 			|| FiresideConfig.BANK_HASH_KEY.equals(event.getKey())
-			|| FiresideConfig.POTION_STORAGE_HASH_KEY.equals(event.getKey()))
+			|| FiresideConfig.POTION_STORAGE_HASH_KEY.equals(event.getKey())
+			|| FiresideConfig.QUESTS_HASH_KEY.equals(event.getKey())
+			|| FiresideConfig.DIARIES_HASH_KEY.equals(event.getKey()))
 		{
-			// The stored bank hashes are bookkeeping, not settings.
+			// The stored snapshot hashes are bookkeeping, not settings.
 			return;
 		}
 		if (sender != null)
@@ -336,6 +360,11 @@ public class FiresidePlugin extends Plugin
 		if (bankTracker != null)
 		{
 			bankTracker.onSettingsChanged();
+		}
+		QuestTracker questTracker = quests;
+		if (questTracker != null)
+		{
+			questTracker.onSettingsChanged();
 		}
 		String key = event.getKey();
 		boolean connectionChanged = FiresideConfig.SERVER_URL_KEY.equals(key)
@@ -362,6 +391,11 @@ public class FiresidePlugin extends Plugin
 		{
 			// Before session.end, and before the queue is flushed to disk.
 			bankTracker.flush();
+		}
+		QuestTracker questTracker = quests;
+		if (questTracker != null)
+		{
+			questTracker.flush();
 		}
 		if (sessions != null)
 		{
@@ -396,6 +430,14 @@ public class FiresidePlugin extends Plugin
 			// The held snapshots go in the session that is ending, before session.end.
 			bankTracker.flush();
 		}
+		QuestTracker questTracker = quests;
+		if (questTracker != null && (state == GameState.HOPPING || state == GameState.LOGIN_SCREEN
+			|| state == GameState.LOGIN_SCREEN_AUTHENTICATOR))
+		{
+			questTracker.flush();
+			// The next login waits until its own quest data is loaded.
+			questTracker.reset();
+		}
 		if (sessions != null && sessions.onGameState(event.getGameState()) && sender != null)
 		{
 			// session.end is queued; send it (and the rest) now.
@@ -423,6 +465,11 @@ public class FiresidePlugin extends Plugin
 		{
 			bankTracker.onTick();
 		}
+		QuestTracker questTracker = quests;
+		if (questTracker != null)
+		{
+			questTracker.onTick();
+		}
 		if (icons != null)
 		{
 			icons.onGameTick();
@@ -435,6 +482,16 @@ public class FiresidePlugin extends Plugin
 		if (sessions != null)
 		{
 			sessions.onStat(event.getSkill().name(), event.getXp(), event.getLevel());
+		}
+	}
+
+	@Subscribe
+	public void onVarbitChanged(VarbitChanged event)
+	{
+		QuestTracker questTracker = quests;
+		if (questTracker != null)
+		{
+			questTracker.onVarChanged(event.getVarpId(), event.getVarbitId());
 		}
 	}
 

@@ -63,7 +63,8 @@ public final class ContentHash
 		return sha256(text.toString());
 	}
 
-	static String sha256(String text)
+	/** {@code sha256:} and the lowercase hex digest of {@code text} (UTF-8). */
+	public static String sha256(String text)
 	{
 		MessageDigest digest;
 		try

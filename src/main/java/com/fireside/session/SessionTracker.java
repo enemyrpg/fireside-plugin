@@ -257,6 +257,12 @@ public class SessionTracker
 		return Event.create(ids, accountHash, clock.instant(), sessionId, payload);
 	}
 
+	/** A session is running: {@link #createInSession} would make an event. */
+	public synchronized boolean isActive()
+	{
+		return enabled && state == State.ACTIVE;
+	}
+
 	synchronized State state()
 	{
 		return state;

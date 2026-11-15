@@ -1,0 +1,49 @@
+{
+  "eventId": "01933c4e-8a2b-7c3d-9e4f-0a1b2c3d4e5f",
+  "schemaVersion": 1,
+  "type": "quests.snapshot",
+  "accountHash": "1234567890123456789",
+  "occurredAt": "2026-11-08T19:42:13.512Z",
+  "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+  "payload": {
+    "questPoints": 4,
+    "quests": [
+      {
+        "quest": "COOKS_ASSISTANT",
+        "name": "Cook's Assistant",
+        "state": "FINISHED",
+        "kind": "QUEST"
+      },
+      {
+        "quest": "DRAGON_SLAYER_I",
+        "name": "Dragon Slayer I",
+        "state": "FINISHED",
+        "kind": "QUEST"
+      },
+      {
+        "quest": "DRAGON_SLAYER_II",
+        "name": "Dragon Slayer II",
+        "state": "IN_PROGRESS",
+        "kind": "QUEST"
+      },
+      {
+        "quest": "DESERT_TREASURE_II__THE_FALLEN_EMPIRE",
+        "name": "Desert Treasure II - The Fallen Empire",
+        "state": "NOT_STARTED",
+        "kind": "QUEST"
+      },
+      {
+        "quest": "ALFRED_GRIMHANDS_BARCRAWL",
+        "name": "Alfred Grimhand's Barcrawl",
+        "state": "FINISHED",
+        "kind": "MINIQUEST"
+      },
+      {
+        "quest": "BEAR_YOUR_SOUL",
+        "name": "Bear Your Soul",
+        "state": "NOT_STARTED",
+        "kind": "MINIQUEST"
+      }
+    ]
+  }
+}

@@ -1,7 +1,8 @@
 # Fireside – RuneLite plugin
 
 A RuneLite plugin that collects data from Old School RuneScape (XP, loot, kill
-counts, raids, bank, sessions, AFK time and world info) and sends it to your own
+counts, raids, bank, quests, diaries, sessions, AFK time and world info) and sends
+it to your own
 self-hosted [Fireside server](https://github.com/enemyrpg/fireside).
 Nothing is sent anywhere until you configure a server URL and API key.
 
@@ -18,7 +19,8 @@ This plugin is in early development.
 4. Turn on **Send data**. It is off by default, and nothing is sent until the
    server URL and API key are set. Data is only sent to the server you set up.
 
-Under **Data** you can turn off XP, loot, kill counts, raid purples and bank.
+Under **Data** you can turn off XP, loot, kill counts, raid purples, bank,
+and quests and diaries.
 **Kill counts** also covers raid PBs: when you open The Fractured Archive's
 records table yourself, your own PBs per team size are sent. The plugin
 never opens the table for you.
@@ -35,6 +37,13 @@ settings, never the bank layout of other plugins such as Bank Tags. It only
 runs on normal worlds (not Leagues, Deadman or beta worlds). If the bank looks
 different from what the plugin expects, nothing is sent and the side panel
 says so.
+
+**Quests and diaries** (on by default) sends the state of every quest and
+miniquest (not started, in progress or finished), your quest points, and which
+achievement diary tiers have all their tasks done. It is sent after login,
+once the game has loaded your quest data, and again when something changes
+(a started quest can take up to five minutes), but only if it differs from
+the last time for that account. It only runs on normal worlds.
 
 **Upload item icons** (on by default) uploads the icons of the items in your
 loot and bank, taken from your own RuneLite client, so the dashboard can show them.

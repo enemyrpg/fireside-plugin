@@ -138,6 +138,20 @@ public class EventSerializationContractTest
 			ContentHash.potions(potions)));
 		examples.put("potion_storage.snapshot (empty)", new PotionStorageSnapshot(Collections.emptyList(),
 			ContentHash.potions(Collections.emptyList())));
+
+		examples.put("quests.snapshot", new QuestsSnapshot(4, Arrays.asList(
+			new QuestsSnapshot.Entry("COOKS_ASSISTANT", "Cook's Assistant", QuestsSnapshot.State.FINISHED,
+				QuestsSnapshot.Kind.QUEST),
+			new QuestsSnapshot.Entry("DRAGON_SLAYER_II", "Dragon Slayer II", QuestsSnapshot.State.IN_PROGRESS,
+				QuestsSnapshot.Kind.QUEST),
+			new QuestsSnapshot.Entry("BEAR_YOUR_SOUL", "Bear Your Soul", QuestsSnapshot.State.NOT_STARTED,
+				QuestsSnapshot.Kind.MINIQUEST))));
+		examples.put("quests.snapshot (without kind)", new QuestsSnapshot(0, Collections.singletonList(
+			new QuestsSnapshot.Entry("X_MARKS_THE_SPOT", "X Marks the Spot", QuestsSnapshot.State.NOT_STARTED,
+				null))));
+		examples.put("diaries.snapshot", new DiariesSnapshot(Arrays.asList(
+			new DiariesSnapshot.Entry("ARDOUGNE", DiariesSnapshot.Tier.HARD, true),
+			new DiariesSnapshot.Entry("KOUREND", DiariesSnapshot.Tier.ELITE, false))));
 		return examples;
 	}
 

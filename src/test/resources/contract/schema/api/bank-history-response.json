@@ -67,6 +67,16 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 9007199254740991
+          },
+          "inventoryHaValue": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "equipmentHaValue": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
           }
         },
         "required": [
@@ -79,7 +89,9 @@
           "equipmentGeValue",
           "cashValue",
           "bankHaValue",
-          "potionStorageHaValue"
+          "potionStorageHaValue",
+          "inventoryHaValue",
+          "equipmentHaValue"
         ],
         "additionalProperties": false
       }
