@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.networknt.schema.JsonSchema;
 import com.fireside.Contract;
+import com.fireside.net.SemVer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -24,12 +25,24 @@ public class PinnedContractTest
 	private static final String DIALECT = "https://json-schema.org/draft/2020-12/schema";
 
 	@Test
-	public void manifestMatchesRequiredVersion()
+	public void manifestMatchesPinnedVersion()
 	{
 		JsonNode manifest = ContractPackage.readJson(ContractPackage.root().resolve("manifest.json"));
-		assertEquals("Pinned contract and Contract.REQUIRED_VERSION differ",
-			Contract.REQUIRED_VERSION, manifest.get("contractVersion").asText());
+		assertEquals("Pinned contract and Contract.PINNED_VERSION differ",
+			Contract.PINNED_VERSION, manifest.get("contractVersion").asText());
 		assertEquals(DIALECT, manifest.get("jsonSchemaDialect").asText());
+	}
+
+	@Test
+	public void requiredVersionsAreNotNewerThanThePinnedContract()
+	{
+		SemVer pinned = SemVer.parse(Contract.PINNED_VERSION);
+		assertTrue("REQUIRED_VERSION is newer than the pinned contract",
+			SemVer.parse(Contract.REQUIRED_VERSION).compareTo(pinned) <= 0);
+		assertTrue("ICONS_VERSION is newer than the pinned contract",
+			SemVer.parse(Contract.ICONS_VERSION).compareTo(pinned) <= 0);
+		// Icons must never be a reason to hold events: an older server still gets them.
+		assertTrue(SemVer.parse(Contract.REQUIRED_VERSION).compareTo(SemVer.parse(Contract.ICONS_VERSION)) <= 0);
 	}
 
 	@Test

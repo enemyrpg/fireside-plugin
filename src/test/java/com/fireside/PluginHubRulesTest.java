@@ -57,6 +57,10 @@ public class PluginHubRulesTest
 			+ "|\\bFileInputStream\\b|\\bFileOutputStream\\b|\\bFileReader\\b|\\bFileWriter\\b|\\bRandomAccessFile\\b");
 		forbid("java.nio file API (use Filepath)",
 			"\\bjava\\s*\\.\\s*nio\\s*\\.\\s*file\\s*\\.\\s*(Files|Paths|Path)\\b|\\bFiles\\s*\\.|\\bPaths\\s*\\.");
+		// For a stream, ImageIO buffers through a temp file; ImageIO.setUseCache would change the whole client.
+		forbid("ImageIO temp-file IO (use MemoryCacheImageOutputStream)",
+			"\\bImageIO\\s*\\.\\s*(write|createImageOutputStream|setUseCache|setCacheDirectory)\\b"
+			+ "|\\bFileCacheImage(Output|Input)Stream\\b|\\bFileImage(Output|Input)Stream\\b");
 		forbid("restricted client API", "\\.\\s*(menuAction|hopToWorld|setCanSendPackets)\\s*\\(");
 		forbid("net.runelite package", "^\\s*package\\s+net\\s*\\.\\s*runelite\\b");
 	}

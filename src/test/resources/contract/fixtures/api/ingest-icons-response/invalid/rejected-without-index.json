@@ -1,0 +1,10 @@
+{
+  "stored": [],
+  "unchanged": [],
+  "rejected": [
+    {
+      "itemId": 4151,
+      "error": "png: Bad CRC in IHDR chunk"
+    }
+  ]
+}

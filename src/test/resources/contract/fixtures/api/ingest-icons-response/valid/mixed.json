@@ -1,0 +1,16 @@
+{
+  "stored": [4151, 4152],
+  "unchanged": [995],
+  "rejected": [
+    {
+      "index": 3,
+      "itemId": 11840,
+      "error": "png: Must be a base64-encoded PNG"
+    },
+    {
+      "index": 4,
+      "itemId": null,
+      "error": "itemId: Invalid input: expected int, received string"
+    }
+  ]
+}

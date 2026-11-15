@@ -5,6 +5,7 @@ import com.fireside.event.EventJson;
 import com.fireside.net.IngestClient;
 import com.fireside.net.IngestResponse;
 import com.fireside.net.IngestResult;
+import com.fireside.net.SemVer;
 import com.fireside.net.VerifyClient;
 import com.fireside.net.VerifyResult;
 import com.fireside.queue.EventQueue;
@@ -92,6 +93,10 @@ public class EventSender
 	private final Consumer<SenderStatus> listener;
 
 	private volatile SenderStatus status = SenderStatus.STARTING_STATUS;
+	/** Told the server's contract version after each verify, and null when the connection changes. */
+	private volatile Consumer<SemVer> contractListener = version ->
+	{
+	};
 
 	// Everything below is only touched on the executor.
 	private SenderSettings settings = SenderSettings.OFF;
@@ -154,6 +159,17 @@ public class EventSender
 	}
 
 	// ---- Public API: thread-safe, never blocks --------------------------------
+
+	/**
+	 * Gets the server's contract version after every successful {@code verify}
+	 * (any version, also one too old for events), and {@code null} when the
+	 * connection changes. Called on the executor; must not block. Set it before
+	 * {@link #start}. Used by the icon uploader.
+	 */
+	public void setContractListener(Consumer<SemVer> listener)
+	{
+		contractListener = listener;
+	}
 
 	/** Opens the queue and starts the send timer. */
 	public void start(SenderSettings initial)
@@ -342,6 +358,7 @@ public class EventSender
 			stopDetail = null;
 			contract = Contract.UNKNOWN;
 			serverContract = null;
+			notifyContract(null);
 			clearRetry();
 			backoff.reset();
 			batchEventLimit = MAX_BATCH_EVENTS;
@@ -457,10 +474,24 @@ public class EventSender
 		}
 		contract = result.isContractTooOld() ? Contract.TOO_OLD : Contract.OK;
 		serverContract = result.getResponse().getContractVersion().toString();
+		notifyContract(result.getResponse().getContractVersion());
 		heldRecheckAt = clock.instant().plus(HELD_RECHECK);
 		if (contract == Contract.TOO_OLD)
 		{
 			log.debug("Server contract {} is too old; holding the queue", serverContract);
+		}
+	}
+
+	private void notifyContract(@Nullable SemVer version)
+	{
+		try
+		{
+			contractListener.accept(version);
+		}
+		catch (RuntimeException e)
+		{
+			// Icons must never get in the way of events.
+			log.warn("Contract listener failed", e);
 		}
 	}
 

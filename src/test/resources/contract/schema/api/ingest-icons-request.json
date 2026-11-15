@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "API: ingest-icons-request",
+  "type": "object",
+  "properties": {
+    "icons": {
+      "minItems": 1,
+      "maxItems": 100,
+      "type": "array",
+      "items": {},
+      "description": "Icons are not checked here. Validate each icon against schema/api/ingest-icon.json."
+    }
+  },
+  "required": [
+    "icons"
+  ],
+  "additionalProperties": false
+}
