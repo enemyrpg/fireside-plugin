@@ -24,6 +24,7 @@ public interface FiresideConfig extends Config
 	/** Per RS profile (account), not shown in the panel: hash of the last queued potion storage snapshot. */
 	String POTION_STORAGE_HASH_KEY = "potionStorageContentHash";
 	String SEND_QUESTS_KEY = "sendQuests";
+	String SEND_PETS_KEY = "sendPets";
 	/** Per RS profile (account), not shown in the panel: hash of the last queued quests snapshot. */
 	String QUESTS_HASH_KEY = "questsContentHash";
 	/** Per RS profile (account), not shown in the panel: hash of the last queued diaries snapshot. */
@@ -154,11 +155,24 @@ public interface FiresideConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = SEND_PETS_KEY,
+		name = "Pets",
+		description = "Send pet drops: which pet message the game showed, and a guess at the pet and where it "
+			+ "came from (never the chat text)",
+		position = 6,
+		section = dataSection
+	)
+	default boolean sendPets()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = UPLOAD_ICONS_KEY,
 		name = "Upload item icons",
 		description = "Upload the icons of items in your loot, so the dashboard can show them. "
 			+ "Sent only to your own server above.",
-		position = 6,
+		position = 7,
 		section = dataSection
 	)
 	default boolean uploadIcons()
@@ -172,7 +186,7 @@ public interface FiresideConfig extends Config
 		keyName = "afkThresholdMinutes",
 		name = "AFK threshold",
 		description = "Minutes without input or XP before time counts as AFK (statistics only)",
-		position = 7,
+		position = 8,
 		section = dataSection
 	)
 	default int afkThresholdMinutes()

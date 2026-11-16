@@ -152,7 +152,28 @@ public class EventSerializationContractTest
 		examples.put("diaries.snapshot", new DiariesSnapshot(Arrays.asList(
 			new DiariesSnapshot.Entry("ARDOUGNE", DiariesSnapshot.Tier.HARD, true),
 			new DiariesSnapshot.Entry("KOUREND", DiariesSnapshot.Tier.ELITE, false))));
+
+		examples.put("pet.drop", new PetDrop(PetDrop.Message.FOLLOWED, new PetDrop.GuessedPet(21992, "Vorki"),
+			PetDrop.GuessedSource.activity("Vorkath")));
+		examples.put("pet.drop (skill)", new PetDrop(PetDrop.Message.BACKPACK,
+			new PetDrop.GuessedPet(13322, "Beaver"), PetDrop.GuessedSource.skill("WOODCUTTING")));
+		examples.put("pet.drop (duplicate)", new PetDrop(PetDrop.Message.DUPLICATE, null,
+			PetDrop.GuessedSource.activity("Vorkath")));
+		examples.put("pet.drop (minimal)", new PetDrop(PetDrop.Message.FOLLOWED, null, null));
 		return examples;
+	}
+
+	@Test
+	public void petDropHasExactlyTheContractFields()
+	{
+		String full = json.toJson(new Event(ids.next(), ACCOUNT, AT, sessionId, new PetDrop(
+			PetDrop.Message.FOLLOWED, new PetDrop.GuessedPet(21992, "Vorki"),
+			PetDrop.GuessedSource.activity("Vorkath"))));
+		assertTrue(full, full.endsWith("\"payload\":{\"message\":\"FOLLOWED\",\"guessedPet\":{\"itemId\":21992,"
+			+ "\"name\":\"Vorki\"},\"guessedSource\":{\"type\":\"ACTIVITY\",\"name\":\"Vorkath\"}}}"));
+		String minimal = json.toJson(new Event(ids.next(), ACCOUNT, AT, sessionId,
+			new PetDrop(PetDrop.Message.DUPLICATE, null, null)));
+		assertTrue(minimal, minimal.endsWith("\"payload\":{\"message\":\"DUPLICATE\"}}"));
 	}
 
 	@Test

@@ -1,7 +1,7 @@
 # Fireside – RuneLite plugin
 
 A RuneLite plugin that collects data from Old School RuneScape (XP, loot, kill
-counts, raids, bank, quests, diaries, sessions, AFK time and world info) and sends
+counts, raids, bank, quests, diaries, pets, sessions, AFK time and world info) and sends
 it to your own
 self-hosted [Fireside server](https://github.com/enemyrpg/fireside).
 Nothing is sent anywhere until you configure a server URL and API key.
@@ -20,7 +20,7 @@ This plugin is in early development.
    server URL and API key are set. Data is only sent to the server you set up.
 
 Under **Data** you can turn off XP, loot, kill counts, raid purples, bank,
-and quests and diaries.
+quests and diaries, and pets.
 **Kill counts** also covers raid PBs: when you open The Fractured Archive's
 records table yourself, your own PBs per team size are sent. The plugin
 never opens the table for you.
@@ -44,6 +44,22 @@ achievement diary tiers have all their tasks done. It is sent after login,
 once the game has loaded your quest data, and again when something changes
 (a started quest can take up to five minutes), but only if it differs from
 the last time for that account. It only runs on normal worlds.
+
+**Pets** (on by default) sends a pet drop when the game shows one of its
+three pet messages ("You have a funny feeling like you're being followed",
+"You feel something weird sneaking into your backpack" and "You have a funny
+feeling like you would have been followed"). Only which of the three it was
+is sent, never the chat text. The plugin adds the pet when the game says
+which it is (the collection log's "New item added to your collection log"
+line, a pet appearing in your inventory, or your new follower's name), and a
+guess at where it came from: the kill count, loot or skill XP closest in
+time to the message. Either is left out when the plugin does not know, and a
+duplicate pet is sent without a pet. Pets are recognised most reliably when
+the game's chat notification for new collection log items is on (in the
+game's settings, under **Chat**: "Collection log - New addition
+notification"). The source guess may use the name of your latest loot or
+kill even when the **Loot** or **Kill counts** toggle is off, but only inside
+the pet event. It only runs on normal worlds.
 
 **Upload item icons** (on by default) uploads the icons of the items in your
 loot and bank, taken from your own RuneLite client, so the dashboard can show them.

@@ -46,6 +46,38 @@ public class Event
 		return new Event(ids.next(), accountHash, occurredAt, sessionId, payload);
 	}
 
+	/**
+	 * The envelope of an event whose payload is not known yet. Reserve it when
+	 * the event happens, so its ID and time are in game order, and add the
+	 * payload when it is known.
+	 */
+	@Value
+	public static class Reserved
+	{
+		@NonNull
+		String eventId;
+		long accountHash;
+		@NonNull
+		Instant occurredAt;
+		@NonNull
+		String sessionId;
+
+		public Event with(EventPayload payload)
+		{
+			return new Event(eventId, accountHash, occurredAt, sessionId, payload);
+		}
+	}
+
+	/** The envelope of a new event with the next ID from {@code ids}. */
+	public static Reserved reserve(UuidV7Generator ids, long accountHash, Instant occurredAt, String sessionId)
+	{
+		if (accountHash == NO_ACCOUNT)
+		{
+			throw new IllegalArgumentException("not logged in");
+		}
+		return new Reserved(ids.next(), accountHash, occurredAt, sessionId);
+	}
+
 	public EventType getType()
 	{
 		return payload.type();

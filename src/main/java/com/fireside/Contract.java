@@ -40,6 +40,12 @@ public final class Contract
 	 */
 	public static final String QUESTS_VERSION = "1.21.0";
 
+	/**
+	 * Lowest server contract version with {@code pet.drop} (10.7). An older
+	 * server gets no pet drops.
+	 */
+	public static final String PETS_VERSION = "1.27.0";
+
 	private Contract()
 	{
 	}

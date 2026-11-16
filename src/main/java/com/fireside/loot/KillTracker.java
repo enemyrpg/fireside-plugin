@@ -170,13 +170,16 @@ public class KillTracker
 	 * Loot from the Loot Tracker, already mapped.
 	 *
 	 * @param amount how many loots the Loot Tracker combined (no kill count unless 1)
+	 * @return the source the loot belongs to (a raid chest under its mode), also
+	 *     with loot off; null without items
 	 */
-	public void onLoot(LootSource source, List<LootItem> items, int amount, int tick)
+	@Nullable
+	public LootSource onLoot(LootSource source, List<LootItem> items, int amount, int tick)
 	{
 		flush();
 		if (items.isEmpty())
 		{
-			return;
+			return null;
 		}
 		Integer killCount = null;
 		Raids.Group chest = source.getType() == LootSource.Type.EVENT && source.getName() != null
@@ -199,10 +202,11 @@ public class KillTracker
 		}
 		if (!lootEnabled.getAsBoolean())
 		{
-			return;
+			return source;
 		}
 		log.debug("Loot from a {} source{}", source.getType(), killCount != null ? " with kill count" : "");
 		sink.accept(new Loot(source, items, killCount));
+		return source;
 	}
 
 	/** Sends a waiting kill count now (e.g. before the session ends). */

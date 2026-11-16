@@ -15,7 +15,8 @@ public enum EventType
 	BANK_SNAPSHOT("bank.snapshot"),
 	POTION_STORAGE_SNAPSHOT("potion_storage.snapshot"),
 	QUESTS_SNAPSHOT("quests.snapshot"),
-	DIARIES_SNAPSHOT("diaries.snapshot");
+	DIARIES_SNAPSHOT("diaries.snapshot"),
+	PET_DROP("pet.drop");
 
 	private final String wireName;
 
