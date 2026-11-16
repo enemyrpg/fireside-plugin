@@ -1,0 +1,82 @@
+{
+  "pets": [
+    {
+      "accountId": 1,
+      "itemId": 21992,
+      "name": "Vorki",
+      "obtainedAt": "2026-11-02T19:04:11.000Z",
+      "approximate": false,
+      "source": {
+        "type": "ACTIVITY",
+        "name": "Vorkath"
+      },
+      "killCount": 1204,
+      "xp": null,
+      "confirmed": true,
+      "origin": "CHAT"
+    },
+    {
+      "accountId": 1,
+      "itemId": 13322,
+      "name": "Beaver",
+      "obtainedAt": "2026-10-20T08:15:00.000Z",
+      "approximate": false,
+      "source": {
+        "type": "SKILL",
+        "name": "WOODCUTTING"
+      },
+      "killCount": null,
+      "xp": 9840112,
+      "confirmed": false,
+      "origin": "CHAT"
+    },
+    {
+      "accountId": 2,
+      "itemId": 25602,
+      "name": "Tiny tempor",
+      "obtainedAt": "2026-10-01T10:00:00.000Z",
+      "approximate": false,
+      "source": null,
+      "killCount": null,
+      "xp": null,
+      "confirmed": false,
+      "origin": "CHAT"
+    },
+    {
+      "accountId": 1,
+      "itemId": 12646,
+      "name": "Baby mole",
+      "obtainedAt": "2026-09-01T12:00:00.000Z",
+      "approximate": true,
+      "source": null,
+      "killCount": null,
+      "xp": null,
+      "confirmed": true,
+      "origin": "CLOG"
+    },
+    {
+      "accountId": 1,
+      "itemId": 12921,
+      "name": "Pet snakeling",
+      "obtainedAt": null,
+      "approximate": false,
+      "source": null,
+      "killCount": null,
+      "xp": null,
+      "confirmed": true,
+      "origin": "CLOG"
+    },
+    {
+      "accountId": 2,
+      "itemId": 12921,
+      "name": "Pet snakeling",
+      "obtainedAt": null,
+      "approximate": false,
+      "source": null,
+      "killCount": null,
+      "xp": null,
+      "confirmed": true,
+      "origin": "CLOG"
+    }
+  ]
+}

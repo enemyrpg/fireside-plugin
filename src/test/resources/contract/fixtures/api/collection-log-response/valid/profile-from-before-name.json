@@ -1,0 +1,15 @@
+{
+  "accountId": 1,
+  "source": "RUNEPROFILE",
+  "sync": {
+    "status": "PROFILE_FROM_BEFORE_NAME",
+    "lastAttemptAt": "2026-11-08T19:42:13.512Z",
+    "lastSuccessAt": null,
+    "lastChangedAt": null,
+    "nextSyncAllowedAt": null
+  },
+  "updatedAt": null,
+  "obtained": null,
+  "total": null,
+  "tabs": []
+}

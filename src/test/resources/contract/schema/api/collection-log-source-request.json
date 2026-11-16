@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "API: collection-log-source-request",
+  "type": "object",
+  "properties": {
+    "source": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "RUNEPROFILE"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "source"
+  ],
+  "additionalProperties": false
+}

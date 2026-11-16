@@ -15,6 +15,7 @@
           "doses": 312,
           "itemDoses": 4,
           "gePriceEach": 12400,
+          "gePriceSource": "SNAPSHOT",
           "haPriceEach": 0,
           "geValue": 967200,
           "haValue": 0
@@ -26,6 +27,7 @@
           "doses": 7,
           "itemDoses": 4,
           "gePriceEach": 10101,
+          "gePriceSource": "SNAPSHOT",
           "haPriceEach": 180,
           "geValue": 17676,
           "haValue": 315
@@ -36,5 +38,9 @@
   "totals": {
     "geValue": 984876,
     "haValue": 315
+  },
+  "prices": {
+    "source": "SNAPSHOT",
+    "fetchedAt": null
   }
 }

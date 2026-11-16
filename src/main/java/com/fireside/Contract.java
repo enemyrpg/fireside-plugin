@@ -10,7 +10,7 @@ package com.fireside;
 public final class Contract
 {
 	/** Version of the pinned contract package the tests validate against. */
-	public static final String PINNED_VERSION = "1.21.0";
+	public static final String PINNED_VERSION = "1.27.0";
 
 	/**
 	 * Lowest server contract version the plugin sends events to. A server that

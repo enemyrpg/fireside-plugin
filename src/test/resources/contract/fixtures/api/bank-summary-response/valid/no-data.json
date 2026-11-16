@@ -5,5 +5,9 @@
   "inventoryGeValue": 0,
   "equipmentGeValue": 0,
   "cashValue": 0,
-  "updatedAt": null
+  "updatedAt": null,
+  "prices": {
+    "source": "SNAPSHOT",
+    "fetchedAt": null
+  }
 }

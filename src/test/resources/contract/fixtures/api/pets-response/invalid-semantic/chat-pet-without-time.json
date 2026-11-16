@@ -1,0 +1,19 @@
+{
+  "pets": [
+    {
+      "accountId": 1,
+      "itemId": 21992,
+      "name": "Vorki",
+      "obtainedAt": null,
+      "approximate": false,
+      "source": {
+        "type": "ACTIVITY",
+        "name": "Vorkath"
+      },
+      "killCount": 1204,
+      "xp": null,
+      "confirmed": true,
+      "origin": "CHAT"
+    }
+  ]
+}

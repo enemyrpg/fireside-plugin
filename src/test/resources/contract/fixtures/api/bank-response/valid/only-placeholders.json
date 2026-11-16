@@ -25,6 +25,7 @@
           "quantity": 0,
           "placeholder": true,
           "gePriceEach": 1450000000,
+          "gePriceSource": "SNAPSHOT",
           "haPriceEach": 720000,
           "geValue": 0,
           "haValue": 0
@@ -46,5 +47,9 @@
     "geValue": 0,
     "haValue": 0,
     "cashValue": 0
+  },
+  "prices": {
+    "source": "SNAPSHOT",
+    "fetchedAt": null
   }
 }
