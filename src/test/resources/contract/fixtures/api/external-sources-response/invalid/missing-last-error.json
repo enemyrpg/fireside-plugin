@@ -1,0 +1,24 @@
+{
+  "contactSet": false,
+  "sources": [
+    {
+      "id": "WIKI_PRICES",
+      "name": "OSRS Wiki Prices",
+      "envName": "PRICES_ENABLED",
+      "enabled": false,
+      "active": false,
+      "lastFetchAt": null,
+      "nextFetchAt": null
+    },
+    {
+      "id": "RUNEPROFILE",
+      "name": "RuneProfile",
+      "envName": "RUNEPROFILE_ENABLED",
+      "enabled": false,
+      "active": false,
+      "lastFetchAt": null,
+      "nextFetchAt": null,
+      "lastError": null
+    }
+  ]
+}

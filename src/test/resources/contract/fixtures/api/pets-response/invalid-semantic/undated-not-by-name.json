@@ -1,0 +1,28 @@
+{
+  "pets": [
+    {
+      "accountId": 1,
+      "itemId": 20693,
+      "name": "Phoenix",
+      "obtainedAt": null,
+      "approximate": false,
+      "source": null,
+      "killCount": null,
+      "xp": null,
+      "confirmed": true,
+      "origin": "CLOG"
+    },
+    {
+      "accountId": 1,
+      "itemId": 12921,
+      "name": "Pet snakeling",
+      "obtainedAt": null,
+      "approximate": false,
+      "source": null,
+      "killCount": null,
+      "xp": null,
+      "confirmed": true,
+      "origin": "CLOG"
+    }
+  ]
+}

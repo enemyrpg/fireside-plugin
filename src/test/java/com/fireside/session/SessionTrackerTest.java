@@ -704,4 +704,21 @@ public class SessionTrackerTest
 			return skills == null ? null : new LinkedHashMap<>(skills);
 		}
 	}
+
+	@Test
+	public void aReservedEnvelopeKeepsItsIdAndTime()
+	{
+		assertEquals(null, tracker.reserveInSession());
+		tracker.onGameState(GameState.LOGGED_IN);
+		tracker.onTick();
+		Event.Reserved reserved = tracker.reserveInSession();
+		clock.advance(TICK);
+		tracker.emitInSession(Kc.builder().boss("Zulrah").killCount(1).build());
+		Event later = events.get(events.size() - 1);
+		Event event = reserved.with(Kc.builder().boss("Vorkath").killCount(2).build());
+		assertEquals(later.getOccurredAt().minus(TICK), event.getOccurredAt());
+		assertEquals(later.getSessionId(), event.getSessionId());
+		assertEquals(ACCOUNT, event.getAccountHash());
+		assertTrue(compareUnsigned(UUID.fromString(event.getEventId()), UUID.fromString(later.getEventId())) < 0);
+	}
 }

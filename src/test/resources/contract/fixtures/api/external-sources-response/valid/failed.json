@@ -1,0 +1,28 @@
+{
+  "contactSet": true,
+  "sources": [
+    {
+      "id": "WIKI_PRICES",
+      "name": "OSRS Wiki Prices",
+      "envName": "PRICES_ENABLED",
+      "enabled": true,
+      "active": true,
+      "lastFetchAt": "2026-11-08T19:00:04.000Z",
+      "nextFetchAt": "2026-11-08T21:00:09.000Z",
+      "lastError": {
+        "at": "2026-11-08T20:00:09.000Z",
+        "message": "HTTP 503"
+      }
+    },
+    {
+      "id": "RUNEPROFILE",
+      "name": "RuneProfile",
+      "envName": "RUNEPROFILE_ENABLED",
+      "enabled": false,
+      "active": false,
+      "lastFetchAt": null,
+      "nextFetchAt": null,
+      "lastError": null
+    }
+  ]
+}

@@ -3,5 +3,9 @@
   "totals": {
     "geValue": 0,
     "haValue": 0
+  },
+  "prices": {
+    "source": "SNAPSHOT",
+    "fetchedAt": null
   }
 }

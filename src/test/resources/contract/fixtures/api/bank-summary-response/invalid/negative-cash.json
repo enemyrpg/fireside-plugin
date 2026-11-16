@@ -5,5 +5,9 @@
   "inventoryGeValue": 235400,
   "equipmentGeValue": 1549500,
   "cashValue": -1,
-  "updatedAt": "2026-11-08T19:42:13.512Z"
+  "updatedAt": "2026-11-08T19:42:13.512Z",
+  "prices": {
+    "source": "SNAPSHOT",
+    "fetchedAt": null
+  }
 }

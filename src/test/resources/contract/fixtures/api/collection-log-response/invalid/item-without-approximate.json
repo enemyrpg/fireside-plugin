@@ -1,0 +1,79 @@
+{
+  "accountId": 1,
+  "source": "RUNEPROFILE",
+  "sync": {
+    "status": "OK",
+    "lastAttemptAt": "2026-11-08T19:42:13.512Z",
+    "lastSuccessAt": "2026-11-08T19:42:13.512Z",
+    "lastChangedAt": "2026-11-07T10:00:00.000Z",
+    "nextSyncAllowedAt": null
+  },
+  "updatedAt": "2026-11-07T10:00:00.000Z",
+  "obtained": 3,
+  "total": 4,
+  "tabs": [
+    {
+      "name": "Bosses",
+      "pages": [
+        {
+          "name": "Abyssal Sire",
+          "obtained": 2,
+          "total": 3,
+          "items": [
+            {
+              "itemId": 13262,
+              "name": "Abyssal orphan",
+              "quantity": 1,
+              "obtained": true,
+              "firstSeenAt": "2026-11-07T09:58:41.000Z"
+            },
+            {
+              "itemId": 13277,
+              "name": "Jar of miasma",
+              "quantity": 0,
+              "obtained": false,
+              "firstSeenAt": null,
+              "approximate": false
+            },
+            {
+              "itemId": 4151,
+              "name": "Abyssal whip",
+              "quantity": 3,
+              "obtained": true,
+              "firstSeenAt": null,
+              "approximate": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Other",
+      "pages": [
+        {
+          "name": "All Pets",
+          "obtained": 2,
+          "total": 2,
+          "items": [
+            {
+              "itemId": 13262,
+              "name": "Abyssal orphan",
+              "quantity": 1,
+              "obtained": true,
+              "firstSeenAt": "2026-11-07T09:58:41.000Z",
+              "approximate": false
+            },
+            {
+              "itemId": 12921,
+              "name": "Pet snakeling",
+              "quantity": 1,
+              "obtained": true,
+              "firstSeenAt": "2026-11-07T10:00:00.000Z",
+              "approximate": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

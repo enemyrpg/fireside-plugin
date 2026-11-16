@@ -257,6 +257,23 @@ public class SessionTracker
 		return Event.create(ids, accountHash, clock.instant(), sessionId, payload);
 	}
 
+	/**
+	 * The envelope of an event in the current session, created now (its ID
+	 * and time in game order): for an event whose payload is known a little
+	 * later.
+	 *
+	 * @return null if there is no active session
+	 */
+	@Nullable
+	public synchronized Event.Reserved reserveInSession()
+	{
+		if (!enabled || state != State.ACTIVE)
+		{
+			return null;
+		}
+		return Event.reserve(ids, accountHash, clock.instant(), sessionId);
+	}
+
 	/** A session is running: {@link #createInSession} would make an event. */
 	public synchronized boolean isActive()
 	{

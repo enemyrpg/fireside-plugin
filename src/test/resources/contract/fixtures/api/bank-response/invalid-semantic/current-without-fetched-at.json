@@ -1,0 +1,208 @@
+{
+  "banks": [
+    {
+      "accountId": 1,
+      "takenAt": "2026-11-08T19:42:13.512Z",
+      "totals": {
+        "geValue": 41691224,
+        "haValue": 17659689,
+        "cashValue": 16825000
+      },
+      "tabs": [
+        {
+          "tab": 1,
+          "itemCount": 3,
+          "geValue": 24300014,
+          "haValue": 909000
+        },
+        {
+          "tab": 2,
+          "itemCount": 2,
+          "geValue": 691200,
+          "haValue": 50688
+        },
+        {
+          "tab": 0,
+          "itemCount": 3,
+          "geValue": 16700010,
+          "haValue": 16700001
+        }
+      ],
+      "items": [
+        {
+          "position": 0,
+          "tab": 1,
+          "itemId": 11802,
+          "name": "Armadyl godsword",
+          "quantity": 1,
+          "placeholder": false,
+          "gePriceEach": 9800007,
+          "gePriceSource": "CURRENT",
+          "haPriceEach": 750000,
+          "geValue": 9800007,
+          "haValue": 750000
+        },
+        {
+          "position": 1,
+          "tab": 1,
+          "itemId": 11832,
+          "name": "Bandos chestplate",
+          "quantity": 1,
+          "placeholder": false,
+          "gePriceEach": 14500007,
+          "gePriceSource": "CURRENT",
+          "haPriceEach": 159000,
+          "geValue": 14500007,
+          "haValue": 159000
+        },
+        {
+          "position": 2,
+          "tab": 1,
+          "itemId": 20997,
+          "name": "Twisted bow",
+          "quantity": 0,
+          "placeholder": true,
+          "gePriceEach": 1450000000,
+          "gePriceSource": "SNAPSHOT",
+          "haPriceEach": 720000,
+          "geValue": 0,
+          "haValue": 0
+        },
+        {
+          "position": 3,
+          "tab": 2,
+          "itemId": 2434,
+          "name": "Prayer potion(4)",
+          "quantity": 48,
+          "placeholder": false,
+          "gePriceEach": 9200,
+          "gePriceSource": "SNAPSHOT",
+          "haPriceEach": 456,
+          "geValue": 441600,
+          "haValue": 21888
+        },
+        {
+          "position": 4,
+          "tab": 2,
+          "itemId": 385,
+          "name": "Shark",
+          "quantity": 320,
+          "placeholder": false,
+          "gePriceEach": 780,
+          "gePriceSource": "SNAPSHOT",
+          "haPriceEach": 90,
+          "geValue": 249600,
+          "haValue": 28800
+        },
+        {
+          "position": 5,
+          "tab": 0,
+          "itemId": 995,
+          "name": "Coins",
+          "quantity": 12500000,
+          "placeholder": false,
+          "gePriceEach": 1,
+          "gePriceSource": "SNAPSHOT",
+          "haPriceEach": 1,
+          "geValue": 12500000,
+          "haValue": 12500000
+        },
+        {
+          "position": 6,
+          "tab": 0,
+          "itemId": 13204,
+          "name": "Platinum token",
+          "quantity": 4200,
+          "placeholder": false,
+          "gePriceEach": 1000,
+          "gePriceSource": "SNAPSHOT",
+          "haPriceEach": 1000,
+          "geValue": 4200000,
+          "haValue": 4200000
+        },
+        {
+          "position": 7,
+          "tab": 0,
+          "itemId": 1755,
+          "name": "Chisel",
+          "quantity": 1,
+          "placeholder": false,
+          "gePriceEach": 10,
+          "gePriceSource": "SNAPSHOT",
+          "haPriceEach": 1,
+          "geValue": 10,
+          "haValue": 1
+        }
+      ],
+      "inventory": {
+        "geValue": 235400,
+        "haValue": 130472,
+        "items": [
+          {
+            "position": 0,
+            "slot": null,
+            "itemId": 995,
+            "name": "Coins",
+            "quantity": 125000,
+            "gePriceEach": 1,
+            "gePriceSource": "SNAPSHOT",
+            "haPriceEach": 1,
+            "geValue": 125000,
+            "haValue": 125000
+          },
+          {
+            "position": 1,
+            "slot": null,
+            "itemId": 2435,
+            "name": "Prayer potion(4)",
+            "quantity": 12,
+            "gePriceEach": 9200,
+            "gePriceSource": "SNAPSHOT",
+            "haPriceEach": 456,
+            "geValue": 110400,
+            "haValue": 5472
+          }
+        ]
+      },
+      "equipment": {
+        "geValue": 1549500,
+        "haValue": 180000,
+        "items": [
+          {
+            "position": 0,
+            "slot": "WEAPON",
+            "itemId": 4151,
+            "name": "Abyssal whip",
+            "quantity": 1,
+            "gePriceEach": 1500000,
+            "gePriceSource": "SNAPSHOT",
+            "haPriceEach": 72000,
+            "geValue": 1500000,
+            "haValue": 72000
+          },
+          {
+            "position": 1,
+            "slot": "AMMO",
+            "itemId": 892,
+            "name": "Rune arrow",
+            "quantity": 450,
+            "gePriceEach": 110,
+            "gePriceSource": "SNAPSHOT",
+            "haPriceEach": 240,
+            "geValue": 49500,
+            "haValue": 108000
+          }
+        ]
+      }
+    }
+  ],
+  "totals": {
+    "geValue": 41691224,
+    "haValue": 17659689,
+    "cashValue": 16825000
+  },
+  "prices": {
+    "source": "CURRENT",
+    "fetchedAt": null
+  }
+}

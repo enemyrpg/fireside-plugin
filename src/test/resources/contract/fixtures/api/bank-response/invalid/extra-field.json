@@ -37,6 +37,7 @@
           "quantity": 1,
           "placeholder": false,
           "gePriceEach": 9800000,
+          "gePriceSource": "SNAPSHOT",
           "haPriceEach": 750000,
           "geValue": 9800000,
           "haValue": 750000
@@ -49,6 +50,7 @@
           "quantity": 1,
           "placeholder": false,
           "gePriceEach": 14500000,
+          "gePriceSource": "SNAPSHOT",
           "haPriceEach": 159000,
           "geValue": 14500000,
           "haValue": 159000
@@ -61,6 +63,7 @@
           "quantity": 0,
           "placeholder": true,
           "gePriceEach": 1450000000,
+          "gePriceSource": "SNAPSHOT",
           "haPriceEach": 720000,
           "geValue": 0,
           "haValue": 0
@@ -73,6 +76,7 @@
           "quantity": 48,
           "placeholder": false,
           "gePriceEach": 9200,
+          "gePriceSource": "SNAPSHOT",
           "haPriceEach": 456,
           "geValue": 441600,
           "haValue": 21888
@@ -85,6 +89,7 @@
           "quantity": 320,
           "placeholder": false,
           "gePriceEach": 780,
+          "gePriceSource": "SNAPSHOT",
           "haPriceEach": 90,
           "geValue": 249600,
           "haValue": 28800
@@ -97,6 +102,7 @@
           "quantity": 12500000,
           "placeholder": false,
           "gePriceEach": 1,
+          "gePriceSource": "SNAPSHOT",
           "haPriceEach": 1,
           "geValue": 12500000,
           "haValue": 12500000
@@ -109,6 +115,7 @@
           "quantity": 4200,
           "placeholder": false,
           "gePriceEach": 1000,
+          "gePriceSource": "SNAPSHOT",
           "haPriceEach": 1000,
           "geValue": 4200000,
           "haValue": 4200000
@@ -121,6 +128,7 @@
           "quantity": 1,
           "placeholder": false,
           "gePriceEach": 10,
+          "gePriceSource": "SNAPSHOT",
           "haPriceEach": 1,
           "geValue": 10,
           "haValue": 1
@@ -137,6 +145,7 @@
             "name": "Coins",
             "quantity": 125000,
             "gePriceEach": 1,
+            "gePriceSource": "SNAPSHOT",
             "haPriceEach": 1,
             "geValue": 125000,
             "haValue": 125000
@@ -148,6 +157,7 @@
             "name": "Prayer potion(4)",
             "quantity": 12,
             "gePriceEach": 9200,
+            "gePriceSource": "SNAPSHOT",
             "haPriceEach": 456,
             "geValue": 110400,
             "haValue": 5472
@@ -165,6 +175,7 @@
             "name": "Abyssal whip",
             "quantity": 1,
             "gePriceEach": 1500000,
+            "gePriceSource": "SNAPSHOT",
             "haPriceEach": 72000,
             "geValue": 1500000,
             "haValue": 72000
@@ -176,6 +187,7 @@
             "name": "Rune arrow",
             "quantity": 450,
             "gePriceEach": 110,
+            "gePriceSource": "SNAPSHOT",
             "haPriceEach": 240,
             "geValue": 49500,
             "haValue": 108000
@@ -189,5 +201,9 @@
     "geValue": 41691210,
     "haValue": 17659689,
     "cashValue": 16825000
+  },
+  "prices": {
+    "source": "SNAPSHOT",
+    "fetchedAt": null
   }
 }

@@ -1,0 +1,19 @@
+{
+  "eventId": "01933c4e-8a2b-7c3d-9e4f-0a1b2c3d4e71",
+  "schemaVersion": 1,
+  "type": "pet.drop",
+  "accountHash": "1234567890123456789",
+  "occurredAt": "2026-11-08T19:42:13.512Z",
+  "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+  "payload": {
+    "message": "FOLLOWED",
+    "guessedPet": {
+      "itemId": 21992,
+      "name": "Vorki"
+    },
+    "guessedSource": {
+      "type": "ACTIVITY",
+      "name": "Vorkath"
+    }
+  }
+}

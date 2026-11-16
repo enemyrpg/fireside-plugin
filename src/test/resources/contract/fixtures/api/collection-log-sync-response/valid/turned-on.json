@@ -1,0 +1,11 @@
+{
+  "accountId": 2,
+  "source": "RUNEPROFILE",
+  "sync": {
+    "status": "NEVER_SYNCED",
+    "lastAttemptAt": null,
+    "lastSuccessAt": null,
+    "lastChangedAt": null,
+    "nextSyncAllowedAt": null
+  }
+}

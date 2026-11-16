@@ -4,5 +4,9 @@
   "potionStorageGeValue": 977600,
   "inventoryGeValue": 235400,
   "equipmentGeValue": 1549500,
-  "cashValue": 16825000
+  "cashValue": 16825000,
+  "prices": {
+    "source": "SNAPSHOT",
+    "fetchedAt": null
+  }
 }

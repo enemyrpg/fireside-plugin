@@ -22,6 +22,8 @@ import com.fireside.net.SemVer;
 import com.fireside.net.ServerUrl;
 import com.fireside.net.VerifyClient;
 import com.fireside.net.VerifyResult;
+import com.fireside.pet.ClientPetView;
+import com.fireside.pet.PetTracker;
 import com.fireside.queue.EventQueue;
 import com.fireside.quest.ClientQuestView;
 import com.fireside.quest.QuestTracker;
@@ -81,8 +83,8 @@ import okhttp3.Call;
 @PluginDescriptor(
 	name = Branding.DISPLAY_NAME,
 	internalName = Branding.INTERNAL_NAME,
-	description = "Self-hosted tracker for your own accounts: sessions, screen time, XP, loot, KC, bank and quests on your own dashboard.",
-	tags = {"tracker", "sessions", "screen time", "loot", "bank", "self-hosted"}
+	description = "Self-hosted tracker for your own accounts: sessions, screen time, XP, loot, KC, bank, quests and pets on your own dashboard.",
+	tags = {"tracker", "sessions", "screen time", "loot", "bank", "pets", "self-hosted"}
 )
 public class FiresidePlugin extends Plugin
 {
@@ -143,6 +145,9 @@ public class FiresidePlugin extends Plugin
 	@Inject
 	private ClientQuestView questView;
 
+	@Inject
+	private ClientPetView petView;
+
 	/**
 	 * The plugin's own thread: all queue disk IO and sender state live on it.
 	 * HTTP runs on OkHttp's pool; results come back to this thread.
@@ -163,6 +168,8 @@ public class FiresidePlugin extends Plugin
 	private volatile BankTracker bank;
 	/** Quest and diary snapshots. Reads on the client thread; synchronized. */
 	private volatile QuestTracker quests;
+	/** Pet drops. Client thread, except the flush at client shutdown; synchronized. */
+	private volatile PetTracker pets;
 	/** Panel line about a skipped bank snapshot; null when there is none. */
 	private volatile String bankStatus;
 	/** The last server contract the sender reported, for trackers created after it. */
@@ -225,6 +232,11 @@ public class FiresidePlugin extends Plugin
 			{
 				questTracker.onServerContract(version);
 			}
+			PetTracker petTracker = pets;
+			if (petTracker != null)
+			{
+				petTracker.onServerContract(version);
+			}
 		});
 		sender.start(senderSettings());
 
@@ -255,6 +267,9 @@ public class FiresidePlugin extends Plugin
 		quests = new QuestTracker(questView, bankHashes, tracker::createInSession, tracker::isActive, eventSink,
 			Clock.systemUTC(), () -> config.sendQuests() && config.sendingEnabled(), System::nanoTime);
 		quests.onServerContract(serverContract);
+		pets = new PetTracker(petView, tracker::reserveInSession, eventSink,
+			() -> config.sendPets() && config.sendingEnabled());
+		pets.onServerContract(serverContract);
 		lootTrackerActive = isLootTrackerActive();
 		// Picks up a game that is already logged in (plugin turned on mid-game).
 		clientThread.invoke(() ->
@@ -299,6 +314,13 @@ public class FiresidePlugin extends Plugin
 			stoppingQuests.flush();
 		}
 		quests = null;
+		PetTracker stoppingPets = pets;
+		if (stoppingPets != null)
+		{
+			// A held pet drop belongs to the session that is still running.
+			stoppingPets.flush();
+		}
+		pets = null;
 		serverContract = null;
 		bankStatus = null;
 		// Queues an open AFK period (cached values only, safe off the client thread) before the
@@ -397,6 +419,11 @@ public class FiresidePlugin extends Plugin
 		{
 			questTracker.flush();
 		}
+		PetTracker petTracker = pets;
+		if (petTracker != null)
+		{
+			petTracker.flush();
+		}
 		if (sessions != null)
 		{
 			sessions.onClientShutdown();
@@ -438,6 +465,14 @@ public class FiresidePlugin extends Plugin
 			// The next login waits until its own quest data is loaded.
 			questTracker.reset();
 		}
+		PetTracker petTracker = pets;
+		if (petTracker != null && (state == GameState.HOPPING || state == GameState.LOGIN_SCREEN
+			|| state == GameState.LOGIN_SCREEN_AUTHENTICATOR))
+		{
+			// A held pet drop goes in the session that is ending, before session.end.
+			petTracker.flush();
+			petTracker.reset();
+		}
 		if (sessions != null && sessions.onGameState(event.getGameState()) && sender != null)
 		{
 			// session.end is queued; send it (and the rest) now.
@@ -470,6 +505,11 @@ public class FiresidePlugin extends Plugin
 		{
 			questTracker.onTick();
 		}
+		PetTracker petTracker = pets;
+		if (petTracker != null)
+		{
+			petTracker.onTick(client.getTickCount());
+		}
 		if (icons != null)
 		{
 			icons.onGameTick();
@@ -482,6 +522,11 @@ public class FiresidePlugin extends Plugin
 		if (sessions != null)
 		{
 			sessions.onStat(event.getSkill().name(), event.getXp(), event.getLevel());
+		}
+		PetTracker petTracker = pets;
+		if (petTracker != null)
+		{
+			petTracker.onXp(event.getSkill().name(), event.getXp(), client.getTickCount());
 		}
 	}
 
@@ -501,6 +546,11 @@ public class FiresidePlugin extends Plugin
 		if (kills != null)
 		{
 			kills.onChatMessage(event.getType(), event.getMessage(), client.getTickCount());
+		}
+		PetTracker petTracker = pets;
+		if (petTracker != null)
+		{
+			petTracker.onChatMessage(event.getType(), event.getMessage(), client.getTickCount());
 		}
 	}
 
@@ -544,7 +594,13 @@ public class FiresidePlugin extends Plugin
 			return;
 		}
 		List<LootItem> items = lootMapper.items(event.getItems());
-		kills.onLoot(source, items, event.getAmount(), client.getTickCount());
+		LootSource sentAs = kills.onLoot(source, items, event.getAmount(), client.getTickCount());
+		PetTracker petTracker = pets;
+		if (petTracker != null)
+		{
+			// Only the source's name, for the source guess of a pet drop. Null for another player's loot.
+			petTracker.onLoot((sentAs != null ? sentAs : source).getName(), client.getTickCount());
+		}
 	}
 
 	@Subscribe

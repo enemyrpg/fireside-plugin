@@ -1,0 +1,47 @@
+{
+  "defaults": [
+    {
+      "accountId": 1,
+      "mode": "SPLIT"
+    }
+  ],
+  "total": {
+    "share": 0,
+    "fromOwnDrops": 0,
+    "fromTeammateDrops": 0
+  },
+  "raids": [
+    {
+      "raid": "Chambers of Xeric",
+      "share": 0,
+      "fromOwnDrops": 0,
+      "fromTeammateDrops": 0
+    },
+    {
+      "raid": "Theatre of Blood",
+      "share": 0,
+      "fromOwnDrops": 0,
+      "fromTeammateDrops": 0,
+      "manualSpecialLootValue": 0
+    },
+    {
+      "raid": "Tombs of Amascut",
+      "share": 0,
+      "fromOwnDrops": 0,
+      "fromTeammateDrops": 0,
+      "manualSpecialLootValue": 0
+    },
+    {
+      "raid": "The Fractured Archive",
+      "share": 0,
+      "fromOwnDrops": 0,
+      "fromTeammateDrops": 0,
+      "manualSpecialLootValue": 0
+    }
+  ],
+  "months": [],
+  "drops": {
+    "items": [],
+    "nextCursor": null
+  }
+}

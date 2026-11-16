@@ -1,0 +1,16 @@
+{
+  "pets": [
+    {
+      "accountId": 1,
+      "itemId": 21992,
+      "name": "Vorki",
+      "obtainedAt": null,
+      "approximate": false,
+      "source": null,
+      "killCount": null,
+      "xp": null,
+      "confirmed": false,
+      "origin": "CLOG"
+    }
+  ]
+}

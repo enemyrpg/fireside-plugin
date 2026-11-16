@@ -1,0 +1,13 @@
+{
+  "geValue": 1483313734,
+  "bankGeValue": 1480551234,
+  "potionStorageGeValue": 977600,
+  "inventoryGeValue": 235400,
+  "equipmentGeValue": 1549500,
+  "cashValue": 16825000,
+  "updatedAt": "2026-11-08T19:42:13.512Z",
+  "prices": {
+    "source": "CURRENT",
+    "fetchedAt": "2026-11-08T19:00:04.000Z"
+  }
+}
