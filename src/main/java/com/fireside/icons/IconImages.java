@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
 
 /**
- * Loads item icons. {@link ClientIconImages} is the real one; tests use a fake.
+ * Loads item icons and game sprites. {@link ClientIconImages} is the real one; tests use a fake.
  */
 public interface IconImages
 {
@@ -15,4 +15,12 @@ public interface IconImages
 	 * thread and never blocks.
 	 */
 	void load(int itemId, Consumer<BufferedImage> onLoaded);
+
+	/**
+	 * Starts loading a game sprite (the icon of a skill or boss, 10.12).
+	 * {@code onLoaded} is called once, on any thread, with the sprite as the
+	 * game has it (trimmed, so often narrower than its canvas), or never if the
+	 * game has no such sprite. May be called from any thread and never blocks.
+	 */
+	void loadSprite(int spriteId, Consumer<BufferedImage> onLoaded);
 }

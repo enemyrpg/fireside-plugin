@@ -36,12 +36,12 @@ public class IconResult
 	Integer status;
 	@Nullable
 	Duration retryAfter;
-	/** {@code wanted}: the IDs without an icon on the server. */
-	List<Integer> missing;
-	/** {@code icons}: stored and unchanged IDs. */
-	List<Integer> accepted;
-	/** {@code icons}: IDs the server rejected (never retried this session). */
-	List<Integer> rejected;
+	/** {@code wanted}: the keys without an icon on the server. */
+	List<IconKey> missing;
+	/** {@code icons}: stored and unchanged keys, as they were sent. */
+	List<IconKey> accepted;
+	/** {@code icons}: keys the server rejected and could name (never retried this session). */
+	List<IconKey> rejected;
 
 	/** Request position of each rejection, for a rejection whose {@code itemId} is null. */
 	List<Integer> rejectedIndexes;
@@ -60,6 +60,9 @@ public class IconResult
 	private static final class WantedBody
 	{
 		List<Integer> missing;
+		/** Only in the answer when the request had skills or bosses (contract 1.29.0). */
+		List<String> missingSkills;
+		List<String> missingBosses;
 	}
 
 	private static final class IconsBody
@@ -67,12 +70,23 @@ public class IconResult
 		List<Integer> stored;
 		List<Integer> unchanged;
 		List<Rejection> rejected;
+		/** Only in the answer when the request had a skill or boss icon (contract 1.29.0). */
+		List<Named> storedNamed;
+		List<Named> unchangedNamed;
+	}
+
+	private static final class Named
+	{
+		String kind;
+		String key;
 	}
 
 	private static final class Rejection
 	{
 		Integer index;
 		Integer itemId;
+		String kind;
+		String key;
 	}
 
 	/** Status codes other than 200, shared by both endpoints. */
@@ -114,7 +128,32 @@ public class IconResult
 			{
 				return failed(code);
 			}
-			return new IconResult(Kind.OK, code, null, Collections.unmodifiableList(parsed.missing),
+			List<IconKey> missing = new ArrayList<>();
+			for (Integer id : parsed.missing)
+			{
+				missing.add(IconKey.item(id));
+			}
+			if (parsed.missingSkills != null)
+			{
+				for (String name : parsed.missingSkills)
+				{
+					if (name != null)
+					{
+						missing.add(IconKey.skill(name));
+					}
+				}
+			}
+			if (parsed.missingBosses != null)
+			{
+				for (String name : parsed.missingBosses)
+				{
+					if (name != null)
+					{
+						missing.add(IconKey.boss(name));
+					}
+				}
+			}
+			return new IconResult(Kind.OK, code, null, Collections.unmodifiableList(missing),
 				Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
 		}
 		catch (JsonParseException | IllegalStateException | NumberFormatException e)
@@ -138,9 +177,18 @@ public class IconResult
 			{
 				return failed(code);
 			}
-			List<Integer> accepted = new ArrayList<>(parsed.stored);
-			accepted.addAll(parsed.unchanged);
-			List<Integer> rejected = new ArrayList<>();
+			List<IconKey> accepted = new ArrayList<>();
+			for (Integer id : parsed.stored)
+			{
+				accepted.add(IconKey.item(id));
+			}
+			for (Integer id : parsed.unchanged)
+			{
+				accepted.add(IconKey.item(id));
+			}
+			addNamed(accepted, parsed.storedNamed);
+			addNamed(accepted, parsed.unchangedNamed);
+			List<IconKey> rejected = new ArrayList<>();
 			List<Integer> rejectedIndexes = new ArrayList<>();
 			for (Rejection r : parsed.rejected)
 			{
@@ -148,9 +196,14 @@ public class IconResult
 				{
 					continue;
 				}
+				IconKey named = IconKey.named(r.kind, r.key);
 				if (r.itemId != null)
 				{
-					rejected.add(r.itemId);
+					rejected.add(IconKey.item(r.itemId));
+				}
+				else if (named != null)
+				{
+					rejected.add(named);
 				}
 				if (r.index != null)
 				{
@@ -164,6 +217,22 @@ public class IconResult
 		catch (JsonParseException | IllegalStateException | NumberFormatException e)
 		{
 			return failed(code);
+		}
+	}
+
+	private static void addNamed(List<IconKey> keys, @Nullable List<Named> named)
+	{
+		if (named == null)
+		{
+			return;
+		}
+		for (Named n : named)
+		{
+			IconKey key = n == null ? null : IconKey.named(n.kind, n.key);
+			if (key != null)
+			{
+				keys.add(key);
+			}
 		}
 	}
 }

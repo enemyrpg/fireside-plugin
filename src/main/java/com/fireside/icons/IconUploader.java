@@ -3,6 +3,7 @@ package com.fireside.icons;
 import com.fireside.Contract;
 import com.fireside.event.Event;
 import com.fireside.net.IconClient;
+import com.fireside.net.IconKey;
 import com.fireside.net.IconResult;
 import com.fireside.net.SemVer;
 import com.fireside.net.ServerUrl;
@@ -16,6 +17,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,10 +33,13 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.client.util.ImageUtil;
 import okhttp3.Call;
 
 /**
- * Uploads the icons of the items in queued events to the server (10.3).
+ * Uploads icons to the server: those of the items in queued events (10.3), and
+ * once per login those of the whole collection log, all skills and all
+ * bosses/raids (10.12).
  * <p>
  * <b>Flow.</b> {@link #collect} takes the item IDs of every queued event
  * ({@link IconIds}, exactly as in the event). New IDs are asked about with
@@ -57,6 +62,17 @@ import okhttp3.Call;
  * <b>When.</b> Only while sending is on, the server is configured, "Upload item
  * icons" is on and the server's contract (from the sender's {@code verify}) is
  * at least {@link Contract#ICONS_VERSION}. An older server gets no icon requests.
+ * <p>
+ * <b>The import (10.12).</b> {@link #importAll} takes the icons of the whole
+ * collection log, all skills and all bosses/raids ({@link IconCatalog}) through
+ * the same flow: {@code wanted} first, then only what the server lacks is
+ * loaded and uploaded. It needs contract {@link Contract#NAMED_ICONS_VERSION};
+ * an older server gets no import at all, and item icons from events work as
+ * before. Keys from queued events always go first, in {@code wanted} and in the
+ * loads of a game tick. Skill and boss sprites are padded to
+ * {@link #NAMED_SIDE} x {@link #NAMED_SIDE} before they are encoded. An image
+ * the game cannot give is skipped; only the counts are logged, when the import
+ * is done.
  */
 @Slf4j
 public class IconUploader
@@ -84,7 +100,42 @@ public class IconUploader
 	/** Icon loads started per game tick at most (about 40 per second), so the client thread never hitches. */
 	static final int MAX_LOADS_PER_TICK = 25;
 
+	/**
+	 * Side of a skill or boss icon. The game's sprites are trimmed (16 to 25 px wide); the
+	 * dashboard draws them at exactly this size, as RuneLite's Hiscore panel does.
+	 */
+	static final int NAMED_SIDE = 25;
+
 	private static final SemVer ICONS_VERSION = SemVer.parse(Contract.ICONS_VERSION);
+	private static final SemVer NAMED_ICONS_VERSION = SemVer.parse(Contract.NAMED_ICONS_VERSION);
+
+	/** One import: what is still open, and the counts for the log. */
+	private static final class ImportRun
+	{
+		static final int CHECKED = 0;
+		static final int MISSING = 1;
+		static final int UPLOADED = 2;
+		static final int SKIPPED = 3;
+
+		final Instant startedAt;
+		/** Keys that are neither answered "has it", uploaded nor skipped yet. */
+		final Set<IconKey> open = new HashSet<>();
+		final Map<IconKey.Kind, int[]> counts = new EnumMap<>(IconKey.Kind.class);
+
+		ImportRun(Instant startedAt)
+		{
+			this.startedAt = startedAt;
+			for (IconKey.Kind kind : IconKey.Kind.values())
+			{
+				counts.put(kind, new int[4]);
+			}
+		}
+
+		void count(IconKey key, int what)
+		{
+			counts.get(key.getKind())[what]++;
+		}
+	}
 
 	private final ScheduledExecutorService executor;
 	private final IconClient client;
@@ -106,14 +157,28 @@ public class IconUploader
 
 	/** Bumped when the connection changes or icons stop, so late results are ignored. */
 	private int generation;
-	/** IDs the server has answered for (or that were handled) this session. */
-	private final Set<Integer> checked = new HashSet<>();
-	/** New IDs to ask about. */
-	private final Set<Integer> pending = new LinkedHashSet<>();
-	/** IDs the server lacks, waiting for a game tick to start loading. */
-	private final Set<Integer> toLoad = new LinkedHashSet<>();
-	/** IDs whose image is loading, with their timeout. */
-	private final Map<Integer, ScheduledFuture<?>> loading = new HashMap<>();
+	/** Keys the server has answered for (or that were handled) this session. */
+	private final Set<IconKey> checked = new HashSet<>();
+	/** New keys from events to ask about. */
+	private final Set<IconKey> pending = new LinkedHashSet<>();
+	/** Keys from events the server lacks, waiting for a game tick to start loading. */
+	private final Set<IconKey> toLoad = new LinkedHashSet<>();
+	/** Keys whose image is loading, with their timeout. */
+	private final Map<IconKey, ScheduledFuture<?>> loading = new HashMap<>();
+	/** The import's keys to ask about, after {@link #pending}. */
+	private final Set<IconKey> importPending = new LinkedHashSet<>();
+	/** The import's keys the server lacks, loaded after {@link #toLoad}. */
+	private final Set<IconKey> importToLoad = new LinkedHashSet<>();
+	/** The game sprite of each skill and boss key, from the catalog. */
+	private final Map<IconKey, Integer> sprites = new HashMap<>();
+	/** Keys the server rejected or the game gave no usable image for: not imported again this session. */
+	private final Set<IconKey> unusable = new HashSet<>();
+	/** The import in progress, or null. */
+	@Nullable
+	private ImportRun run;
+	/** A catalog that waits for the server's contract version. */
+	@Nullable
+	private IconCatalog heldImport;
 	/** Encoded icons waiting for upload. */
 	private final Deque<IconClient.Icon> ready = new ArrayDeque<>();
 	/** When the oldest icon in {@link #ready} got there; null when it is empty (or after a failed upload). */
@@ -123,8 +188,8 @@ public class IconUploader
 	@Nullable
 	private Call call;
 	private boolean busy;
-	/** IDs of the upload in flight, so they can be unchecked if it is cancelled. */
-	private List<Integer> uploading = new ArrayList<>();
+	/** Keys of the upload in flight, so they can be unchecked if it is cancelled. */
+	private List<IconKey> uploading = new ArrayList<>();
 	@Nullable
 	private Instant notBefore;
 	@Nullable
@@ -169,6 +234,21 @@ public class IconUploader
 					log.debug("Server contract {} has no item icons; skipping icons", version);
 					dropWork();
 				}
+				else if (!namedOk())
+				{
+					if (run != null || heldImport != null)
+					{
+						log.debug("Server contract {} has no skill and boss icons; skipping the icon import", version);
+						// Also what was loading: an older server rejects icons with a kind.
+						stopWork();
+					}
+				}
+				else if (heldImport != null)
+				{
+					IconCatalog catalog = heldImport;
+					heldImport = null;
+					beginImport(catalog);
+				}
 			}
 			pump();
 		});
@@ -182,6 +262,36 @@ public class IconUploader
 		{
 			post(() -> addIds(ids));
 		}
+	}
+
+	/**
+	 * Checks every icon in the catalog against the server and uploads what it
+	 * lacks (10.12). Call it once per login. Ignored while icons are off, the
+	 * server is older than {@link Contract#NAMED_ICONS_VERSION} or an import is
+	 * already running; held until the server's contract version is known.
+	 */
+	public void importAll(IconCatalog catalog)
+	{
+		post(() ->
+		{
+			if (!active())
+			{
+				return;
+			}
+			if (serverContract == null)
+			{
+				heldImport = catalog;
+			}
+			else if (namedOk())
+			{
+				beginImport(catalog);
+				pump();
+			}
+			else
+			{
+				log.debug("Server contract {} has no skill and boss icons; skipping the icon import", serverContract);
+			}
+		});
 	}
 
 	/**
@@ -217,6 +327,11 @@ public class IconUploader
 		return serverContract != null && serverContract.compareTo(ICONS_VERSION) >= 0;
 	}
 
+	private boolean namedOk()
+	{
+		return serverContract != null && serverContract.compareTo(NAMED_ICONS_VERSION) >= 0;
+	}
+
 	private void applySettings(SenderSettings newSettings, boolean uploadIcons)
 	{
 		boolean connectionChanged = !newSettings.sameConnection(settings);
@@ -227,6 +342,7 @@ public class IconUploader
 			// Another server: nothing we know applies to it.
 			stopWork();
 			checked.clear();
+			unusable.clear();
 			serverContract = null;
 			unavailable = false;
 			unauthorized = false;
@@ -249,7 +365,11 @@ public class IconUploader
 		boolean added = false;
 		for (Integer id : ids)
 		{
-			if (!checked.contains(id) && !loading.containsKey(id) && !toLoad.contains(id) && pending.add(id))
+			IconKey key = IconKey.item(id);
+			// An item the import has not asked about yet goes first, as part of the event.
+			boolean fromImport = importPending.remove(key);
+			if ((fromImport || (!checked.contains(key) && !loading.containsKey(key) && !toLoad.contains(key)))
+				&& pending.add(key))
 			{
 				added = true;
 			}
@@ -260,6 +380,79 @@ public class IconUploader
 		}
 	}
 
+	private void beginImport(IconCatalog catalog)
+	{
+		if (run != null)
+		{
+			log.debug("An icon import is already running; not started again");
+			return;
+		}
+		ImportRun started = new ImportRun(clock.instant());
+		sprites.putAll(catalog.getSprites());
+		// Keys already on their way (from events) are left to finish as they are.
+		Set<IconKey> inFlight = new HashSet<>(pending);
+		inFlight.addAll(toLoad);
+		inFlight.addAll(loading.keySet());
+		inFlight.addAll(uploading);
+		for (IconClient.Icon icon : ready)
+		{
+			inFlight.add(icon.getKey());
+		}
+		for (IconKey key : catalog.keys())
+		{
+			if (unusable.contains(key))
+			{
+				started.count(key, ImportRun.SKIPPED);
+			}
+			else if (!inFlight.contains(key) && importPending.add(key))
+			{
+				started.open.add(key);
+			}
+		}
+		run = started;
+		if (started.open.isEmpty())
+		{
+			finishImport();
+		}
+	}
+
+	/** The import no longer waits for {@code key}. */
+	private void resolve(IconKey key, int what)
+	{
+		if (run != null && run.open.remove(key))
+		{
+			run.count(key, what);
+			if (run.open.isEmpty())
+			{
+				finishImport();
+			}
+		}
+	}
+
+	private void finishImport()
+	{
+		ImportRun done = run;
+		run = null;
+		if (done == null)
+		{
+			return;
+		}
+		long ms = Duration.between(done.startedAt, clock.instant()).toMillis();
+		for (IconKey.Kind kind : IconKey.Kind.values())
+		{
+			int[] c = done.counts.get(kind);
+			log.debug("Icon import, {}: {} checked, {} missing, {} uploaded, {} skipped ({} ms)", kind,
+				c[ImportRun.CHECKED], c[ImportRun.MISSING], c[ImportRun.UPLOADED], c[ImportRun.SKIPPED], ms);
+		}
+	}
+
+	/** No usable image, or rejected: never again this session. */
+	private void skip(IconKey key)
+	{
+		unusable.add(key);
+		resolve(key, ImportRun.SKIPPED);
+	}
+
 	/** Starts the next request if one is due. */
 	private void pump()
 	{
@@ -267,7 +460,7 @@ public class IconUploader
 		{
 			return;
 		}
-		if (ready.isEmpty() && pending.isEmpty())
+		if (ready.isEmpty() && pending.isEmpty() && importPending.isEmpty())
 		{
 			return;
 		}
@@ -279,7 +472,8 @@ public class IconUploader
 		}
 		if (!ready.isEmpty())
 		{
-			if (ready.size() < IconClient.MAX_ICONS_PER_REQUEST && (!toLoad.isEmpty() || !loading.isEmpty())
+			if (ready.size() < IconClient.MAX_ICONS_PER_REQUEST
+				&& (!toLoad.isEmpty() || !importToLoad.isEmpty() || !loading.isEmpty())
 				&& firstReadyAt != null && now.isBefore(firstReadyAt.plus(timing.getGatherDelay())))
 			{
 				// More icons are loading or start on the next game ticks: wait for a fuller batch,
@@ -297,129 +491,220 @@ public class IconUploader
 
 	private void startWanted()
 	{
-		List<Integer> ids = new ArrayList<>(IconClient.MAX_WANTED_IDS);
-		for (Iterator<Integer> it = pending.iterator(); it.hasNext() && ids.size() < IconClient.MAX_WANTED_IDS; )
-		{
-			ids.add(it.next());
-			it.remove();
-		}
+		// Keys from events first; the import fills what is left of the request.
+		List<IconKey> keys = new ArrayList<>(IconClient.MAX_WANTED_IDS);
+		take(pending, keys);
+		take(importPending, keys);
 		int gen = generation;
 		busy = true;
 		try
 		{
-			call = client.wanted(settings.url(), settings.getApiKey(), ids,
-				result -> post(() -> onWanted(gen, ids, result)));
+			call = client.wanted(settings.url(), settings.getApiKey(), keys,
+				result -> post(() -> onWanted(gen, keys, result)));
 		}
 		catch (RuntimeException e)
 		{
 			log.warn("Could not start an icon request", e);
 			busy = false;
-			pending.addAll(ids);
+			askAgain(keys);
 			retryLater(null);
 		}
 	}
 
-	private void onWanted(int gen, List<Integer> ids, IconResult result)
+	private static void take(Set<IconKey> from, List<IconKey> keys)
+	{
+		for (Iterator<IconKey> it = from.iterator(); it.hasNext() && keys.size() < IconClient.MAX_WANTED_IDS; )
+		{
+			keys.add(it.next());
+			it.remove();
+		}
+	}
+
+	/** Whether {@code key} is part of the import in progress (those are only counted, not logged one by one). */
+	private boolean imported(IconKey key)
+	{
+		return run != null && run.open.contains(key);
+	}
+
+	/** Puts the keys of a failed {@code wanted} back, in front of newer keys (the order does not matter). */
+	private void askAgain(List<IconKey> keys)
+	{
+		Set<IconKey> events = new LinkedHashSet<>();
+		Set<IconKey> imports = new LinkedHashSet<>();
+		for (IconKey key : keys)
+		{
+			(imported(key) ? imports : events).add(key);
+		}
+		events.addAll(pending);
+		pending.clear();
+		pending.addAll(events);
+		imports.addAll(importPending);
+		importPending.clear();
+		importPending.addAll(imports);
+	}
+
+	private void onWanted(int gen, List<IconKey> keys, IconResult result)
 	{
 		if (closed || gen != generation)
 		{
 			return;
 		}
 		requestDone();
-		if (result.getKind() == IconResult.Kind.OK)
+		if (result.getKind() != IconResult.Kind.OK)
 		{
-			backoff.reset();
-			checked.addAll(ids);
-			Set<Integer> asked = new HashSet<>(ids);
-			for (Integer id : result.getMissing())
-			{
-				// Only what we asked about; the server answers in the same order.
-				if (asked.remove(id))
-				{
-					toLoad.add(id);
-				}
-			}
-			log.debug("Server lacks {} of {} item icon(s)", result.getMissing().size(), ids.size());
-			pump();
+			askAgain(keys);
+			failed(result);
 			return;
 		}
-		// Asked again later (in front of newer IDs, the order does not matter).
-		Set<Integer> again = new LinkedHashSet<>(ids);
-		again.addAll(pending);
-		pending.clear();
-		pending.addAll(again);
-		failed(result);
+		backoff.reset();
+		checked.addAll(keys);
+		// Only what we asked about counts as missing.
+		Set<IconKey> missing = new HashSet<>(result.getMissing());
+		int lacking = 0;
+		for (IconKey key : new LinkedHashSet<>(keys))
+		{
+			boolean fromImport = imported(key);
+			if (fromImport)
+			{
+				run.count(key, ImportRun.CHECKED);
+			}
+			if (missing.contains(key))
+			{
+				lacking++;
+				if (fromImport)
+				{
+					run.count(key, ImportRun.MISSING);
+					importToLoad.add(key);
+				}
+				else
+				{
+					toLoad.add(key);
+				}
+			}
+			else if (fromImport)
+			{
+				// The server has it: nothing more to do for this key.
+				run.open.remove(key);
+			}
+		}
+		log.debug("Server lacks {} of {} icon(s)", lacking, keys.size());
+		if (run != null && run.open.isEmpty())
+		{
+			finishImport();
+		}
+		pump();
 	}
 
 	private void startLoads()
 	{
-		if (!active() || toLoad.isEmpty())
+		if (!active() || (toLoad.isEmpty() && importToLoad.isEmpty()))
 		{
 			return;
 		}
-		int started = 0;
-		for (Iterator<Integer> it = toLoad.iterator(); it.hasNext() && started < MAX_LOADS_PER_TICK; started++)
+		// Icons of events first; the import gets what is left of the tick.
+		int started = startLoads(toLoad, 0);
+		startLoads(importToLoad, started);
+	}
+
+	private int startLoads(Set<IconKey> from, int started)
+	{
+		for (Iterator<IconKey> it = from.iterator(); it.hasNext() && started < MAX_LOADS_PER_TICK; started++)
 		{
-			int itemId = it.next();
+			IconKey key = it.next();
 			it.remove();
-			startLoad(itemId);
+			startLoad(key);
 		}
+		return started;
 	}
 
 	/** Starts one load; its timeout counts from now. */
-	private void startLoad(int itemId)
+	private void startLoad(IconKey key)
 	{
 		int gen = generation;
 		ScheduledFuture<?> timeout = executor.schedule(() -> safely(() ->
 		{
-			if (gen == generation && loading.remove(itemId) != null)
+			if (gen == generation && loading.remove(key) != null)
 			{
 				// Dropped for the session: it is in checked, so it is not asked about again.
-				log.debug("Item icon {} did not load in time; skipped", itemId);
+				if (!imported(key))
+				{
+					log.debug("Item icon {} did not load in time; skipped", key.getItemId());
+				}
+				skip(key);
 			}
 		}), timing.getLoadTimeout().toMillis(), TimeUnit.MILLISECONDS);
-		loading.put(itemId, timeout);
+		loading.put(key, timeout);
 		try
 		{
-			images.load(itemId, image -> post(() -> onLoaded(gen, itemId, image)));
+			if (key.getKind() == IconKey.Kind.ITEM)
+			{
+				images.load(key.getItemId(), image -> post(() -> onLoaded(gen, key, image)));
+				return;
+			}
+			Integer sprite = sprites.get(key);
+			if (sprite != null)
+			{
+				images.loadSprite(sprite, image -> post(() -> onLoaded(gen, key, image)));
+				return;
+			}
 		}
 		catch (RuntimeException e)
 		{
-			log.debug("Could not load item icon {}: {}", itemId, e.getClass().getSimpleName());
-			cancel(loading.remove(itemId));
+			if (!imported(key))
+			{
+				log.debug("Could not load item icon {}: {}", key.getItemId(), e.getClass().getSimpleName());
+			}
 		}
+		cancel(loading.remove(key));
+		skip(key);
 	}
 
-	private void onLoaded(int gen, int itemId, BufferedImage image)
+	private void onLoaded(int gen, IconKey key, BufferedImage image)
 	{
 		if (closed || gen != generation)
 		{
 			return;
 		}
-		ScheduledFuture<?> timeout = loading.remove(itemId);
+		ScheduledFuture<?> timeout = loading.remove(key);
 		if (timeout == null)
 		{
 			return; // Timed out already, or loaded twice.
 		}
 		cancel(timeout);
-		byte[] png = PngEncoder.encode(image);
+		byte[] png = PngEncoder.encode(key.getKind() == IconKey.Kind.ITEM ? image : padded(image));
 		if (png == null)
 		{
-			log.debug("Item icon {} is empty or too large; skipped", itemId);
+			if (!imported(key))
+			{
+				log.debug("Item icon {} is empty or too large; skipped", key.getItemId());
+			}
+			skip(key);
 			return;
 		}
 		if (ready.size() >= MAX_READY)
 		{
-			// The server has been failing for a long time; ask again when the item shows up again.
-			checked.remove(itemId);
+			// The server has been failing for a long time; ask again when the item shows up again
+			// (or at the next import).
+			checked.remove(key);
+			resolve(key, ImportRun.SKIPPED);
 			return;
 		}
 		if (ready.isEmpty())
 		{
 			firstReadyAt = clock.instant();
 		}
-		ready.add(new IconClient.Icon(itemId, png));
+		ready.add(new IconClient.Icon(key, png));
 		schedulePump(ready.size() >= IconClient.MAX_ICONS_PER_REQUEST ? Duration.ZERO : timing.getGatherDelay());
+	}
+
+	/**
+	 * A skill or boss sprite centred on a {@link #NAMED_SIDE} x {@link #NAMED_SIDE}
+	 * canvas, as RuneLite's Hiscore panel shows them. A blank sprite stays blank
+	 * (and is skipped by the encoder).
+	 */
+	static BufferedImage padded(BufferedImage sprite)
+	{
+		return ImageUtil.resizeCanvas(sprite, NAMED_SIDE, NAMED_SIDE);
 	}
 
 	private void startUpload()
@@ -445,7 +730,7 @@ public class IconUploader
 		uploading = new ArrayList<>();
 		for (IconClient.Icon icon : batch)
 		{
-			uploading.add(icon.getItemId());
+			uploading.add(icon.getKey());
 		}
 		try
 		{
@@ -473,8 +758,20 @@ public class IconUploader
 		{
 			backoff.reset();
 			// Rejected icons are not tried again this session (03), and neither is anything
-			// the answer left out: the IDs stay in checked.
-			log.debug("Uploaded {} item icon(s), {} rejected", result.getAccepted().size(),
+			// the answer left out: the keys stay in checked.
+			Set<IconKey> accepted = new HashSet<>(result.getAccepted());
+			for (IconClient.Icon icon : batch)
+			{
+				if (accepted.contains(icon.getKey()))
+				{
+					resolve(icon.getKey(), ImportRun.UPLOADED);
+				}
+				else
+				{
+					skip(icon.getKey());
+				}
+			}
+			log.debug("Uploaded {} icon(s), {} rejected", result.getAccepted().size(),
 				Math.max(result.getRejected().size(), result.getRejectedIndexes().size()));
 			pump();
 			return;
@@ -549,22 +846,31 @@ public class IconUploader
 	}
 
 	/**
-	 * Forgets the work in progress. Icons that were loading or waiting for upload
-	 * are no longer checked, so they are asked about again if the item shows up
-	 * again (e.g. after "Upload item icons" is turned back on).
+	 * Forgets the work in progress, the import included. Icons that were loading
+	 * or waiting for upload are no longer checked, so they are asked about again
+	 * if the item shows up again (e.g. after "Upload item icons" is turned back on).
 	 */
 	private void dropWork()
 	{
+		if (run != null)
+		{
+			log.debug("Icon import stopped with {} icon(s) left", run.open.size());
+		}
+		run = null;
+		heldImport = null;
+		importPending.clear();
 		pending.clear();
 		checked.removeAll(toLoad);
 		toLoad.clear();
+		checked.removeAll(importToLoad);
+		importToLoad.clear();
 		for (IconClient.Icon icon : ready)
 		{
-			checked.remove(icon.getItemId());
+			checked.remove(icon.getKey());
 		}
 		ready.clear();
 		firstReadyAt = null;
-		for (Map.Entry<Integer, ScheduledFuture<?>> entry : loading.entrySet())
+		for (Map.Entry<IconKey, ScheduledFuture<?>> entry : loading.entrySet())
 		{
 			checked.remove(entry.getKey());
 			cancel(entry.getValue());

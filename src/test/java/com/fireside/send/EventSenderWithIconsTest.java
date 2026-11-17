@@ -5,15 +5,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.fireside.Contract;
 import com.fireside.event.Event;
 import com.fireside.event.EventJson;
 import com.fireside.event.Loot;
 import com.fireside.event.LootItem;
 import com.fireside.event.LootSource;
 import com.fireside.event.UuidV7Generator;
+import com.fireside.icons.IconCatalog;
 import com.fireside.icons.IconImages;
 import com.fireside.icons.IconUploader;
 import com.fireside.net.IconClient;
+import com.fireside.net.IconKey;
 import com.fireside.net.IngestClient;
 import com.fireside.net.VerifyClient;
 import com.fireside.queue.EventQueue;
@@ -24,7 +27,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -105,7 +110,20 @@ public class EventSenderWithIconsTest
 				}
 				statuses.add(s);
 			});
-		IconImages images = (itemId, onLoaded) -> onLoaded.accept(image());
+		IconImages images = new IconImages()
+		{
+			@Override
+			public void load(int itemId, Consumer<BufferedImage> onLoaded)
+			{
+				onLoaded.accept(image());
+			}
+
+			@Override
+			public void loadSprite(int spriteId, Consumer<BufferedImage> onLoaded)
+			{
+				onLoaded.accept(image());
+			}
+		};
 		icons = new IconUploader(iconExecutor, new IconClient(http, RuneLiteAPI.GSON), images,
 			new Backoff(Duration.ofMillis(20), Duration.ofMillis(50), new Random(1)), Clock.systemUTC(),
 			new IconUploader.Timing(Duration.ofMillis(10), Duration.ofMillis(10), Duration.ofMillis(1),
@@ -202,6 +220,65 @@ public class EventSenderWithIconsTest
 		sender.sendNow();
 		assertEventsUnaffected(more);
 		assertTrue(server.batches.size() >= 2);
+	}
+
+	/** The whole collection log plus skills and bosses, as the import after a login hands it over. */
+	private static IconCatalog fullCatalog()
+	{
+		List<Integer> itemIds = new ArrayList<>();
+		for (int i = 0; i < 1740; i++)
+		{
+			itemIds.add(20_000 + i);
+		}
+		Map<IconKey, Integer> sprites = new LinkedHashMap<>();
+		sprites.put(IconKey.skill("OVERALL"), 1);
+		for (int i = 0; i < 24; i++)
+		{
+			sprites.put(IconKey.skill("SKILL_" + i), 100 + i);
+		}
+		for (int i = 0; i < 70; i++)
+		{
+			sprites.put(IconKey.boss("Boss " + i), 200 + i);
+		}
+		return IconCatalog.of(itemIds, sprites);
+	}
+
+	@Test
+	public void aFullIconImportAgainstAFailingIconEndpointDoesNotAffectEvents() throws Exception
+	{
+		server.contractVersion = Contract.NAMED_ICONS_VERSION;
+		server.iconStatus = 500;
+		start();
+		List<String> submitted = submitLoot(3);
+		sender.sendNow();
+		await("the server's contract", () -> sender.getStatus().getState() == SenderStatus.State.IDLE
+			&& sender.getStatus().getQueueSize() == 0);
+		icons.importAll(fullCatalog());
+		await("import retries", () -> server.iconCalls.size() >= 3);
+		assertEventsUnaffected(submitted);
+
+		// Events queued while the import keeps trying.
+		List<String> more = submitLoot(5);
+		sender.sendNow();
+		assertEventsUnaffected(more);
+	}
+
+	@Test
+	public void aServerBeforeNamedIconsGetsEventsAndNoImport() throws Exception
+	{
+		server.contractVersion = "1.28.0";
+		server.iconStatus = 500;
+		start();
+		sender.sendNow();
+		await("the server's contract", () -> sender.getStatus().getState() == SenderStatus.State.IDLE);
+		statuses.poll(200, TimeUnit.MILLISECONDS);
+		icons.importAll(fullCatalog());
+		statuses.poll(400, TimeUnit.MILLISECONDS);
+		assertTrue("import requests to a 1.28 server: " + server.iconCalls, server.iconCalls.isEmpty());
+
+		List<String> submitted = submitLoot(2);
+		sender.sendNow();
+		assertEventsUnaffected(submitted);
 	}
 
 	@Test
