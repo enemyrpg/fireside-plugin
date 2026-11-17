@@ -58,5 +58,110 @@
         "gained": 18
       }
     ]
+  },
+  "pets": {
+    "pets": [
+      {
+        "accountId": 1,
+        "itemId": 21992,
+        "name": "Vorki",
+        "obtainedAt": "2026-11-05T19:42:13.512Z",
+        "approximate": false,
+        "source": {
+          "type": "ACTIVITY",
+          "name": "Vorkath"
+        },
+        "killCount": 1204,
+        "xp": null,
+        "confirmed": true,
+        "origin": "CHAT"
+      }
+    ]
+  },
+  "bank": {
+    "startGeValue": 2410000000,
+    "endGeValue": 2418630000,
+    "days": [
+      {
+        "date": "2026-11-02",
+        "geValue": 2410000000
+      },
+      {
+        "date": "2026-11-03",
+        "geValue": 2412500000
+      },
+      {
+        "date": "2026-11-04",
+        "geValue": 2412500000
+      },
+      {
+        "date": "2026-11-05",
+        "geValue": 2415100000
+      },
+      {
+        "date": "2026-11-06",
+        "geValue": 2415100000
+      },
+      {
+        "date": "2026-11-07",
+        "geValue": 2417000000
+      },
+      {
+        "date": "2026-11-08",
+        "geValue": 2418630000
+      }
+    ]
+  },
+  "collectionLog": {
+    "newItems": 3,
+    "obtained": 712,
+    "total": 1568,
+    "recentItems": [
+      {
+        "accountId": 1,
+        "itemId": 11286,
+        "name": "Draconic visage",
+        "page": "Vorkath",
+        "firstSeenAt": "2026-11-08T19:42:13.512Z",
+        "approximate": false
+      },
+      {
+        "accountId": 1,
+        "itemId": 21992,
+        "name": "Vorki",
+        "page": "Vorkath",
+        "firstSeenAt": "2026-11-05T19:42:13.512Z",
+        "approximate": false
+      },
+      {
+        "accountId": 1,
+        "itemId": 22006,
+        "name": "Skeletal visage",
+        "page": "Vorkath",
+        "firstSeenAt": "2026-11-03T06:00:00.000Z",
+        "approximate": true
+      }
+    ]
+  },
+  "quests": {
+    "questPointsGained": 2,
+    "quests": [
+      {
+        "accountId": 1,
+        "quest": "DRAGON_SLAYER_II",
+        "name": "Dragon Slayer II",
+        "kind": "QUEST",
+        "finishedAt": "2026-11-06T18:00:00.000Z"
+      }
+    ],
+    "diaries": [
+      {
+        "accountId": 1,
+        "region": "KANDARIN",
+        "name": "Kandarin",
+        "tier": "HARD",
+        "completedAt": "2026-11-04T18:00:00.000Z"
+      }
+    ]
   }
 }

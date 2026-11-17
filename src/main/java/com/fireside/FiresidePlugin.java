@@ -11,7 +11,9 @@ import com.fireside.event.LootItem;
 import com.fireside.event.LootSource;
 import com.fireside.event.Event;
 import com.fireside.event.UuidV7Generator;
+import com.fireside.icons.ClientIconGameData;
 import com.fireside.icons.ClientIconImages;
+import com.fireside.icons.IconImporter;
 import com.fireside.icons.IconUploader;
 import com.fireside.loot.ClientItemLookup;
 import com.fireside.loot.KillTracker;
@@ -88,6 +90,8 @@ import okhttp3.Call;
 )
 public class FiresidePlugin extends Plugin
 {
+	private static final SemVer NAMED_ICONS_VERSION = SemVer.parse(Contract.NAMED_ICONS_VERSION);
+
 	@Inject
 	private FiresideConfig config;
 
@@ -105,6 +109,9 @@ public class FiresidePlugin extends Plugin
 
 	@Inject
 	private ClientIconImages iconImages;
+
+	@Inject
+	private ClientIconGameData iconGameData;
 
 	@Inject
 	private EventJson eventJson;
@@ -157,6 +164,8 @@ public class FiresidePlugin extends Plugin
 	/** Item icons: its own thread, so it never delays the event queue. */
 	private ScheduledThreadPoolExecutor iconExecutor;
 	private IconUploader icons;
+	/** When the icons of the collection log, skills and bosses are checked (once per login). Synchronized. */
+	private volatile IconImporter iconImporter;
 	/** Sessions, heartbeats and AFK. Client thread, except at ClientShutdown. */
 	private SessionTracker sessions;
 	/** Kill counts and loot. Client thread. */
@@ -218,6 +227,8 @@ public class FiresidePlugin extends Plugin
 			IconUploader.Timing.DEFAULT);
 		icons.updateSettings(senderSettings(), config.uploadIcons());
 		IconUploader contractIcons = icons;
+		iconImporter = new IconImporter(iconGameData, contractIcons::importAll, this::iconImportAllowed,
+			System::nanoTime);
 		sender.setContractListener(version ->
 		{
 			serverContract = version;
@@ -276,6 +287,11 @@ public class FiresidePlugin extends Plugin
 		{
 			tracker.onGameState(client.getGameState());
 			tracker.setEnabled(config.sendingEnabled());
+			IconImporter importer = iconImporter;
+			if (importer != null && client.getGameState() == GameState.LOGGED_IN)
+			{
+				importer.onStartedLoggedIn();
+			}
 		});
 
 		panel = new FiresidePanel(this::testConnection, this::openDashboard, this::sendNow,
@@ -335,6 +351,8 @@ public class FiresidePlugin extends Plugin
 		executor.shutdown();
 		sender = null;
 		executor = null;
+		iconImporter.reset();
+		iconImporter = null;
 		icons.shutdown();
 		iconExecutor.shutdown();
 		icons = null;
@@ -391,6 +409,12 @@ public class FiresidePlugin extends Plugin
 		String key = event.getKey();
 		boolean connectionChanged = FiresideConfig.SERVER_URL_KEY.equals(key)
 			|| FiresideConfig.API_KEY_KEY.equals(key);
+		IconImporter importer = iconImporter;
+		if (importer != null && connectionChanged)
+		{
+			// Another server: check its icons once, without waiting for the next login.
+			importer.onConnectionChanged();
+		}
 		SwingUtilities.invokeLater(() ->
 		{
 			if (connectionChanged)
@@ -438,6 +462,11 @@ public class FiresidePlugin extends Plugin
 	public void onGameStateChanged(GameStateChanged event)
 	{
 		GameState state = event.getGameState();
+		IconImporter importer = iconImporter;
+		if (importer != null)
+		{
+			importer.onGameState(state);
+		}
 		if (kills != null && (state == GameState.HOPPING || state == GameState.LOGIN_SCREEN
 			|| state == GameState.LOGIN_SCREEN_AUTHENTICATOR))
 		{
@@ -513,6 +542,11 @@ public class FiresidePlugin extends Plugin
 		if (icons != null)
 		{
 			icons.onGameTick();
+		}
+		IconImporter importer = iconImporter;
+		if (importer != null)
+		{
+			importer.onTick();
 		}
 	}
 
@@ -623,6 +657,21 @@ public class FiresidePlugin extends Plugin
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Whether the icons of the collection log, skills and bosses may be checked now: sending and
+	 * "Upload item icons" are on, the server is set up, and its contract has those icons.
+	 */
+	private boolean iconImportAllowed()
+	{
+		SemVer contract = serverContract;
+		if (contract == null || contract.compareTo(NAMED_ICONS_VERSION) < 0 || !config.uploadIcons())
+		{
+			return false;
+		}
+		SenderSettings settings = senderSettings();
+		return settings.isEnabled() && settings.isConfigured();
 	}
 
 	private SenderSettings senderSettings()

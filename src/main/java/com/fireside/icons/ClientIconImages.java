@@ -4,7 +4,9 @@ import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.game.SpriteManager;
 import net.runelite.client.util.AsyncBufferedImage;
 
 /**
@@ -20,16 +22,29 @@ import net.runelite.client.util.AsyncBufferedImage;
  * {@code getImage(itemId)} means quantity 1 without a quantity number. For
  * stack-dependent items such as coins that is the single-item sprite, which is
  * the only consistent choice: the server keeps one icon per item ID.
+ * <p>
+ * Sprites (skills and bosses, 10.12) come from RuneLite's {@link SpriteManager},
+ * read on the client thread. Not {@code getSpriteAsync}: it tries again every
+ * frame for as long as the sprite is missing, which would never end for a
+ * sprite the game does not have. Here a sprite that is not loaded yet is tried
+ * a limited number of times and then given up (the uploader's timeout skips it).
  */
 @Singleton
 public class ClientIconImages implements IconImages
 {
+	/** Client frames one sprite is tried for (about two seconds). */
+	static final int SPRITE_ATTEMPTS = 100;
+
 	private final ItemManager itemManager;
+	private final SpriteManager spriteManager;
+	private final ClientThread clientThread;
 
 	@Inject
-	ClientIconImages(ItemManager itemManager)
+	ClientIconImages(ItemManager itemManager, SpriteManager spriteManager, ClientThread clientThread)
 	{
 		this.itemManager = itemManager;
+		this.spriteManager = spriteManager;
+		this.clientThread = clientThread;
 	}
 
 	@Override
@@ -40,5 +55,30 @@ public class ClientIconImages implements IconImages
 		{
 			image.onLoaded(() -> onLoaded.accept(image));
 		}
+	}
+
+	@Override
+	public void loadSprite(int spriteId, Consumer<BufferedImage> onLoaded)
+	{
+		int[] attempts = {0};
+		// Returning false runs it again on the next client frame.
+		clientThread.invoke(() ->
+		{
+			BufferedImage image;
+			try
+			{
+				image = spriteManager.getSprite(spriteId, 0);
+			}
+			catch (RuntimeException e)
+			{
+				return true;
+			}
+			if (image == null)
+			{
+				return ++attempts[0] >= SPRITE_ATTEMPTS;
+			}
+			onLoaded.accept(image);
+			return true;
+		});
 	}
 }

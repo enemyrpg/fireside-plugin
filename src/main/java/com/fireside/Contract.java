@@ -10,7 +10,7 @@ package com.fireside;
 public final class Contract
 {
 	/** Version of the pinned contract package the tests validate against. */
-	public static final String PINNED_VERSION = "1.27.0";
+	public static final String PINNED_VERSION = "1.29.0";
 
 	/**
 	 * Lowest server contract version the plugin sends events to. A server that
@@ -45,6 +45,13 @@ public final class Contract
 	 * server gets no pet drops.
 	 */
 	public static final String PETS_VERSION = "1.27.0";
+
+	/**
+	 * Lowest server contract version with icons for skills and bosses/raids
+	 * (10.12). An older server gets no icon import (collection log, skills and
+	 * bosses); item icons from events still work from {@link #ICONS_VERSION}.
+	 */
+	public static final String NAMED_ICONS_VERSION = "1.29.0";
 
 	private Contract()
 	{

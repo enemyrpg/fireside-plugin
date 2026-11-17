@@ -10,6 +10,22 @@
         "minimum": 0,
         "maximum": 9007199254740991
       }
+    },
+    "missingSkills": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 100,
+        "pattern": "^[A-Z][A-Z0-9_]*$"
+      }
+    },
+    "missingBosses": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 100,
+        "pattern": "^\\S(?:.*\\S)?$"
+      }
     }
   },
   "required": [

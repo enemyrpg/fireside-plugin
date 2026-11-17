@@ -68,6 +68,13 @@ database. The plugin asks the server which icons it lacks and uploads only
 those, at a lower priority than your data. A server too old for icons still
 gets all your data.
 
+After you log in, the plugin also checks the icons of every collection log
+item, every skill and every boss and raid on the hiscores, so the dashboard
+can show things your account has not had yet. The first login uploads what
+the server lacks (about 1,800 small images, spread over a minute or so); later
+logins only ask and upload nothing. These icons need a server with contract
+1.29.0 or newer.
+
 ## Queue and sending
 Events are written to a queue on disk first and sent in batches: every 30
 seconds, when 50 events are waiting, at logout, and when you press **Send

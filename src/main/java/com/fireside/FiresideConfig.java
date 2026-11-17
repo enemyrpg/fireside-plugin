@@ -170,7 +170,8 @@ public interface FiresideConfig extends Config
 	@ConfigItem(
 		keyName = UPLOAD_ICONS_KEY,
 		name = "Upload item icons",
-		description = "Upload the icons of items in your loot, so the dashboard can show them. "
+		description = "Upload the icons of items in your loot and bank, and once the icons of the whole "
+			+ "collection log, all skills and all bosses, so the dashboard can show them. "
 			+ "Sent only to your own server above.",
 		position = 7,
 		section = dataSection

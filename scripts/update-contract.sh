@@ -68,4 +68,4 @@ mkdir -p "$(dirname "$target")"
 cp -R "$src" "$target"
 
 echo "Pinned contract $version in ${target#"$root"/}"
-echo "Remember to update Contract.PINNED_VERSION (and REQUIRED_VERSION or ICONS_VERSION if the plugin now needs this version)."
+echo "Remember to update Contract.PINNED_VERSION (and REQUIRED_VERSION or ICONS_VERSION or NAMED_ICONS_VERSION if the plugin now needs this version)."

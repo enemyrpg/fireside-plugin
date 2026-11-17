@@ -1,0 +1,32 @@
+{
+  "stored": [4151],
+  "unchanged": [],
+  "rejected": [
+    {
+      "index": 3,
+      "itemId": null,
+      "kind": "BOSS",
+      "key": "Zulrah",
+      "error": "key: Duplicate key in request"
+    },
+    {
+      "index": 4,
+      "itemId": null,
+      "kind": null,
+      "key": null,
+      "error": "kind: Invalid input: expected \"BOSS\""
+    }
+  ],
+  "storedNamed": [
+    {
+      "kind": "SKILL",
+      "key": "ATTACK"
+    }
+  ],
+  "unchangedNamed": [
+    {
+      "kind": "BOSS",
+      "key": "Zulrah"
+    }
+  ]
+}

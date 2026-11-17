@@ -1,5 +1,5 @@
 {
-  "contractVersion": "1.27.0",
+  "contractVersion": "1.29.0",
   "eventSchemaVersion": 1,
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "schemas": [
@@ -22,6 +22,7 @@
     "schema/api/external-sources-response.json",
     "schema/api/gains-response.json",
     "schema/api/health-response.json",
+    "schema/api/icons-status-response.json",
     "schema/api/ingest-icon.json",
     "schema/api/ingest-icons-request.json",
     "schema/api/ingest-icons-response.json",
@@ -74,6 +75,7 @@
   },
   "notes": [
     "schema/api/ingest-request.json does not check the events in a batch. Validate each event against schema/event.json.",
-    "schema/api/ingest-icons-request.json does not check the icons in a request. Validate each icon against schema/api/ingest-icon.json. The PNG structure (IHDR, at most 64x64, CRCs, IEND, no APNG) is only checked by the server; see the invalid-semantic fixtures of ingest-icon."
+    "schema/api/ingest-icons-request.json does not check the icons in a request. Validate each icon against schema/api/ingest-icon.json. The PNG structure (IHDR, at most 64x64, CRCs, IEND, no APNG) is only checked by the server; see the invalid-semantic fixtures of ingest-icon.",
+    "schema/api/ingest-icon.json: an icon without \"kind\" is an item icon. \"kind\" SKILL or BOSS with \"key\" needs server contract 1.29.0 or newer, and so do \"skills\" and \"bosses\" in ingest-icons-wanted-request.json; an older server rejects them."
   ]
 }
