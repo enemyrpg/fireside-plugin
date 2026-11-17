@@ -7,5 +7,9 @@
   "playtime": null,
   "xp": null,
   "loot": null,
-  "kc": null
+  "kc": null,
+  "pets": null,
+  "bank": null,
+  "collectionLog": null,
+  "quests": null
 }
