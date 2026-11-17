@@ -138,12 +138,49 @@ public class RaidMessageParserTest
 		assertEquals(Raids.Group.FRACTURED_ARCHIVE, purple.getPurple().getGroup());
 	}
 
+	/** The two wordings seen in game on 16 and 17 November 2026, with their split colour tags. */
+	@Test
+	public void fracturedArchiveWillFindWordingForATeammate()
+	{
+		RaidMessageParser.PurpleMessage purple = RaidMessageParser.parsePurple(
+			"<col=ff0000>K1NG DK</col> will find something special: <col=ff0000>Rondache</col>", me("Canvasba"));
+		assertEquals(Raids.Group.FRACTURED_ARCHIVE, purple.getPurple().getGroup());
+		assertEquals("Rondache", purple.getPurple().getName());
+		assertEquals(Recipient.TEAMMATE, purple.getRecipient());
+		assertEquals("Only the name goes to the check", "K1NG DK", namesSeen.get(0));
+	}
+
+	@Test
+	public void fracturedArchiveFoundWordingWithSplitColourTags()
+	{
+		RaidMessageParser.PurpleMessage mine = RaidMessageParser.parsePurple(
+			"<col=ef1020>Canvasba</col> found something special: <col=ef1020>Rondache</col>", me("Canvasba"));
+		assertEquals(Raids.Group.FRACTURED_ARCHIVE, mine.getPurple().getGroup());
+		assertEquals(Recipient.SELF, mine.getRecipient());
+
+		RaidMessageParser.PurpleMessage tome = RaidMessageParser.parsePurple(
+			"<col=ef1020>K1NG DK</col> found something special: <col=ef1020>Zorya's tome (uncharged)</col>",
+			me("Canvasba"));
+		assertEquals("Zorya's tome (uncharged)", tome.getPurple().getName());
+		assertEquals(Recipient.TEAMMATE, tome.getRecipient());
+	}
+
+	@Test
+	public void recipientComesFromTheNameNotTheWording()
+	{
+		RaidMessageParser.PurpleMessage purple = RaidMessageParser.parsePurple(
+			"<col=ff0000>Canvasba</col> will find something special: <col=ff0000>Rondache</col>", me("Canvasba"));
+		assertEquals(Recipient.SELF, purple.getRecipient());
+	}
+
 	@Test
 	public void notPurples()
 	{
 		Predicate<String> me = me("Canvasba");
 		assertNull("Pet", RaidMessageParser.parsePurple("Canvasba found something special: Lil' Zik", me));
 		assertNull("Pet", RaidMessageParser.parsePurple("Canvasba found something special: Tumeken's guardian", me));
+		assertNull("Pet in the will find wording", RaidMessageParser.parsePurple(
+			"<col=ff0000>K1NG DK</col> will find something special: <col=ff0000>Lil' Zik</col>", me));
 		assertNull(RaidMessageParser.parsePurple(COX_OLD_PB_3, me));
 		assertNull(RaidMessageParser.parsePurple("<col=ef20ff>Special loot:</col>", me));
 		assertNull(RaidMessageParser.parsePurple("Twisted Kit recipients: Canvasba", me));

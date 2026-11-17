@@ -4,8 +4,10 @@ import com.fireside.event.EventPayload;
 import com.fireside.event.RaidSpecialLoot;
 import com.fireside.loot.ItemLookup;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
@@ -46,12 +48,22 @@ public class RaidTracker
 		final CompletedRaid raid;
 		final int tick;
 		boolean chestClaimed;
+		/** Purples already sent for this raid; the game may announce one drop twice. */
+		final Set<SentPurple> sentPurples = new HashSet<>();
 
 		Remembered(CompletedRaid raid, int tick)
 		{
 			this.raid = raid;
 			this.tick = tick;
 		}
+	}
+
+	/** What identifies a purple within one raid. Holds no name. */
+	@Value
+	private static class SentPurple
+	{
+		int itemId;
+		RaidSpecialLoot.Recipient recipient;
 	}
 
 	@Value
@@ -231,6 +243,13 @@ public class RaidTracker
 	{
 		if (!purplesEnabled.getAsBoolean())
 		{
+			return;
+		}
+		// Known limit: two teammates getting the same item in one raid count as one purple.
+		if (current != null && current.raid == raid
+			&& !current.sentPurples.add(new SentPurple(purple.item.getItemId(), purple.recipient)))
+		{
+			log.debug("Skipped a raid purple that was already sent for this raid");
 			return;
 		}
 		log.debug("Raid purple for {}", purple.recipient);

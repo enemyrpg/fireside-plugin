@@ -339,6 +339,90 @@ public class RaidTrackerTest
 		assertEquals(new Loot(LootSource.event("Fractured Archive"), CHEST, 3), onlyLoot());
 	}
 
+	private static String willFind(String name, String item)
+	{
+		return "<col=ff0000>" + name + "</col> will find something special: <col=ff0000>" + item + "</col>";
+	}
+
+	private static String found(String name, String item)
+	{
+		return "<col=ef1020>" + name + "</col> found something special: <col=ef1020>" + item + "</col>";
+	}
+
+	@Test
+	public void fracturedArchiveTeammatePurpleInTheWillFindWording()
+	{
+		view.tfa = 2;
+		fracturedArchive(156);
+		game(willFind(TEAMMATE, "Rondache"), 188);
+		List<RaidSpecialLoot> purples = of(RaidSpecialLoot.class);
+		assertEquals(1, purples.size());
+		assertEquals(RaidSpecialLoot.builder().raid("Fractured Archive")
+			.item(new RaidSpecialLoot.Item(Raids.purple("Rondache").getItemId(), "Rondache", 1, 40_000_000))
+			.recipient(Recipient.TEAMMATE).teamSize(2).killCount(156).build(), purples.get(0));
+	}
+
+	@Test
+	public void fracturedArchiveMyPurpleIsSentOnce()
+	{
+		view.tfa = 2;
+		fracturedArchive(153);
+		game(found(ME, "Rondache"), 183);
+		List<RaidSpecialLoot> purples = of(RaidSpecialLoot.class);
+		assertEquals(1, purples.size());
+		assertEquals(Recipient.SELF, purples.get(0).getRecipient());
+	}
+
+	@Test
+	public void willFindFollowedByFoundIsOnePurple()
+	{
+		view.tfa = 2;
+		fracturedArchive(156);
+		game(willFind(TEAMMATE, "Rondache"), 188);
+		game(found(TEAMMATE, "Rondache"), 230);
+		assertEquals(1, of(RaidSpecialLoot.class).size());
+	}
+
+	@Test
+	public void differentItemsOrRecipientsInOneRaidAreSeparatePurples()
+	{
+		view.tfa = 2;
+		fracturedArchive(156);
+		game(willFind(TEAMMATE, "Rondache"), 188);
+		game(found(TEAMMATE, "Zorya's tome (uncharged)"), 190);
+		game(found(ME, "Rondache"), 192);
+		List<RaidSpecialLoot> purples = of(RaidSpecialLoot.class);
+		assertEquals(3, purples.size());
+		assertEquals("Rondache", purples.get(0).getItem().getName());
+		assertEquals("Zorya's tome (uncharged)", purples.get(1).getItem().getName());
+		assertEquals(Recipient.SELF, purples.get(2).getRecipient());
+	}
+
+	@Test
+	public void duplicateGuardIsClearedByTheNextRaid()
+	{
+		view.tfa = 2;
+		fracturedArchive(156);
+		game(willFind(TEAMMATE, "Rondache"), 188);
+		game(kc("Fractured Archive", 157), 900);
+		tracker.onTick(901);
+		game(found(TEAMMATE, "Rondache"), 960);
+		List<RaidSpecialLoot> purples = of(RaidSpecialLoot.class);
+		assertEquals(2, purples.size());
+		assertEquals(Integer.valueOf(156), purples.get(0).getKillCount());
+		assertEquals(Integer.valueOf(157), purples.get(1).getKillCount());
+	}
+
+	@Test
+	public void bothWordingsBeforeTheKillCountAreOnePurple()
+	{
+		view.tfa = 2;
+		game(willFind(TEAMMATE, "Rondache"), 99);
+		game(found(TEAMMATE, "Rondache"), 99);
+		fracturedArchive(156);
+		assertEquals(1, of(RaidSpecialLoot.class).size());
+	}
+
 	// Chest without a known mode
 
 	@Test

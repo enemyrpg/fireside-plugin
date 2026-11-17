@@ -59,9 +59,13 @@ public final class RaidMessageParser
 
 	/** CoX: "Name - Item". */
 	private static final Pattern COX_PURPLE = Pattern.compile("^(?<name>.+?) - (?<item>.+?)\\.?$");
-	/** ToB and ToA (and maybe The Fractured Archive): "Name found something special: Item". */
+	/**
+	 * ToB, ToA and The Fractured Archive: "Name found something special: Item".
+	 * The Fractured Archive also has "Name will find something special: Item";
+	 * one drop may be announced with both wordings.
+	 */
 	private static final Pattern FOUND_SPECIAL = Pattern.compile(
-		"^(?<name>.+?) found something special: (?<item>.+?)\\.?$");
+		"^(?<name>.+?) (?:found|will find) something special: (?<item>.+?)\\.?$");
 
 	/** Jagex display names are 1–12 characters. */
 	private static final int MAX_NAME_LENGTH = 12;
