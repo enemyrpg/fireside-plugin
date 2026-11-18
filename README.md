@@ -1,29 +1,61 @@
 # Fireside – RuneLite plugin
 
-A RuneLite plugin that collects data from Old School RuneScape (XP, loot, kill
-counts, raids, bank, quests, diaries, pets, sessions, AFK time and world info) and sends
-it to your own
-self-hosted [Fireside server](https://github.com/enemyrpg/fireside).
-Nothing is sent anywhere until you configure a server URL and API key.
+A RuneLite plugin that collects your own data from Old School RuneScape (XP,
+loot, kill counts, raids, bank, quests, diaries, pets, sessions, AFK time and
+world info) and sends it to a self-hosted Fireside server, which shows it on
+your own dashboard.
 
-This plugin is in early development.
+Nothing is sent anywhere until you set a server URL and an API key and turn
+on **Send data**. Data is only sent to a server you or someone you trust runs.
+
+> **Status:** the Fireside server is not public yet. Until it is, the plugin
+> is only useful if someone has given you access to their server. Without a
+> server, the plugin does nothing.
+
+## What is sent, and where
+Everything goes to the server URL you enter, and nowhere else. There is no
+central Fireside service and no telemetry. Like any web request, the server
+can see your IP address.
+
+- **Account:** RuneLite's account hash (to tell your accounts apart), display
+  name, account type (e.g. ironman), world and the plugin version.
+- **Sessions:** login, logout and world hops, a heartbeat every minute with
+  region, world type and whether you are idle, and AFK periods.
+- **XP:** XP and level per skill at login, at logout and every 5 minutes if
+  it changed.
+- **Loot and kill counts:** the source, items and prices from RuneLite's Loot
+  Tracker, kill counts, kill times and personal bests, and raid purples.
+- **Bank, quests, diaries and pets:** see **Data** below.
+- **Icons:** item, skill and boss icons from your own client, so the
+  dashboard can show them.
+
+Never sent: other players' names (loot from players has no name, and a raid
+purple is only "you" or "a teammate"), the text of chat messages, and your
+Jagex password or login. Fireside never asks for them.
+
+## Installation
+Install **Fireside** from the Plugin Hub in RuneLite (the wrench icon →
+**Plugin Hub**, search for "Fireside").
 
 ## Configuration
-1. In your dashboard, create an API key under **Settings → API keys**.
+1. In your Fireside dashboard, create an API key under **Settings → API
+   keys**. On a server run by someone else, the admin may create it for you.
 2. In the plugin settings, set **Server URL** to the server's base address,
-   e.g. `http://127.0.0.1:3000` (without `/api/v1`), and paste the **API key**.
+   e.g. `http://127.0.0.1:3100` for a server on your own PC, or the address
+   you were given (without `/api/v1`), and paste the **API key**.
 3. Turn on **Send data**. It is off by default, and nothing is sent until the
    server URL and API key are set. Data is only sent to the server you set up.
 4. Open the plugin's side panel. The plugin checks the connection by itself
    (at start-up, a couple of seconds after you change the settings, and at
    login), and every answer from the server updates the status: **Connected**
    with the time of the last contact, **retrying** while the server can't be
-   reached, or what is wrong (invalid API key, wrong server URL, server too
+   reached, **Server busy** when it asks the plugin to wait, or what is wrong (invalid API key, wrong server URL, server too
    old). It also warns if your clock is more than a minute off, or if the key
    would be sent unencrypted (plain `http` to another machine). Press
    **Test connection** to check again at once.
 
-Under **Data** you can turn off XP, loot, kill counts, raid purples, bank,
+## Data
+Under **Data** in the settings you can turn off XP, loot, kill counts, raid purples, bank,
 quests and diaries, and pets.
 **Kill counts** also covers raid PBs: when you open The Fractured Archive's
 records table yourself, your own PBs per team size are sent. The plugin
@@ -99,60 +131,6 @@ wrong server URL). The panel says why. Fix the setting, or press **Test
 connection** once it works, and sending resumes. If the server is older than
 the plugin needs, events stay queued until the server is updated.
 
-## Development
-Requires JDK 11. If your default Java is not 11, add
-`org.gradle.java.home=/path/to/jdk-11` to `~/.gradle/gradle.properties`.
-
-```sh
-./gradlew build         # build and run tests
-./gradlew run           # start RuneLite with the plugin (-ea --developer-mode --debug)
-./gradlew runIsolated   # the same, with a separate RuneLite folder (see below)
-```
-
-**IntelliJ:** open the project as a Gradle project and set the project SDK to
-11. Pick one of the shared run configurations (from `.run/`) and click Run or
-Debug. They pass the same flags as the Gradle tasks. Do not use the ▶ next to
-`main()` in `FiresidePluginTest`; that starts the client without the flags.
-
-**Logging in:** log in with your Jagex account from the development client's
-login screen. See
-[Using Jagex Accounts](https://github.com/runelite/runelite/wiki/Using-Jagex-Accounts).
-
-**Two run modes.** RuneLite keeps everything in `<user.home>/.runelite/`:
-settings and profiles for all plugins, the plugin's data folder and queue,
-logs and the game cache.
-
-| Gradle task | IntelliJ | RuneLite folder |
-| --- | --- | --- |
-| `./gradlew run` | **RuneLite (dev)** | `~/.runelite/` |
-| `./gradlew runIsolated` | **RuneLite (dev, isolated)** | `~/.runelite-fireside-dev/.runelite/` |
-
-The isolated mode starts Java with `-Duser.home=~/.runelite-fireside-dev`, so
-its Fireside settings (server URL, API key) and queue
-(`~/.runelite-fireside-dev/.runelite/plugin-data/fireside/queue/`) are
-completely separate. Use it to point a branch build at a development server
-while another client sends to your real server. Trade-offs:
-- You log in again in the isolated client; it has its own session.
-- Every other plugin starts with default settings. Copy `profiles2/` from
-  `~/.runelite/` if you want them.
-- The game cache is downloaded again on first start.
-- If you log in to a RuneLite account there, a synced profile brings its
-  settings (including Fireside's) along. Do not sync the profile you use in
-  the isolated client.
-
-A client started from a launcher such as Bolt may use yet another RuneLite
-folder, so its settings and queue are separate too. Do not log in with the
-same character in two clients at the same time.
-
-**Contract:** the event and API contract from the server repo is pinned in
-`src/test/resources/contract/`, and tests validate against it. Update it with
-`./scripts/update-contract.sh <version>` (needs `gh`), then update
-`Contract.REQUIRED_VERSION`.
-
-**Icons:** `icon.png` (Plugin Hub) and the side panel icon are rendered from
-`assets/logo/fireside.svg` with `./scripts/render-icons.sh` (needs
-`rsvg-convert`). See `assets/logo/README.md`.
-
 ## Disclaimer
 Created using intellectual property belonging to Jagex Limited under the terms
 of Jagex's Fan Content Policy. This content is not endorsed by or affiliated
@@ -160,3 +138,5 @@ with Jagex.
 
 ## License
 [BSD 2-Clause](LICENSE)
+
+Building the plugin yourself: see [CONTRIBUTING.md](CONTRIBUTING.md).
