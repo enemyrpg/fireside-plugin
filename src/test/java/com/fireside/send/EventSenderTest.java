@@ -18,7 +18,6 @@ import com.fireside.event.Kc;
 import com.fireside.event.UuidV7Generator;
 import com.fireside.net.IngestClient;
 import com.fireside.net.VerifyClient;
-import com.fireside.net.VerifyResult;
 import com.fireside.queue.EventQueue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -33,7 +32,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -120,7 +118,7 @@ public class EventSenderTest
 		EventSender s = new EventSender(executor, queue, json, new IngestClient(http, RuneLiteAPI.GSON),
 			new VerifyClient(http, RuneLiteAPI.GSON),
 			new Backoff(Duration.ofMillis(40), Duration.ofMillis(200), new Random(1)),
-			Clock.systemUTC(), Duration.ofHours(1), statuses::add);
+			Clock.systemUTC(), Duration.ofHours(1), Duration.ofMillis(50), statuses::add);
 		s.start(initial);
 		return s;
 	}
@@ -129,6 +127,13 @@ public class EventSenderTest
 	{
 		sender = newSender(settings);
 		sender.flush().get();
+		if (settings.isEnabled() && settings.isConfigured())
+		{
+			// The start-up check, so it does not race with the events a test submits.
+			await("start-up check", s -> !s.getConnection().isChecking()
+				&& (s.getConnection().getLastContactAt() != null || s.getConnection().getConsecutiveFailures() > 0
+				|| s.getState() == SenderStatus.State.STOPPED || s.getState() == SenderStatus.State.HELD));
+		}
 		return sender;
 	}
 
@@ -185,13 +190,6 @@ public class EventSenderTest
 	{
 		Path file = queueDir().resolve(EventQueue.PENDING_FILE);
 		return Files.exists(file) ? Files.readAllLines(file, StandardCharsets.UTF_8) : Collections.emptyList();
-	}
-
-	private VerifyResult testConnection(String url, String key) throws Exception
-	{
-		CompletableFuture<VerifyResult> result = new CompletableFuture<>();
-		new VerifyClient(http, RuneLiteAPI.GSON).verify(url, key, result::complete);
-		return result.get(10, TimeUnit.SECONDS);
 	}
 
 	// ---- 200 ------------------------------------------------------------------
@@ -252,7 +250,10 @@ public class EventSenderTest
 		sender.sendNow();
 		awaitEmptyQueue();
 		List<Integer> sizes = server.batches.stream().map(b -> b.eventIds.size()).collect(Collectors.toList());
-		assertEquals(Arrays.asList(500, 500, 201), sizes);
+		// The threshold may send a first small batch while the events are still being submitted.
+		assertTrue(sizes.toString(), sizes.stream().allMatch(n -> n <= EventSender.MAX_BATCH_EVENTS));
+		assertEquals(1201, sizes.stream().mapToInt(Integer::intValue).sum());
+		assertTrue(sizes.toString(), sizes.stream().filter(n -> n == EventSender.MAX_BATCH_EVENTS).count() >= 2);
 		assertEquals(submitted, server.stored);
 		for (FakeIngestServer.Batch b : server.batches)
 		{
@@ -392,11 +393,14 @@ public class EventSenderTest
 		assertTrue(stopped.getDetail().contains("404"));
 
 		// A failed test does not resume sending.
-		sender.onConnectionTested(testConnection(server.url(), "wrong_key"));
-		sender.flush().get();
+		int verifies = server.verifyCalls;
+		server.verifyOverride = new MockResponse().setResponseCode(503);
+		sender.testConnection();
+		await("test done", s -> server.verifyCalls == verifies + 1 && !s.getConnection().isManualCheck());
 		assertEquals(SenderStatus.State.STOPPED, sender.getStatus().getState());
 
-		sender.onConnectionTested(testConnection(server.url(), FakeIngestServer.KEY));
+		server.verifyOverride = null;
+		sender.testConnection();
 		awaitEmptyQueue();
 		assertEquals(2, server.stored.size());
 	}

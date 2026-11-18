@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.fireside.send.ConnectionStatus;
 import com.fireside.send.SenderStatus;
 import com.fireside.send.SenderStatus.State;
 import com.fireside.send.SenderStatus.StopReason;
@@ -19,7 +20,7 @@ public class QueueViewTest
 
 	private static SenderStatus status(State state, int queued, long rejected, @Nullable StopReason stop)
 	{
-		return new SenderStatus(state, queued, rejected, null, 0, null, null, stop, null, null);
+		return new SenderStatus(state, queued, rejected, null, 0, null, null, stop, null, null, ConnectionStatus.NONE);
 	}
 
 	private static QueueView view(SenderStatus status)
@@ -46,7 +47,7 @@ public class QueueViewTest
 		assertFalse(url.isSendNowEnabled());
 
 		QueueView redirect = view(new SenderStatus(State.STOPPED, 1, 0, null, 0, null,
-			"The server redirected (HTTP 301) to https://x/.", StopReason.REDIRECT, null, null));
+			"The server redirected (HTTP 301) to https://x/.", StopReason.REDIRECT, null, null, ConnectionStatus.NONE));
 		assertTrue(redirect.getMessage().startsWith("The server redirected (HTTP 301)"));
 		assertTrue(redirect.getMessage().contains("Test connection"));
 	}
@@ -92,7 +93,7 @@ public class QueueViewTest
 	public void retryingShowsWhenAndWhy()
 	{
 		QueueView v = view(new SenderStatus(State.RETRYING, 4, 0, null, 0, AT, "The server had an error (HTTP 503).",
-			null, null, null));
+			null, null, null, ConnectionStatus.NONE));
 		assertEquals(StatusView.Level.WARNING, v.getLevel());
 		assertEquals("Retrying at 18:04:12", v.getTitle());
 		assertTrue(v.getMessage().startsWith("The server had an error (HTTP 503)."));
@@ -102,7 +103,7 @@ public class QueueViewTest
 	@Test
 	public void heldNamesBothVersions()
 	{
-		QueueView v = view(new SenderStatus(State.HELD, 4, 0, null, 0, null, null, null, "1.12.0", null));
+		QueueView v = view(new SenderStatus(State.HELD, 4, 0, null, 0, null, null, null, "1.12.0", null, ConnectionStatus.NONE));
 		assertTrue(v.getMessage(), v.getMessage().contains("1.12.0"));
 		assertTrue(v.getMessage(), v.getMessage().contains(com.fireside.Contract.REQUIRED_VERSION));
 		assertTrue(v.getMessage().contains("kept"));
@@ -112,7 +113,7 @@ public class QueueViewTest
 	public void lastSentAndStorageError()
 	{
 		QueueView v = view(new SenderStatus(State.IDLE, 0, 0, AT, 42, null, null, null, null,
-			"Can't write the event queue (IOException: disk full)."));
+			"Can't write the event queue (IOException: disk full).", ConnectionStatus.NONE));
 		assertEquals("18:04:12 (42)", v.getLastSent());
 		assertTrue(v.getWarnings().get(0).startsWith("Can't write the event queue"));
 		assertEquals("–", view(status(State.IDLE, 0, 0, null)).getLastSent());

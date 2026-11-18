@@ -50,10 +50,19 @@ public final class VerifyResult
 	private final Duration clockSkew;
 	private final boolean contractTooOld;
 	private final List<String> warnings;
+	@Nullable
+	private final Duration retryAfter;
 
 	private VerifyResult(Outcome outcome, String message, @Nullable VerifyResponse response,
 		@Nullable Duration clockSkew, boolean contractTooOld, List<String> warnings)
 	{
+		this(outcome, message, response, clockSkew, contractTooOld, warnings, null);
+	}
+
+	private VerifyResult(Outcome outcome, String message, @Nullable VerifyResponse response,
+		@Nullable Duration clockSkew, boolean contractTooOld, List<String> warnings, @Nullable Duration retryAfter)
+	{
+		this.retryAfter = retryAfter;
 		this.outcome = outcome;
 		this.message = message;
 		this.response = response;
@@ -65,6 +74,12 @@ public final class VerifyResult
 	private static VerifyResult error(Outcome outcome, String message)
 	{
 		return new VerifyResult(outcome, message, null, null, false, Collections.emptyList());
+	}
+
+	private static VerifyResult error(Outcome outcome, String message, @Nullable Long retryAfterSeconds)
+	{
+		return new VerifyResult(outcome, message, null, null, false, Collections.emptyList(),
+			retryAfterSeconds != null ? Duration.ofSeconds(retryAfterSeconds) : null);
 	}
 
 	static VerifyResult notConfigured()
@@ -137,12 +152,12 @@ public final class VerifyResult
 			Long seconds = parseRetryAfter(retryAfter);
 			return error(Outcome.RATE_LIMITED, seconds != null
 				? "Too many requests (HTTP 429). Try again in " + seconds + " s."
-				: "Too many requests (HTTP 429). Try again in a minute.");
+				: "Too many requests (HTTP 429). Try again in a minute.", seconds);
 		}
 		if (code >= 500 && code <= 599)
 		{
 			return error(Outcome.SERVER_ERROR,
-				"The server had an error (HTTP " + code + "). Check the server log.");
+				"The server had an error (HTTP " + code + "). Check the server log.", parseRetryAfter(retryAfter));
 		}
 		if (code >= 300 && code <= 399)
 		{
@@ -266,5 +281,12 @@ public final class VerifyResult
 	public List<String> getWarnings()
 	{
 		return warnings;
+	}
+
+	/** From {@code Retry-After} on a 429 or 5xx, or null. */
+	@Nullable
+	public Duration getRetryAfter()
+	{
+		return retryAfter;
 	}
 }

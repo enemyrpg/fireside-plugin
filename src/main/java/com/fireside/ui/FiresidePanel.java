@@ -9,10 +9,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.time.Instant;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -37,7 +36,6 @@ public class FiresidePanel extends PluginPanel
 	private static final int SECTION_PADDING = 8;
 	/** Text width inside a section, used for wrapping before the first layout. */
 	private static final int TEXT_WIDTH = PANEL_WIDTH - 2 * OUTER_PADDING - 2 * SECTION_PADDING;
-	private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
 
 	private static final Color OK_COLOR = new Color(0x5C, 0xC4, 0x5C);
 	private static final Color WARNING_COLOR = new Color(0xF2, 0xB1, 0x34);
@@ -52,7 +50,7 @@ public class FiresidePanel extends PluginPanel
 	private final JLabel keyValue = valueLabel();
 	private final JLabel serverVersionValue = valueLabel();
 	private final JLabel serverContractValue = valueLabel();
-	private final JLabel lastTestValue = valueLabel();
+	private final JLabel lastContactValue = valueLabel();
 
 	private final JButton testButton = new JButton("Test connection");
 	private final JButton dashboardButton = new JButton("Open dashboard");
@@ -121,7 +119,7 @@ public class FiresidePanel extends PluginPanel
 		details.add(row("Server version", serverVersionValue));
 		details.add(row("Server contract", serverContractValue));
 		details.add(row("Plugin needs", valueLabel(Contract.REQUIRED_VERSION)));
-		details.add(row("Last test", lastTestValue));
+		details.add(row("Last contact", lastContactValue));
 		content.add(left(details));
 		content.add(Box.createVerticalStrut(8));
 
@@ -173,16 +171,14 @@ public class FiresidePanel extends PluginPanel
 	 * Updates everything shown in the panel.
 	 *
 	 * @param serverUrl          the configured URL as typed, or null if not set
-	 * @param response           details from the last successful test, if any
-	 * @param testedAt           when the last test finished, if any
+	 * @param response           details from the last successful {@code verify}, if any
+	 * @param lastContact        "12 s ago", or "–"
 	 * @param dashboardAvailable true when the URL is valid
 	 */
 	public void render(StatusView view, @Nullable String serverUrl, boolean sendingEnabled,
-		@Nullable VerifyResponse response, @Nullable Instant testedAt, boolean testing, boolean dashboardAvailable)
+		@Nullable VerifyResponse response, String lastContact, boolean testing, boolean dashboardAvailable)
 	{
-		statusTitle.setText(view.getTitle());
-		statusTitle.setForeground(color(view.getLevel()));
-		statusMessage.setText(view.getMessage());
+		updateTimeText(view, lastContact);
 
 		showWarnings(warningsPanel, view.getWarnings());
 
@@ -191,7 +187,6 @@ public class FiresidePanel extends PluginPanel
 		setTruncated(keyValue, response != null ? response.getKeyName() : "–");
 		serverVersionValue.setText(response != null ? response.getServerVersion() : "–");
 		serverContractValue.setText(response != null ? response.getContractVersion().toString() : "–");
-		lastTestValue.setText(testedAt != null ? TIME.format(testedAt) : "–");
 
 		testButton.setEnabled(!testing);
 		testButton.setText(testing ? "Testing…" : "Test connection");
@@ -199,6 +194,39 @@ public class FiresidePanel extends PluginPanel
 
 		revalidate();
 		repaint();
+	}
+
+	/**
+	 * Every second: only the status line and "Last contact", and only what
+	 * changed. Never rebuilds the panel.
+	 */
+	public void updateTimeText(StatusView view, String lastContact)
+	{
+		boolean changed = false;
+		if (!Objects.equals(statusTitle.getText(), view.getTitle()))
+		{
+			statusTitle.setText(view.getTitle());
+			changed = true;
+		}
+		Color color = color(view.getLevel());
+		if (!color.equals(statusTitle.getForeground()))
+		{
+			statusTitle.setForeground(color);
+		}
+		if (!Objects.equals(statusMessage.getText(), view.getMessage()))
+		{
+			statusMessage.setText(view.getMessage());
+			changed = true;
+		}
+		if (!Objects.equals(lastContactValue.getText(), lastContact))
+		{
+			lastContactValue.setText(lastContact);
+		}
+		if (changed)
+		{
+			// A new line of text can change the height.
+			revalidate();
+		}
 	}
 
 	/** Updates the queue section. */
