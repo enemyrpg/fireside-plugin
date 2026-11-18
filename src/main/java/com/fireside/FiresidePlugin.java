@@ -19,11 +19,11 @@ import com.fireside.loot.ClientItemLookup;
 import com.fireside.loot.KillTracker;
 import com.fireside.loot.LootMapper;
 import com.fireside.net.IconClient;
+import com.fireside.net.IconResult;
 import com.fireside.net.IngestClient;
 import com.fireside.net.SemVer;
 import com.fireside.net.ServerUrl;
 import com.fireside.net.VerifyClient;
-import com.fireside.net.VerifyResult;
 import com.fireside.pet.ClientPetView;
 import com.fireside.pet.PetTracker;
 import com.fireside.queue.EventQueue;
@@ -34,6 +34,7 @@ import com.fireside.raid.ClientTfaRecordsView;
 import com.fireside.raid.RaidTracker;
 import com.fireside.raid.TfaRecordsReader;
 import com.fireside.send.Backoff;
+import com.fireside.send.ConnectionStatus;
 import com.fireside.send.EventSender;
 import com.fireside.send.SenderSettings;
 import com.fireside.send.SenderStatus;
@@ -53,6 +54,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
@@ -79,7 +81,6 @@ import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.util.Filepath;
 import net.runelite.client.util.LinkBrowser;
-import okhttp3.Call;
 
 @Slf4j
 @PluginDescriptor(
@@ -91,6 +92,8 @@ import okhttp3.Call;
 public class FiresidePlugin extends Plugin
 {
 	private static final SemVer NAMED_ICONS_VERSION = SemVer.parse(Contract.NAMED_ICONS_VERSION);
+	/** How often "Last contact: 12 s ago" is redrawn (no network calls). */
+	private static final int CLOCK_TICK_MS = 1000;
 
 	@Inject
 	private FiresideConfig config;
@@ -185,16 +188,16 @@ public class FiresidePlugin extends Plugin
 	private volatile SemVer serverContract;
 	/** Whether RuneLite's Loot Tracker (which posts {@code LootReceived}) is running. */
 	private volatile boolean lootTrackerActive;
+	/** True from the login screen (or a lost connection) until the next LOGGED_IN. Client thread. */
+	private boolean awaitingLogin;
 
 	// Panel state below is only touched on the Swing event dispatch thread.
 	private FiresidePanel panel;
 	private NavigationButton navigationButton;
-	private Call pendingTest;
-	/** Bumped when a test starts or the URL/key changes, so stale results are dropped. */
-	private int testGeneration;
-	private boolean testing;
-	private VerifyResult lastResult;
-	private Instant lastTestedAt;
+	/** The sender's latest status. */
+	private SenderStatus senderStatus = SenderStatus.STARTING_STATUS;
+	/** Redraws the status line and "Last contact" every second. */
+	private Timer clockTimer;
 
 	@Override
 	protected void startUp() throws Exception
@@ -213,7 +216,7 @@ public class FiresidePlugin extends Plugin
 		EventQueue queue = new EventQueue(queueDir, gson, Clock.systemUTC());
 		sender = new EventSender(executor, queue, eventJson, ingestClient, verifyClient,
 			new Backoff(Backoff.DEFAULT_BASE, Backoff.DEFAULT_MAX, new SecureRandom()), Clock.systemUTC(),
-			EventSender.SEND_INTERVAL, status -> SwingUtilities.invokeLater(() -> renderQueue(status)));
+			EventSender.SEND_INTERVAL, status -> SwingUtilities.invokeLater(() -> onSenderStatus(status)));
 		iconExecutor = new ScheduledThreadPoolExecutor(1, r ->
 		{
 			Thread thread = new Thread(r, Branding.DISPLAY_NAME + " icons");
@@ -227,6 +230,15 @@ public class FiresidePlugin extends Plugin
 			IconUploader.Timing.DEFAULT);
 		icons.updateSettings(senderSettings(), config.uploadIcons());
 		IconUploader contractIcons = icons;
+		EventSender contactSink = sender;
+		icons.setContactListener(kind ->
+		{
+			// 401 and 404 from the icon endpoints say nothing new: verify and ingest report those.
+			if (kind == IconResult.Kind.OK || kind == IconResult.Kind.RATE_LIMITED || kind == IconResult.Kind.FAILED)
+			{
+				contactSink.onIconContact(kind == IconResult.Kind.OK, kind == IconResult.Kind.RATE_LIMITED);
+			}
+		});
 		iconImporter = new IconImporter(iconGameData, contractIcons::importAll, this::iconImportAllowed,
 			System::nanoTime);
 		sender.setContractListener(version ->
@@ -286,6 +298,8 @@ public class FiresidePlugin extends Plugin
 		clientThread.invoke(() ->
 		{
 			tracker.onGameState(client.getGameState());
+			// Started at the login screen: the next login checks the connection.
+			awaitingLogin = client.getGameState() != GameState.LOGGED_IN;
 			tracker.setEnabled(config.sendingEnabled());
 			IconImporter importer = iconImporter;
 			if (importer != null && client.getGameState() == GameState.LOGGED_IN)
@@ -305,10 +319,14 @@ public class FiresidePlugin extends Plugin
 		clientToolbar.addNavigation(navigationButton);
 		SwingUtilities.invokeLater(() ->
 		{
-			refreshPanel();
 			if (sender != null)
 			{
-				renderQueue(sender.getStatus());
+				onSenderStatus(sender.getStatus());
+			}
+			if (panel != null && clockTimer == null)
+			{
+				clockTimer = new Timer(CLOCK_TICK_MS, e -> tickPanel());
+				clockTimer.start();
 			}
 		});
 		log.debug("{} started", Branding.DISPLAY_NAME);
@@ -361,9 +379,12 @@ public class FiresidePlugin extends Plugin
 		clientToolbar.removeNavigation(navigationButton);
 		SwingUtilities.invokeLater(() ->
 		{
-			resetTest();
-			lastResult = null;
-			lastTestedAt = null;
+			if (clockTimer != null)
+			{
+				clockTimer.stop();
+				clockTimer = null;
+			}
+			senderStatus = SenderStatus.STARTING_STATUS;
 			panel = null;
 		});
 		navigationButton = null;
@@ -415,17 +436,7 @@ public class FiresidePlugin extends Plugin
 			// Another server: check its icons once, without waiting for the next login.
 			importer.onConnectionChanged();
 		}
-		SwingUtilities.invokeLater(() ->
-		{
-			if (connectionChanged)
-			{
-				// An old result says nothing about the new URL or key.
-				resetTest();
-				lastResult = null;
-				lastTestedAt = null;
-			}
-			refreshPanel();
-		});
+		SwingUtilities.invokeLater(this::refreshPanel);
 	}
 
 	/** Ends the session and makes sure every queued event is on disk. Never waits for the network. */
@@ -462,6 +473,20 @@ public class FiresidePlugin extends Plugin
 	public void onGameStateChanged(GameStateChanged event)
 	{
 		GameState state = event.getGameState();
+		if (state == GameState.LOGIN_SCREEN || state == GameState.LOGIN_SCREEN_AUTHENTICATOR
+			|| state == GameState.CONNECTION_LOST)
+		{
+			awaitingLogin = true;
+		}
+		else if (state == GameState.LOGGED_IN && awaitingLogin)
+		{
+			// A real login, not a world hop or a region load (LOADING -> LOGGED_IN).
+			awaitingLogin = false;
+			if (sender != null)
+			{
+				sender.onLogin();
+			}
+		}
 		IconImporter importer = iconImporter;
 		if (importer != null)
 		{
@@ -688,52 +713,23 @@ public class FiresidePlugin extends Plugin
 		}
 	}
 
-	private void renderQueue(SenderStatus status)
+	/** A new status from the sender, on the EDT. */
+	private void onSenderStatus(SenderStatus status)
 	{
+		senderStatus = status;
 		if (panel != null)
 		{
 			panel.renderQueue(QueueView.compute(status, ZoneId.systemDefault()));
 		}
+		refreshPanel();
 	}
 
-	/** "Test connection" button, on the EDT. The request itself runs on OkHttp's threads. */
+	/** "Test connection" button, on the EDT. The sender runs the request on its executor and OkHttp's threads. */
 	private void testConnection()
 	{
-		resetTest();
-		int generation = testGeneration;
-		testing = true;
-		refreshPanel();
-		pendingTest = verifyClient.verify(config.serverUrl(), config.apiKey(),
-			result -> SwingUtilities.invokeLater(() -> onTestFinished(generation, result)));
-	}
-
-	private void onTestFinished(int generation, VerifyResult result)
-	{
-		if (panel == null || generation != testGeneration)
-		{
-			return;
-		}
-		log.debug("Connection test result: {}", result.getOutcome());
-		testing = false;
-		pendingTest = null;
 		if (sender != null)
 		{
-			// Success resumes stopped sending and updates the contract check.
-			sender.onConnectionTested(result);
-		}
-		lastResult = result;
-		lastTestedAt = Instant.now();
-		refreshPanel();
-	}
-
-	private void resetTest()
-	{
-		testGeneration++;
-		testing = false;
-		if (pendingTest != null)
-		{
-			pendingTest.cancel();
-			pendingTest = null;
+			sender.testConnection();
 		}
 	}
 
@@ -753,11 +749,28 @@ public class FiresidePlugin extends Plugin
 			return;
 		}
 		String url = config.serverUrl();
-		StatusView view = StatusView.compute(url, config.apiKey(), testing, lastResult,
-			config.sendLoot() && !lootTrackerActive, bankStatus);
-		panel.render(view, url, config.sendingEnabled(),
-			lastResult != null ? lastResult.getResponse() : null,
-			lastTestedAt, testing, ServerUrl.parse(url) != null);
+		Instant now = Instant.now();
+		ConnectionStatus connection = senderStatus.getConnection();
+		panel.render(statusView(now), url, config.sendingEnabled(), connection.getVerifyResponse(),
+			StatusView.ago(connection.getLastContactAt(), now), connection.isManualCheck(),
+			ServerUrl.parse(url) != null);
+	}
+
+	/** Every second, on the EDT: only the time-dependent text, without rebuilding the panel. */
+	private void tickPanel()
+	{
+		if (panel == null)
+		{
+			return;
+		}
+		Instant now = Instant.now();
+		panel.updateTimeText(statusView(now), StatusView.ago(senderStatus.getConnection().getLastContactAt(), now));
+	}
+
+	private StatusView statusView(Instant now)
+	{
+		return StatusView.compute(config.serverUrl(), config.apiKey(), config.sendingEnabled(), senderStatus, now,
+			ZoneId.systemDefault(), config.sendLoot() && !lootTrackerActive, bankStatus);
 	}
 
 	@Provides

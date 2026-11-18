@@ -64,6 +64,17 @@ import okhttp3.Call;
  * Before the first batch, the server's contract version is checked with
  * {@code verify}. If it is too old, the queue is held (not sent, not moved to
  * the error log) and checked again every {@link #HELD_RECHECK}.
+ * <p>
+ * <b>Connection status.</b> Every answer from the server updates a
+ * {@link ConnectionStatus} ({@link SenderStatus#getConnection()}), and
+ * {@code verify} also runs on its own, even with an empty queue: at start-up,
+ * {@link #CHECK_DEBOUNCE} after the URL, key or "Send data" changes, at login
+ * ({@link #onLogin}) and on "Test connection" ({@link #testConnection}). A
+ * temporary failure is retried with the same backoff as events, so while the
+ * server is down it is checked at least every 5 minutes. After 401, 404 or a
+ * redirect nothing is checked until the config changes or "Test connection"
+ * succeeds. There is no polling while connected: heartbeats confirm the
+ * connection during play.
  */
 @Slf4j
 public class EventSender
@@ -74,6 +85,8 @@ public class EventSender
 	/** Under the server's 1 MiB body limit, with room to spare. */
 	public static final long MAX_BATCH_BYTES = 1_000_000;
 	public static final Duration HELD_RECHECK = Duration.ofMinutes(5);
+	/** From the last change of URL, key or "Send data" to the automatic {@code verify}. */
+	public static final Duration CHECK_DEBOUNCE = Duration.ofSeconds(2);
 
 	private enum Contract
 	{
@@ -90,6 +103,7 @@ public class EventSender
 	private final Backoff backoff;
 	private final Clock clock;
 	private final Duration sendInterval;
+	private final Duration checkDebounce;
 	private final Consumer<SenderStatus> listener;
 
 	private volatile SenderStatus status = SenderStatus.STARTING_STATUS;
@@ -113,6 +127,19 @@ public class EventSender
 	private boolean verifying;
 	@Nullable
 	private Call call;
+
+	private final ConnectionState connection = new ConnectionState();
+	/** A {@code verify} is due (start-up, config change, login, or one that failed and is retried). */
+	private boolean checkWanted;
+	/** "Test connection" was pressed and its {@code verify} has not started yet. */
+	private boolean manualWanted;
+	/** The {@code verify} in flight is (also) a "Test connection". */
+	private boolean manualRunning;
+	/** Until then nothing is sent or checked, so quick config changes give one {@code verify}. */
+	@Nullable
+	private Instant checkNotBefore;
+	@Nullable
+	private ScheduledFuture<?> debounceFuture;
 
 	private Contract contract = Contract.UNKNOWN;
 	@Nullable
@@ -147,6 +174,17 @@ public class EventSender
 	public EventSender(ScheduledExecutorService executor, EventQueue queue, EventJson json, IngestClient ingest,
 		VerifyClient verifier, Backoff backoff, Clock clock, Duration sendInterval, Consumer<SenderStatus> listener)
 	{
+		this(executor, queue, json, ingest, verifier, backoff, clock, sendInterval, CHECK_DEBOUNCE, listener);
+	}
+
+	/**
+	 * @param checkDebounce wait after a config change before the {@code verify}
+	 * @param listener      gets a new status after every change, on the executor
+	 */
+	public EventSender(ScheduledExecutorService executor, EventQueue queue, EventJson json, IngestClient ingest,
+		VerifyClient verifier, Backoff backoff, Clock clock, Duration sendInterval, Duration checkDebounce,
+		Consumer<SenderStatus> listener)
+	{
 		this.executor = executor;
 		this.queue = queue;
 		this.json = json;
@@ -155,6 +193,7 @@ public class EventSender
 		this.backoff = backoff;
 		this.clock = clock;
 		this.sendInterval = sendInterval;
+		this.checkDebounce = checkDebounce;
 		this.listener = listener;
 	}
 
@@ -177,6 +216,7 @@ public class EventSender
 		post(() ->
 		{
 			settings = initial;
+			checkWanted = true;
 			openQueue();
 			long interval = sendInterval.toMillis();
 			tickFuture = executor.scheduleWithFixedDelay(() -> safely(() -> trySend(false)), interval, interval,
@@ -233,29 +273,71 @@ public class EventSender
 		post(() -> trySend(false));
 	}
 
-	/** Result of the panel's "Test connection". Success clears a stop and updates the contract check. */
-	public void onConnectionTested(VerifyResult result)
+	/**
+	 * "Test connection": a {@code verify} now (after the request in flight, if
+	 * any), also while sending is stopped. Success clears a stop and updates
+	 * the contract check. Does nothing while sending is off or the URL or key
+	 * is missing: nothing is sent then.
+	 */
+	public void testConnection()
 	{
 		post(() ->
 		{
-			switch (result.getOutcome())
+			if (closed || !settings.isEnabled() || !settings.isConfigured())
 			{
-				case OK:
-					stopReason = null;
-					stopDetail = null;
-					storeVerified(result);
-					clearRetry();
-					backoff.reset();
-					trySend(false);
-					break;
-				case UNAUTHORIZED:
-					stop(SenderStatus.StopReason.UNAUTHORIZED, result.getMessage());
-					break;
-				case NOT_FOUND:
-					stop(SenderStatus.StopReason.NOT_FOUND, result.getMessage());
-					break;
-				default:
-					break;
+				return;
+			}
+			clearRetry();
+			if (busy && verifying)
+			{
+				// The verify in flight answers the test too.
+				manualRunning = true;
+			}
+			else
+			{
+				manualWanted = true;
+				trySend(true);
+			}
+			publish();
+		});
+	}
+
+	/** At login: checks the connection once (not on world hops or region loads; the caller filters those). */
+	public void onLogin()
+	{
+		post(() ->
+		{
+			if (checkWanted || (busy && verifying))
+			{
+				return;
+			}
+			checkWanted = true;
+			trySend(false);
+			publish();
+		});
+	}
+
+	/**
+	 * An answer from an icon endpoint (another thread): {@code ok} for a
+	 * successful one, otherwise a temporary failure (network, 5xx, 429). Only
+	 * updates the connection status; icons have their own retries.
+	 */
+	public void onIconContact(boolean ok, boolean rateLimited)
+	{
+		post(() ->
+		{
+			if (closed || !settings.isEnabled() || !settings.isConfigured())
+			{
+				return;
+			}
+			if (ok)
+			{
+				connection.success(clock.instant());
+			}
+			else
+			{
+				connection.failure(rateLimited ? "Too many requests (HTTP 429)." : "An icon request failed.",
+					rateLimited);
 			}
 			publish();
 		});
@@ -289,6 +371,8 @@ public class EventSender
 			closed = true;
 			cancel(tickFuture);
 			tickFuture = null;
+			cancel(debounceFuture);
+			debounceFuture = null;
 			clearRetry();
 			cancelInFlight();
 		});
@@ -362,28 +446,71 @@ public class EventSender
 			clearRetry();
 			backoff.reset();
 			batchEventLimit = MAX_BATCH_EVENTS;
+			connection.reset();
+		}
+		if (connectionChanged || (newSettings.isEnabled() && !old.isEnabled()))
+		{
+			checkWanted = true;
+			debounceCheck();
 		}
 		trySend(false);
 		publish();
 	}
 
+	/** Holds checks and sending for {@link #checkDebounce}; every new change starts the wait again. */
+	private void debounceCheck()
+	{
+		checkNotBefore = clock.instant().plus(checkDebounce);
+		cancel(debounceFuture);
+		debounceFuture = executor.schedule(() -> safely(() ->
+		{
+			debounceFuture = null;
+			checkNotBefore = null;
+			trySend(false);
+			publish();
+		}), checkDebounce.toMillis(), TimeUnit.MILLISECONDS);
+	}
+
 	private void trySend(boolean manual)
 	{
-		if (closed || !queueOpen || busy || stopReason != null
-			|| !settings.isEnabled() || !settings.isConfigured())
+		if (closed || !queueOpen || busy)
+		{
+			return;
+		}
+		if (!settings.isEnabled() || !settings.isConfigured())
+		{
+			return;
+		}
+		if (manualWanted)
+		{
+			// "Test connection" also works while stopped.
+			startVerify(true);
+			return;
+		}
+		if (stopReason != null)
 		{
 			return;
 		}
 		Instant now = clock.instant();
+		if (checkNotBefore != null && now.isBefore(checkNotBefore))
+		{
+			return;
+		}
 		if (!manual && retryAt != null && now.isBefore(retryAt))
 		{
+			return;
+		}
+		if (checkWanted && (contract != Contract.OK || queue.size() == 0))
+		{
+			// With a known contract and events to send, the batch checks the connection just as well.
+			startVerify(false);
 			return;
 		}
 		if (contract == Contract.TOO_OLD)
 		{
 			if (manual || heldRecheckAt == null || !now.isBefore(heldRecheckAt))
 			{
-				startVerify();
+				startVerify(false);
 			}
 			return;
 		}
@@ -393,7 +520,7 @@ public class EventSender
 		}
 		if (contract == Contract.UNKNOWN)
 		{
-			startVerify();
+			startVerify(false);
 			return;
 		}
 		List<QueuedEvent> batch;
@@ -413,11 +540,13 @@ public class EventSender
 		}
 	}
 
-	private void startVerify()
+	private void startVerify(boolean manual)
 	{
 		int gen = generation;
 		busy = true;
 		verifying = true;
+		manualWanted = false;
+		manualRunning = manual;
 		publish();
 		try
 		{
@@ -439,9 +568,21 @@ public class EventSender
 		busy = false;
 		verifying = false;
 		call = null;
+		manualRunning = false;
 		switch (result.getOutcome())
 		{
 			case OK:
+				connection.verified(clock.instant(), result);
+				checkWanted = false;
+				if (stopReason != null)
+				{
+					log.debug("Connection test succeeded; sending resumes");
+				}
+				// Only a "Test connection" runs while stopped; its success resumes sending.
+				stopReason = null;
+				stopDetail = null;
+				clearRetry();
+				backoff.reset();
 				storeVerified(result);
 				if (contract == Contract.OK)
 				{
@@ -449,9 +590,11 @@ public class EventSender
 				}
 				break;
 			case UNAUTHORIZED:
+				checkWanted = false;
 				stop(SenderStatus.StopReason.UNAUTHORIZED, result.getMessage());
 				break;
 			case NOT_FOUND:
+				checkWanted = false;
 				stop(SenderStatus.StopReason.NOT_FOUND, result.getMessage());
 				break;
 			case NOT_CONFIGURED:
@@ -460,10 +603,25 @@ public class EventSender
 				// Shown as "not configured"; checked again when the config changes.
 				break;
 			default:
-				scheduleRetry(result.getMessage(), null);
+				connection.failure(result.getMessage(), result.getOutcome() == VerifyResult.Outcome.RATE_LIMITED);
+				if (stopReason == null)
+				{
+					// Checked again after the backoff, also with an empty queue.
+					checkWanted = true;
+					scheduleRetry(result.getMessage(), result.getRetryAfter());
+				}
 				break;
 		}
 		publish();
+	}
+
+	/** A "Test connection" pressed while a batch was in flight runs now. */
+	private void runPendingTest()
+	{
+		if (manualWanted)
+		{
+			trySend(true);
+		}
 	}
 
 	private void storeVerified(VerifyResult result)
@@ -519,6 +677,7 @@ public class EventSender
 		log.warn("Could not start a request", e);
 		busy = false;
 		verifying = false;
+		manualRunning = false;
 		call = null;
 		scheduleRetry("Could not start a request (" + e.getClass().getSimpleName() + ").", null);
 		publish();
@@ -542,11 +701,14 @@ public class EventSender
 			boolean progress = confirm(batch, result.getResponse());
 			if (!stale)
 			{
+				connection.success(clock.instant());
+				checkWanted = false;
 				if (progress)
 				{
 					backoff.reset();
 					clearRetry();
-					if (backlog > 0)
+					// Also when the threshold was reached while the request was in flight.
+					if (backlog > 0 || queue.size() >= SEND_THRESHOLD)
 					{
 						trySend(false);
 					}
@@ -555,6 +717,7 @@ public class EventSender
 				{
 					scheduleRetry("The server did not confirm any of the events.", null);
 				}
+				runPendingTest();
 			}
 			publish();
 			return;
@@ -562,6 +725,17 @@ public class EventSender
 		if (stale)
 		{
 			return;
+		}
+		if (result.getKind() == IngestResult.Kind.BAD_REQUEST || result.getKind() == IngestResult.Kind.TOO_LARGE)
+		{
+			// The server checks the key before it reads the body, so these prove the connection works.
+			connection.success(clock.instant());
+			checkWanted = false;
+		}
+		else if (result.getKind() == IngestResult.Kind.TEMPORARY)
+		{
+			Integer code = result.getHttpStatus();
+			connection.failure(result.getMessage(), code != null && code == 429);
 		}
 		switch (result.getKind())
 		{
@@ -597,6 +771,7 @@ public class EventSender
 				scheduleRetry(result.getMessage(), result.getRetryAfter());
 				break;
 		}
+		runPendingTest();
 		publish();
 	}
 
@@ -721,6 +896,9 @@ public class EventSender
 		generation++;
 		busy = false;
 		verifying = false;
+		// A "Test connection" for the old settings (or while turning sending off) is dropped.
+		manualWanted = false;
+		manualRunning = false;
 		if (call != null)
 		{
 			call.cancel();
@@ -776,7 +954,8 @@ public class EventSender
 			queueOpen ? queue.rejectedCount() : 0, lastSentAt, lastSentCount,
 			state == SenderStatus.State.RETRYING ? retryAt : null, detail,
 			state == SenderStatus.State.STOPPED ? stopReason : null,
-			contract == Contract.TOO_OLD ? serverContract : null, storageError);
+			contract == Contract.TOO_OLD ? serverContract : null, storageError,
+			connection.snapshot(busy, manualWanted || manualRunning, retryAt));
 		if (!next.equals(status))
 		{
 			status = next;

@@ -36,7 +36,7 @@ public class SenderStatus
 	}
 
 	public static final SenderStatus STARTING_STATUS = new SenderStatus(State.STARTING, 0, 0, null, 0, null,
-		null, null, null, null);
+		null, null, null, null, ConnectionStatus.NONE);
 
 	State state;
 	int queueSize;
@@ -59,4 +59,6 @@ public class SenderStatus
 	/** Set when the queue could not be written to or read from disk. */
 	@Nullable
 	String storageError;
+	/** The connection to the server, for the panel's status line. */
+	ConnectionStatus connection;
 }

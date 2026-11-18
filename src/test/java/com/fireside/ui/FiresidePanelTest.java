@@ -46,6 +46,54 @@ public class FiresidePanelTest
 		assertEquals(false, path[0].isEditable());
 	}
 
+	@Test
+	public void clockTickOnlyChangesTheStatusTextAndLastContact() throws Exception
+	{
+		SwingUtilities.invokeAndWait(() ->
+		{
+			FiresidePanel panel = new FiresidePanel(() -> {}, () -> {}, () -> {}, FOLDER);
+			StatusView first = StatusView.forTest(StatusView.Level.OK, "Connected", "Last contact: 1 s ago.",
+				java.util.Collections.singletonList("A warning"));
+			panel.render(first, "http://127.0.0.1:3000", true, null, "1 s ago", false, true);
+			List<String> labels = new ArrayList<>();
+			walk(panel, c ->
+			{
+				if (c instanceof javax.swing.JLabel)
+				{
+					labels.add(((javax.swing.JLabel) c).getText());
+				}
+			});
+			assertTrue(labels.toString(), labels.contains("Last contact"));
+			assertTrue(labels.toString(), labels.contains("1 s ago"));
+			assertTrue(labels.toString(), !labels.contains("Last test"));
+
+			List<Component> before = new ArrayList<>();
+			walk(panel, before::add);
+			StatusView later = StatusView.forTest(StatusView.Level.WARNING, "Can't reach the server – retrying",
+				"Down.", java.util.Collections.singletonList("A warning"));
+			panel.updateTimeText(later, "2 min ago");
+			List<Component> after = new ArrayList<>();
+			walk(panel, after::add);
+			// Same components: nothing was rebuilt.
+			assertEquals(before, after);
+			List<String> texts = new ArrayList<>();
+			walk(panel, c ->
+			{
+				if (c instanceof javax.swing.JLabel)
+				{
+					texts.add(((javax.swing.JLabel) c).getText());
+				}
+				if (c instanceof JTextComponent)
+				{
+					texts.add(((JTextComponent) c).getText());
+				}
+			});
+			assertTrue(texts.toString(), texts.contains("Can't reach the server – retrying"));
+			assertTrue(texts.toString(), texts.contains("Down."));
+			assertTrue(texts.toString(), texts.contains("2 min ago"));
+		});
+	}
+
 	private interface Visitor
 	{
 		void visit(Component c);

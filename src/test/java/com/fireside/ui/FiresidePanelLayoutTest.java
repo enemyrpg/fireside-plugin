@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.gson.Gson;
 import com.fireside.net.VerifyResponse;
+import com.fireside.send.ConnectionStatus;
 import com.fireside.send.SenderStatus;
 import java.awt.Component;
 import java.awt.Container;
@@ -45,8 +46,8 @@ public class FiresidePanelLayoutTest
 			VerifyResponse response = VerifyResponse.parse(new Gson(),
 				"{\"ok\":true,\"keyName\":\"My very long development client key name\",\"serverVersion\":\"0.1.0\","
 					+ "\"contractVersion\":\"1.12.0\",\"serverTime\":\"2026-11-13T18:00:00.000Z\"}");
-			StatusView view = StatusView.compute("http://192.168.100.200:3100/some/long/prefix", "k", false, null);
-			List<String> warnings = new ArrayList<>(view.getWarnings());
+			List<String> warnings = new ArrayList<>();
+			warnings.add(StatusView.INSECURE_WARNING);
 			warnings.add("Your computer's clock is 2 min 0 s ahead of the server's. Turn on automatic time sync "
 				+ "(NTP) on both machines, or sessions may be closed too early.");
 			warnings.add("The server is too old (contract 1.12.0, this plugin needs 1.13.0). Update the server. "
@@ -55,12 +56,13 @@ public class FiresidePanelLayoutTest
 				"Connected as key \"My very long development client key name\". Server 0.1.0, contract 1.12.0.",
 				warnings);
 			panel.render(connected, "http://192.168.100.200:3100/some/long/prefix", true, response,
-				Instant.parse("2026-11-13T18:00:00Z"), false, true);
+				"12 s ago", false, true);
 			panel.renderQueue(QueueView.compute(new SenderStatus(SenderStatus.State.STOPPED, 123_456, 1_234,
 				Instant.parse("2026-11-13T18:00:00Z"), 500, null, "ignored",
 				SenderStatus.StopReason.NOT_FOUND, null,
 				"Can't write the event queue (FileSystemException: /home/someone/.runelite/plugin-data/fireside/"
-					+ "queue/pending.jsonl: No space left on device)."), java.time.ZoneOffset.UTC));
+					+ "queue/pending.jsonl: No space left on device).", ConnectionStatus.NONE),
+				java.time.ZoneOffset.UTC));
 
 			Container root = panel.getWrappedPanel();
 			root.setSize(SIDEBAR_WIDTH, 1200);

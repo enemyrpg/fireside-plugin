@@ -15,6 +15,7 @@ import com.fireside.event.LootItem;
 import com.fireside.event.LootSource;
 import com.fireside.event.UuidV7Generator;
 import com.fireside.net.IconClient;
+import com.fireside.net.IconResult;
 import com.fireside.net.IconKey;
 import com.fireside.net.SemVer;
 import com.fireside.send.Backoff;
@@ -460,6 +461,25 @@ public class IconUploaderTest
 		executor.submit(() ->
 		{
 		}).get(WAIT.toMillis(), TimeUnit.MILLISECONDS);
+	}
+
+	@Test
+	public void everyAnswerIsReportedForTheConnectionStatus() throws Exception
+	{
+		LinkedBlockingQueue<IconResult.Kind> contacts = new LinkedBlockingQueue<>();
+		server.stored.add(1);
+		server.script.add(r -> new MockResponse().setResponseCode(503));
+		server.script.add(r -> new MockResponse().setResponseCode(429).setHeader("Retry-After", "0"));
+		IconUploader u = new IconUploader(executor, new IconClient(new OkHttpClient(), RuneLiteAPI.GSON), images,
+			new Backoff(Duration.ofMillis(40), Duration.ofMillis(200), new Random(1)), Clock.systemUTC(), FAST);
+		u.setContactListener(contacts::add);
+		uploader = u;
+		u.updateSettings(settings, true);
+		u.onServerContract(SemVer.parse("1.18.0"));
+		u.collect(loot(1));
+		assertEquals(IconResult.Kind.FAILED, contacts.poll(WAIT.toMillis(), TimeUnit.MILLISECONDS));
+		assertEquals(IconResult.Kind.RATE_LIMITED, contacts.poll(WAIT.toMillis(), TimeUnit.MILLISECONDS));
+		assertEquals(IconResult.Kind.OK, contacts.poll(WAIT.toMillis(), TimeUnit.MILLISECONDS));
 	}
 
 	@Test

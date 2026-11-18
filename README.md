@@ -12,12 +12,16 @@ This plugin is in early development.
 1. In your dashboard, create an API key under **Settings → API keys**.
 2. In the plugin settings, set **Server URL** to the server's base address,
    e.g. `http://127.0.0.1:3000` (without `/api/v1`), and paste the **API key**.
-3. Open the plugin's side panel and press **Test connection**. It shows
-   whether the server answers and the key works, and warns if your clock is
-   more than a minute off, if the server is too old for the plugin, or if
-   the key would be sent unencrypted (plain `http` to another machine).
-4. Turn on **Send data**. It is off by default, and nothing is sent until the
+3. Turn on **Send data**. It is off by default, and nothing is sent until the
    server URL and API key are set. Data is only sent to the server you set up.
+4. Open the plugin's side panel. The plugin checks the connection by itself
+   (at start-up, a couple of seconds after you change the settings, and at
+   login), and every answer from the server updates the status: **Connected**
+   with the time of the last contact, **retrying** while the server can't be
+   reached, or what is wrong (invalid API key, wrong server URL, server too
+   old). It also warns if your clock is more than a minute off, or if the key
+   would be sent unencrypted (plain `http` to another machine). Press
+   **Test connection** to check again at once.
 
 Under **Data** you can turn off XP, loot, kill counts, raid purples, bank,
 quests and diaries, and pets.

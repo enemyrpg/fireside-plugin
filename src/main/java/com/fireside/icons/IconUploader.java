@@ -30,6 +30,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -143,6 +144,10 @@ public class IconUploader
 	private final Backoff backoff;
 	private final Clock clock;
 	private final Timing timing;
+	/** Told the kind of every icon answer, for the connection status. */
+	private volatile Consumer<IconResult.Kind> contactListener = kind ->
+	{
+	};
 
 	// Everything below is only touched on the executor.
 	private SenderSettings settings = SenderSettings.OFF;
@@ -209,6 +214,15 @@ public class IconUploader
 	}
 
 	// ---- Public API: thread-safe, never blocks --------------------------------
+
+	/**
+	 * Gets the kind of every answer from an icon endpoint (for the connection
+	 * status), on the icon thread. Must not block. Set it before use.
+	 */
+	public void setContactListener(Consumer<IconResult.Kind> listener)
+	{
+		contactListener = listener;
+	}
 
 	/** The connection and whether icons are on ("Send data" and "Upload item icons"). */
 	public void updateSettings(SenderSettings newSettings, boolean uploadIcons)
@@ -550,6 +564,7 @@ public class IconUploader
 			return;
 		}
 		requestDone();
+		reportContact(result.getKind());
 		if (result.getKind() != IconResult.Kind.OK)
 		{
 			askAgain(keys);
@@ -754,6 +769,7 @@ public class IconUploader
 			return;
 		}
 		requestDone();
+		reportContact(result.getKind());
 		if (result.getKind() == IconResult.Kind.OK)
 		{
 			backoff.reset();
@@ -804,6 +820,18 @@ public class IconUploader
 			default:
 				retryLater(result.getRetryAfter());
 				break;
+		}
+	}
+
+	private void reportContact(IconResult.Kind kind)
+	{
+		try
+		{
+			contactListener.accept(kind);
+		}
+		catch (RuntimeException e)
+		{
+			log.warn("Contact listener failed", e);
 		}
 	}
 
