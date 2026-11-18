@@ -21,7 +21,8 @@ contract package (JSON Schema + fixtures) lives in
 - `./gradlew build` – build and test
 - `./gradlew run` or the shared **RuneLite (dev)** run configuration in
   IntelliJ (`.run/`) – start RuneLite with the plugin in developer mode
-  (`-ea`, `--developer-mode`, `--debug`); see README "Development"
+  (`-ea`, `--developer-mode`, `--debug`); see "Development" in
+  `CONTRIBUTING.md`
 - `./gradlew runIsolated` or **RuneLite (dev, isolated)** – the same with a
   separate RuneLite directory (`user.home` = `~/.runelite-fireside-dev`), so
   config, queue and plugin data are separate from `./gradlew run`
