@@ -24,10 +24,12 @@ import lombok.extern.slf4j.Slf4j;
  * While the table is open it is read once per game tick, unless a tab is
  * still loading. Only {@code ALL_STATS_TABLES} is read, never the party
  * panels (other players' names). The game only builds a tab's section when
- * the tab is opened, so a read may hold fewer records than an earlier one.
- * An event is therefore sent only when a read has a record not yet sent for
- * the account, or a faster one; it holds every record of that read.
- * Covered by the "Kill counts" setting.
+ * the tab is opened, so the records of one opening are collected over many
+ * reads. At most one event is sent per opening (#16): on the tick after the
+ * table closes (a close and reopen in the same tick is one opening), or on
+ * {@link #flush()} (logout, hop, client or plugin shutdown). It is sent only
+ * if the opening has a record not yet sent for the account, or a faster one,
+ * and holds every record of the opening. Covered by the "Kill counts" setting.
  */
 @Slf4j
 public class TfaRecordsReader
@@ -45,6 +47,12 @@ public class TfaRecordsReader
 	private final BooleanSupplier kcEnabled;
 
 	private boolean open;
+	/** The table closed; the opening is sent on the next tick unless it reopens first. */
+	private boolean closing;
+	/** The records of the current opening, lowest time per (scope, team size). */
+	private final Map<Key, PbRecords.Record> pending = new LinkedHashMap<>();
+	/** The account the pending records were read for; null if none. */
+	private Long pendingAccount;
 	/** Per account: the fastest time sent per (scope, team size). In memory only. */
 	private final Map<Long, Map<Key, Double>> sent = new HashMap<>();
 
@@ -65,24 +73,36 @@ public class TfaRecordsReader
 	/** The records table was loaded (opened). */
 	public void onTableOpened()
 	{
+		log.debug("Records table opened");
 		open = true;
+		closing = false;
 	}
 
-	/** The records table was closed. */
+	/** The records table was closed. The opening is sent on the next tick. */
 	public void onTableClosed()
 	{
+		log.debug("Records table closed, {} records collected", pending.size());
 		open = false;
+		closing = true;
 	}
 
-	/** Forgets that the table is open (logout, hop). What was sent is kept. */
+	/** Forgets the current opening (logout, hop). Call {@link #flush()} first to send it. What was sent is kept. */
 	public void reset()
 	{
 		open = false;
+		closing = false;
+		pending.clear();
+		pendingAccount = null;
 	}
 
-	/** Every game tick: reads the open table and sends new records. */
+	/** Every game tick: sends a closed opening, or collects the records of the open table. */
 	public void onTick()
 	{
+		if (closing)
+		{
+			closing = false;
+			flush();
+		}
 		if (!open || !kcEnabled.getAsBoolean() || view.isLoading())
 		{
 			return;
@@ -92,7 +112,39 @@ public class TfaRecordsReader
 		{
 			return;
 		}
-		Map<Key, Double> known = sent.computeIfAbsent(view.accountHash(), account -> new HashMap<>());
+		long account = view.accountHash();
+		if (pendingAccount != null && pendingAccount != account)
+		{
+			// Should not happen while the table is open.
+			flush();
+		}
+		pendingAccount = account;
+		for (PbRecords.Record record : records)
+		{
+			pending.merge(keyOf(record), record, (a, b) -> b.getSeconds() < a.getSeconds() ? b : a);
+		}
+	}
+
+	/**
+	 * Sends the records collected so far, as one event, if any is new or
+	 * faster for the account, and starts a new collection. Without a session
+	 * or with "Kill counts" off they are dropped; the next opening sends them.
+	 */
+	public void flush()
+	{
+		if (pending.isEmpty())
+		{
+			return;
+		}
+		List<PbRecords.Record> records = new ArrayList<>(pending.values());
+		long account = pendingAccount;
+		pending.clear();
+		pendingAccount = null;
+		if (!kcEnabled.getAsBoolean())
+		{
+			return;
+		}
+		Map<Key, Double> known = sent.computeIfAbsent(account, a -> new HashMap<>());
 		boolean anyNew = false;
 		for (PbRecords.Record record : records)
 		{
@@ -105,11 +157,12 @@ public class TfaRecordsReader
 		}
 		if (!anyNew)
 		{
+			log.debug("Records table: nothing new in {} records", records.size());
 			return;
 		}
 		if (!sink.test(new PbRecords(BOSS, records)))
 		{
-			// No session: try again on a later tick.
+			log.debug("Records table: no session, {} records dropped", records.size());
 			return;
 		}
 		log.debug("Records table: sent {} records", records.size());

@@ -136,131 +136,233 @@ public class TfaRecordsReaderTest
 			TfaRecordsReader.parse(Arrays.asList(section("Overall", "1:10.00"), section("Overall", "1:00.00"))));
 	}
 
-	// Reading and sending
+	// Reading and sending: one event per opening
 
-	@Test
-	public void sendsTheRecordsWhenTheTableIsOpen()
+	/** Closes the table; the send happens on the next tick. */
+	private void close()
 	{
-		view.sections = Collections.singletonList(section("Overall", "-", "-", "18:08.40"));
+		reader.onTableClosed();
 		reader.onTick();
-		assertTrue("Nothing is read before the table is open", sent.isEmpty());
+	}
+
+	/** One opening that shows {@code sections}, then closes. */
+	private void openShowAndClose(Section... sections)
+	{
 		reader.onTableOpened();
+		view.sections = Arrays.asList(sections);
 		reader.onTick();
-		assertEquals(Collections.singletonList(new PbRecords("Fractured Archive",
-			Collections.singletonList(record("overall", 3, 1088.4)))), sent);
+		close();
 	}
 
 	@Test
-	public void waitsWhileATabIsLoadingAndStopsWhenClosed()
+	public void sendsTheRecordsWhenTheTableCloses()
+	{
+		view.sections = Collections.singletonList(section("Overall", "-", "-", "18:08.40"));
+		reader.onTick();
+		reader.onTableOpened();
+		reader.onTick();
+		reader.onTick();
+		assertTrue("Nothing is sent while the table is open", sent.isEmpty());
+		reader.onTableClosed();
+		assertTrue("Sent on the tick after the close", sent.isEmpty());
+		reader.onTick();
+		assertEquals(Collections.singletonList(new PbRecords("Fractured Archive",
+			Collections.singletonList(record("overall", 3, 1088.4)))), sent);
+		reader.onTick();
+		assertEquals(1, sent.size());
+	}
+
+	@Test
+	public void clickingThroughAllTabsSendsOneEventWithAllRecords()
+	{
+		reader.onTableOpened();
+		view.sections = Collections.singletonList(section("Overall", "18:08.40"));
+		reader.onTick();
+		// Each tab builds its section after a loading spinner.
+		view.loading = true;
+		view.sections = Arrays.asList(section("Overall", "18:08.40"), section("Ocellus", ""));
+		reader.onTick();
+		view.loading = false;
+		view.sections = Arrays.asList(section("Overall", "18:08.40"), section("Ocellus", "1:45.00"));
+		reader.onTick();
+		view.loading = true;
+		reader.onTick();
+		view.loading = false;
+		view.sections = Arrays.asList(section("Overall", "18:08.40"), section("Ocellus", "1:45.00"),
+			section("Moia", "2:00.00", "1:50.00"));
+		reader.onTick();
+		assertTrue(sent.isEmpty());
+		close();
+		assertEquals(1, sent.size());
+		assertEquals(Arrays.asList(record("overall", 1, 1088.4), record("Ocellus", 1, 105.0),
+			record("Moia", 1, 120.0), record("Moia", 2, 110.0)), records(0));
+	}
+
+	@Test
+	public void keepsRecordsReadEarlierInTheOpening()
+	{
+		// A tab's section may be gone from a later read; what was read stays.
+		reader.onTableOpened();
+		view.sections = Arrays.asList(section("Overall", "18:08.40"), section("Ocellus", "1:45.00"));
+		reader.onTick();
+		view.sections = Collections.singletonList(section("Overall", "18:08.40"));
+		reader.onTick();
+		close();
+		assertEquals(Arrays.asList(record("overall", 1, 1088.4), record("Ocellus", 1, 105.0)), records(0));
+	}
+
+	@Test
+	public void reopeningWithoutChangesSendsNothing()
+	{
+		openShowAndClose(section("Overall", "18:08.40"), section("Ocellus", "1:45.00"));
+		openShowAndClose(section("Overall", "18:08.40"), section("Ocellus", "1:45.00"));
+		// Fewer tabs opened this time.
+		openShowAndClose(section("Overall", "18:08.40"));
+		// A slower value (should not happen) is nothing new.
+		openShowAndClose(section("Overall", "19:00.00"));
+		assertEquals(1, sent.size());
+	}
+
+	@Test
+	public void aFasterTimeOnReopeningSendsOneEvent()
+	{
+		openShowAndClose(section("Overall", "18:08.40"), section("Ocellus", "1:45.00"));
+		reader.onTableOpened();
+		view.sections = Collections.singletonList(section("Overall", "18:00.00"));
+		reader.onTick();
+		view.sections = Arrays.asList(section("Overall", "18:00.00"), section("Ocellus", "1:45.00"));
+		reader.onTick();
+		close();
+		assertEquals(2, sent.size());
+		assertEquals(Arrays.asList(record("overall", 1, 1080.0), record("Ocellus", 1, 105.0)), records(1));
+	}
+
+	@Test
+	public void aTabNotSeenBeforeOnReopeningSendsOneEvent()
+	{
+		openShowAndClose(section("Overall", "18:08.40"));
+		openShowAndClose(section("Overall", "18:08.40"), section("Moia", "2:00.00"));
+		assertEquals(2, sent.size());
+		assertEquals(Arrays.asList(record("overall", 1, 1088.4), record("Moia", 1, 120.0)), records(1));
+	}
+
+	@Test
+	public void closeAndReopenInTheSameTickIsOneOpening()
+	{
+		reader.onTableOpened();
+		view.sections = Collections.singletonList(section("Overall", "18:08.40"));
+		reader.onTick();
+		reader.onTableClosed();
+		reader.onTableOpened();
+		view.sections = Arrays.asList(section("Overall", "18:08.40"), section("Ocellus", "1:45.00"));
+		reader.onTick();
+		assertTrue(sent.isEmpty());
+		close();
+		assertEquals(1, sent.size());
+		assertEquals(2, records(0).size());
+	}
+
+	@Test
+	public void waitsWhileATabIsLoading()
 	{
 		view.sections = Collections.singletonList(section("Overall", "18:08.40"));
 		reader.onTableOpened();
 		view.loading = true;
 		reader.onTick();
-		assertTrue(sent.isEmpty());
-		reader.onTableClosed();
-		view.loading = false;
-		reader.onTick();
+		close();
 		assertTrue(sent.isEmpty());
 	}
 
 	@Test
 	public void sendsNothingWithoutRecords()
 	{
-		view.sections = Collections.singletonList(section("Overall", "-", "-"));
-		reader.onTableOpened();
-		reader.onTick();
+		openShowAndClose(section("Overall", "-", "-"));
 		assertTrue(sent.isEmpty());
-	}
-
-	@Test
-	public void sendsTheSameRecordsOnce()
-	{
-		view.sections = Collections.singletonList(section("Overall", "18:08.40"));
-		reader.onTableOpened();
-		reader.onTick();
-		reader.onTick();
-		reader.onTableClosed();
-		reader.onTableOpened();
-		reader.onTick();
-		assertEquals(1, sent.size());
-	}
-
-	@Test
-	public void sendsAgainOnlyForANewTabOrAFasterTime()
-	{
-		reader.onTableOpened();
-		view.sections = Arrays.asList(section("Overall", "18:08.40"), section("Ocellus", "1:45.00"));
-		reader.onTick();
-		// Reopened: only Overall is built again. Nothing new.
-		view.sections = Collections.singletonList(section("Overall", "18:08.40"));
-		reader.onTick();
-		assertEquals(1, sent.size());
-		// A tab not seen before.
-		view.sections = Arrays.asList(section("Overall", "18:08.40"), section("Moia", "2:00.00"));
-		reader.onTick();
-		assertEquals(2, sent.size());
-		assertEquals(Arrays.asList(record("overall", 1, 1088.4), record("Moia", 1, 120.0)), records(1));
-		// A faster time.
-		view.sections = Collections.singletonList(section("Overall", "18:00.00"));
-		reader.onTick();
-		assertEquals(3, sent.size());
-		assertEquals(Collections.singletonList(record("overall", 1, 1080.0)), records(2));
-		// A slower value (should not happen) is nothing new.
-		view.sections = Collections.singletonList(section("Overall", "19:00.00"));
-		reader.onTick();
-		assertEquals(3, sent.size());
 	}
 
 	@Test
 	public void remembersWhatWasSentPerAccount()
 	{
-		view.sections = Collections.singletonList(section("Overall", "18:08.40"));
-		reader.onTableOpened();
-		reader.onTick();
+		openShowAndClose(section("Overall", "18:08.40"));
 		view.account = ALT;
-		reader.onTick();
+		openShowAndClose(section("Overall", "18:08.40"));
 		view.account = ME;
-		reader.onTick();
+		openShowAndClose(section("Overall", "18:08.40"));
 		assertEquals(2, sent.size());
 	}
 
 	@Test
-	public void sendsNothingWithKillCountsOffAndSendsLaterWhenOn()
+	public void sendsNothingWithKillCountsOffAndSendsAtTheNextOpeningWhenOn()
 	{
-		view.sections = Collections.singletonList(section("Overall", "18:08.40"));
 		reader.onTableOpened();
-		kcEnabled = false;
+		view.sections = Collections.singletonList(section("Overall", "18:08.40"));
 		reader.onTick();
+		kcEnabled = false;
+		close();
+		openShowAndClose(section("Overall", "18:08.40"));
 		assertTrue(sent.isEmpty());
 		kcEnabled = true;
-		reader.onTick();
+		openShowAndClose(section("Overall", "18:08.40"));
 		assertEquals(1, sent.size());
 	}
 
 	@Test
-	public void recordsNotAcceptedOutsideASessionAreSentLater()
+	public void recordsNotAcceptedOutsideASessionAreSentAtTheNextOpening()
 	{
-		view.sections = Collections.singletonList(section("Overall", "18:08.40"));
-		reader.onTableOpened();
 		inSession = false;
-		reader.onTick();
+		openShowAndClose(section("Overall", "18:08.40"));
 		assertTrue(sent.isEmpty());
 		inSession = true;
 		reader.onTick();
+		assertTrue("Not carried over to another session", sent.isEmpty());
+		openShowAndClose(section("Overall", "18:08.40"));
 		assertEquals(1, sent.size());
 	}
 
 	@Test
-	public void resetClosesTheTableButKeepsWhatWasSent()
+	public void logoutOrHopWithTheTableOpenSendsWhatWasCollected()
 	{
-		view.sections = Collections.singletonList(section("Overall", "18:08.40"));
 		reader.onTableOpened();
+		view.sections = Arrays.asList(section("Overall", "18:08.40"), section("Ocellus", "1:45.00"));
 		reader.onTick();
+		// As the plugin does on HOPPING / LOGIN_SCREEN, before the session ends.
+		reader.flush();
+		reader.reset();
+		assertEquals(1, sent.size());
+		assertEquals(2, records(0).size());
+		// A close after the logout, and later ticks, send nothing more.
+		close();
+		reader.onTick();
+		assertEquals(1, sent.size());
+	}
+
+	@Test
+	public void clientShutdownWithTheTableOpenSendsOneEventInTheSession()
+	{
+		reader.onTableOpened();
+		view.sections = Collections.singletonList(section("Overall", "18:08.40"));
+		reader.onTick();
+		// As the plugin does in onClientShutdown, before sessions.onClientShutdown().
+		reader.flush();
+		inSession = false;
+		reader.flush();
+		close();
+		assertEquals(1, sent.size());
+	}
+
+	@Test
+	public void resetForgetsTheOpeningButKeepsWhatWasSent()
+	{
+		openShowAndClose(section("Overall", "18:08.40"));
+		reader.onTableOpened();
+		view.sections = Collections.singletonList(section("Overall", "18:00.00"));
+		reader.onTick();
+		// Reset without a flush drops what was collected.
 		reader.reset();
 		reader.onTick();
-		reader.onTableOpened();
-		reader.onTick();
+		reader.flush();
+		assertEquals(1, sent.size());
+		openShowAndClose(section("Overall", "18:08.40"));
 		assertEquals(1, sent.size());
 	}
 

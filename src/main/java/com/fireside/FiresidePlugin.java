@@ -355,6 +355,10 @@ public class FiresidePlugin extends Plugin
 			stoppingPets.flush();
 		}
 		pets = null;
+		if (tfaRecords != null)
+		{
+			tfaRecords.flush();
+		}
 		serverContract = null;
 		bankStatus = null;
 		// Queues an open AFK period (cached values only, safe off the client thread) before the
@@ -459,6 +463,11 @@ public class FiresidePlugin extends Plugin
 		{
 			petTracker.flush();
 		}
+		if (tfaRecords != null)
+		{
+			// An open records table goes in the session that is ending.
+			tfaRecords.flush();
+		}
 		if (sessions != null)
 		{
 			sessions.onClientShutdown();
@@ -502,6 +511,8 @@ public class FiresidePlugin extends Plugin
 		if (tfaRecords != null && (state == GameState.HOPPING || state == GameState.LOGIN_SCREEN
 			|| state == GameState.LOGIN_SCREEN_AUTHENTICATOR))
 		{
+			// An open records table goes in the session that is ending.
+			tfaRecords.flush();
 			tfaRecords.reset();
 		}
 		BankTracker bankTracker = bank;
