@@ -1,6 +1,7 @@
 {
   "accountId": 1,
   "source": "RUNEPROFILE",
+  "sourceAvailable": true,
   "sync": {
     "status": "NEVER_SYNCED",
     "lastAttemptAt": null,

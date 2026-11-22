@@ -1,0 +1,18 @@
+{
+  "invite": {
+    "id": "K7Q2M4XP",
+    "type": "invite",
+    "label": "For a friend",
+    "role": "member",
+    "canCreateApiKeys": true,
+    "createdBy": { "id": 1, "username": "admin" },
+    "createdAt": "2026-11-18T10:00:00.000Z",
+    "expiresAt": "2026-11-25T10:00:00.000Z",
+    "status": "active",
+    "usedAt": null,
+    "usedBy": null,
+    "revokedAt": null
+  },
+  "url": "https://app.example.com/invite#Q2xhdWRlIG1hZGUgdGhpcyBmaXh0dXJlIHRva2VuIQ",
+  "localOnly": false
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "API: login-response",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "username": {
+              "type": "string",
+              "minLength": 1
+            },
+            "role": {
+              "type": "string",
+              "enum": [
+                "admin",
+                "member"
+              ]
+            },
+            "canCreateApiKeys": {
+              "type": "boolean"
+            },
+            "twoFactorEnabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "username",
+            "role",
+            "canCreateApiKeys",
+            "twoFactorEnabled"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "user"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "twoFactorRequired": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "twoFactorRequired"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

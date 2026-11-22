@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "API: update-server-settings-request",
+  "type": "object",
+  "properties": {
+    "defaultInviteCanCreateApiKeys": {
+      "type": "boolean"
+    },
+    "instanceText": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

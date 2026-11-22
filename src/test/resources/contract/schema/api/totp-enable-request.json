@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "API: totp-enable-request",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "maxLength": 64
+    }
+  },
+  "required": [
+    "code"
+  ],
+  "additionalProperties": false
+}

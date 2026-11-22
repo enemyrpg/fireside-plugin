@@ -10,7 +10,7 @@ import net.runelite.api.GameState;
 
 /**
  * Decides when the icons of the whole collection log, all skills and all
- * bosses/raids are checked against the server (10.12): once per login, and once
+ * bosses/raids are checked against the server: once per login, and once
  * more if the server URL or key changes while logged in. A world hop is not a
  * login.
  * <p>

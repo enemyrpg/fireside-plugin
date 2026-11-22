@@ -1,0 +1,57 @@
+{
+  "invites": [
+    {
+      "id": "K7Q2M4XP",
+      "type": "invite",
+      "label": "For a friend",
+      "role": "member",
+      "canCreateApiKeys": true,
+      "createdBy": { "id": 1, "username": "admin" },
+      "createdAt": "2026-11-18T10:00:00.000Z",
+      "expiresAt": "2026-11-25T10:00:00.000Z",
+      "status": "active",
+      "usedAt": null,
+      "usedBy": null,
+      "revokedAt": null
+    },
+    {
+      "id": "8F3D0A1Z",
+      "type": "invite",
+      "label": null,
+      "role": "admin",
+      "canCreateApiKeys": false,
+      "createdBy": null,
+      "createdAt": "2026-11-10T10:00:00.000Z",
+      "expiresAt": "2026-11-11T10:00:00.000Z",
+      "status": "used",
+      "usedAt": "2026-11-10T11:00:00.000Z",
+      "usedBy": { "id": 3, "username": "kari" },
+      "revokedAt": null
+    },
+    {
+      "id": "9G4E1B2Y",
+      "type": "invite",
+      "label": null,
+      "role": "member",
+      "canCreateApiKeys": true,
+      "createdBy": { "id": 1, "username": "admin" },
+      "createdAt": "2026-11-01T10:00:00.000Z",
+      "expiresAt": "2026-11-02T10:00:00.000Z",
+      "status": "expired",
+      "usedAt": null,
+      "usedBy": null,
+      "revokedAt": null
+    },
+    {
+      "id": "AH5F2C3X",
+      "type": "password_reset",
+      "targetUser": { "id": 2, "username": "ola" },
+      "createdBy": { "id": 1, "username": "admin" },
+      "createdAt": "2026-11-18T08:00:00.000Z",
+      "expiresAt": "2026-11-19T08:00:00.000Z",
+      "status": "revoked",
+      "usedAt": null,
+      "revokedAt": "2026-11-18T09:00:00.000Z"
+    }
+  ]
+}

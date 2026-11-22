@@ -1,0 +1,157 @@
+{
+  "prices": {
+    "source": "CURRENT",
+    "fetchedAt": "2026-11-21T12:00:04.000Z"
+  },
+  "periods": [
+    {
+      "period": "24h",
+      "baselineAt": "2026-11-20T12:00:03.000Z",
+      "change": 8980,
+      "items": [
+        {
+          "kind": "ITEM",
+          "itemId": 27641,
+          "name": "Saturated heart",
+          "quantity": 1,
+          "priceEach": 61090000,
+          "previousPriceEach": 60950000,
+          "change": 140000
+        },
+        {
+          "kind": "POTION",
+          "itemId": 2434,
+          "name": "Prayer potion",
+          "doses": 340,
+          "itemDoses": 4,
+          "priceEach": 9200,
+          "previousPriceEach": 9212,
+          "change": -1020
+        },
+        {
+          "kind": "ITEM",
+          "itemId": 31106,
+          "name": "Confliction gauntlets",
+          "quantity": 1,
+          "priceEach": 57270000,
+          "previousPriceEach": 57400000,
+          "change": -130000
+        }
+      ]
+    },
+    {
+      "period": "7d",
+      "baselineAt": "2026-11-14T00:00:05.000Z",
+      "change": 4183655,
+      "items": [
+        {
+          "kind": "ITEM",
+          "itemId": 27641,
+          "name": "Saturated heart",
+          "quantity": 1,
+          "priceEach": 61090000,
+          "previousPriceEach": 58630000,
+          "change": 2460000
+        },
+        {
+          "kind": "ITEM",
+          "itemId": 27226,
+          "name": "Masori body",
+          "quantity": 1,
+          "priceEach": 47250000,
+          "previousPriceEach": 45830000,
+          "change": 1420000
+        },
+        {
+          "kind": "ITEM",
+          "itemId": 22978,
+          "name": "Dragon hunter lance",
+          "quantity": 1,
+          "priceEach": 39380000,
+          "previousPriceEach": 38270000,
+          "change": 1110000
+        },
+        {
+          "kind": "ITEM",
+          "itemId": 29801,
+          "name": "Amulet of rancour",
+          "quantity": 1,
+          "priceEach": 43322000,
+          "previousPriceEach": 42556000,
+          "change": 766000
+        },
+        {
+          "kind": "POTION",
+          "itemId": 2434,
+          "name": "Prayer potion",
+          "doses": 340,
+          "itemDoses": 4,
+          "priceEach": 9200,
+          "previousPriceEach": 9100,
+          "change": 8500
+        },
+        {
+          "kind": "ITEM",
+          "itemId": 1201,
+          "name": "Rune kiteshield",
+          "quantity": 6,
+          "priceEach": 31800,
+          "previousPriceEach": 32057,
+          "change": -1542
+        },
+        {
+          "kind": "ITEM",
+          "itemId": 9194,
+          "name": "Onyx bolt tips",
+          "quantity": 55,
+          "priceEach": 8500,
+          "previousPriceEach": 8665,
+          "change": -9075
+        },
+        {
+          "kind": "ITEM",
+          "itemId": 11237,
+          "name": "Dragon arrowtips",
+          "quantity": 356,
+          "priceEach": 2642,
+          "previousPriceEach": 2755,
+          "change": -40228
+        },
+        {
+          "kind": "ITEM",
+          "itemId": 31106,
+          "name": "Confliction gauntlets",
+          "quantity": 1,
+          "priceEach": 57270000,
+          "previousPriceEach": 58800000,
+          "change": -1530000
+        }
+      ]
+    },
+    {
+      "period": "30d",
+      "baselineAt": "2026-10-22T00:00:02.000Z",
+      "change": 630000,
+      "items": [
+        {
+          "kind": "ITEM",
+          "itemId": 22978,
+          "name": "Dragon hunter lance",
+          "quantity": 1,
+          "priceEach": 39380000,
+          "previousPriceEach": 36900000,
+          "change": 2480000
+        },
+        {
+          "kind": "ITEM",
+          "itemId": 27226,
+          "name": "Masori body",
+          "quantity": 1,
+          "priceEach": 47250000,
+          "previousPriceEach": 49100000,
+          "change": -1850000
+        }
+      ]
+    }
+  ]
+}

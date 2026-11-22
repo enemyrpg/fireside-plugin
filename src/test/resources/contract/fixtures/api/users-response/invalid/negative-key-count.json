@@ -1,0 +1,16 @@
+{
+  "users": [
+    {
+      "id": 2,
+      "username": "ola",
+      "role": "member",
+      "canCreateApiKeys": true,
+      "createdAt": "2026-11-18T10:00:00.000Z",
+      "lastLoginAt": null,
+      "disabledAt": null,
+      "isSelf": false,
+      "activeApiKeys": -1,
+      "twoFactorEnabled": false
+    }
+  ]
+}
