@@ -375,7 +375,7 @@ public class EventSenderTest
 		assertEquals(1, server.batches.size());
 
 		// A new key resumes sending.
-		sender.updateSettings(new SenderSettings(true, server.url(), "ost_other_key"));
+		sender.updateSettings(new SenderSettings(true, server.url(), "fs_other_key"));
 		sender.updateSettings(settings);
 		awaitEmptyQueue();
 		assertEquals(EventSender.SEND_THRESHOLD + 2, server.stored.size());
@@ -408,7 +408,7 @@ public class EventSenderTest
 	@Test
 	public void unauthorizedVerifyStops() throws Exception
 	{
-		settings = new SenderSettings(true, server.url(), "ost_revoked_key");
+		settings = new SenderSettings(true, server.url(), "fs_revoked_key");
 		startSender();
 		submit(sender, 1);
 		sender.sendNow();

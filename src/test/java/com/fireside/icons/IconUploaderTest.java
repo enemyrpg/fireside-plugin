@@ -59,8 +59,8 @@ import org.junit.Test;
 /** The uploader against a mock server: batching, once per session, old servers and failures. */
 public class IconUploaderTest
 {
-	private static final String KEY = "ost_test_0123456789abcdef";
-	private static final String OTHER_KEY = "ost_test_fedcba9876543210";
+	private static final String KEY = "fs_test_0123456789abcdef";
+	private static final String OTHER_KEY = "fs_test_fedcba9876543210";
 	private static final Duration WAIT = Duration.ofSeconds(10);
 	/** Long enough for a request the uploader would make (collect delay 50 ms). */
 	private static final long QUIET_MS = 400;

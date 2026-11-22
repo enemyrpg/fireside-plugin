@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 /** The API key never shows up in log output or in user-facing messages. */
 public class ApiKeyNotLoggedTest
 {
-	private static final String KEY = "ost_secret_key_must_not_leak_42";
+	private static final String KEY = "fs_secret_key_must_not_leak_42";
 
 	private final ListAppender<ILoggingEvent> appender = new ListAppender<>();
 	private Logger root;
