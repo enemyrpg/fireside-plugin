@@ -54,7 +54,7 @@ public class FiresidePanelTest
 			FiresidePanel panel = new FiresidePanel(() -> {}, () -> {}, () -> {}, FOLDER);
 			StatusView first = StatusView.forTest(StatusView.Level.OK, "Connected", "Last contact: 1 s ago.",
 				java.util.Collections.singletonList("A warning"));
-			panel.render(first, "http://127.0.0.1:3000", true, null, "1 s ago", false, true);
+			panel.render(first, "http://127.0.0.1:3100", true, null, "1 s ago", false, true);
 			List<String> labels = new ArrayList<>();
 			walk(panel, c ->
 			{

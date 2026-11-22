@@ -47,7 +47,7 @@ public interface FiresideConfig extends Config
 	@ConfigItem(
 		keyName = SERVER_URL_KEY,
 		name = "Server URL",
-		description = "Base URL of your own server, e.g. http://127.0.0.1:3000 (without /api/v1)",
+		description = "Base URL of your own server, e.g. http://127.0.0.1:3100 (without /api/v1)",
 		position = 0,
 		section = serverSection
 	)

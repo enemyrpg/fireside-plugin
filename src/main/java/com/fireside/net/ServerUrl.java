@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import okhttp3.HttpUrl;
 
 /**
- * The server's base URL from the config, e.g. {@code http://127.0.0.1:3000}.
+ * The server's base URL from the config, e.g. {@code http://127.0.0.1:3100}.
  * A path prefix is allowed (for a reverse proxy); API paths are added to it.
  */
 public final class ServerUrl

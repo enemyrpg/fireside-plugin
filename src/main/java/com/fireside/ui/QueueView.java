@@ -159,7 +159,7 @@ public class QueueView
 		if (reason == SenderStatus.StopReason.NOT_FOUND)
 		{
 			return "Wrong server URL: the server answered 404 Not Found. Use the server's base URL, "
-				+ "e.g. http://127.0.0.1:3000, without /api/v1." + RESUME;
+				+ "e.g. http://127.0.0.1:3100, without /api/v1." + RESUME;
 		}
 		return (status.getDetail() != null ? status.getDetail() : "The server redirected the request.") + RESUME;
 	}
