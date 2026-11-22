@@ -34,7 +34,7 @@ import org.junit.Test;
 
 public class VerifyClientTest
 {
-	static final String KEY = "ost_test_0123456789abcdef";
+	static final String KEY = "fs_test_0123456789abcdef";
 	static final Instant T0 = Instant.parse("2026-11-13T18:00:00Z");
 
 	private final Gson gson = new Gson();
@@ -351,9 +351,9 @@ public class VerifyClientTest
 	@Test
 	public void invalidKeyMakesNoRequest() throws Exception
 	{
-		VerifyResult result = run(client, baseUrl(), "ost_abc def");
+		VerifyResult result = run(client, baseUrl(), "fs_abc def");
 		assertEquals(VerifyResult.Outcome.INVALID_KEY, result.getOutcome());
-		assertEquals(VerifyResult.Outcome.INVALID_KEY, run(client, baseUrl(), "ost_æøå").getOutcome());
+		assertEquals(VerifyResult.Outcome.INVALID_KEY, run(client, baseUrl(), "fs_æøå").getOutcome());
 		assertEquals(0, server.getRequestCount());
 	}
 

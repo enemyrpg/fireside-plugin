@@ -7,6 +7,6 @@ useDefault = true
 [allowlist]
 description = "Made-up API keys in tests and contract fixtures"
 regexes = [
-  '''ost_test_(0123456789abcdef|fedcba9876543210)''',
-  '''(fs|ost)_a1b2Cd3eFg4hIj5kLm6nOp7qRs8tUv9wXy0zAb1cD2e''',
+  '''fs_test_(0123456789abcdef|fedcba9876543210)''',
+  '''fs_a1b2Cd3eFg4hIj5kLm6nOp7qRs8tUv9wXy0zAb1cD2e''',
 ]

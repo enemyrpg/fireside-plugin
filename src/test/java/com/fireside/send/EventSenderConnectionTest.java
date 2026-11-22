@@ -264,7 +264,7 @@ public class EventSenderConnectionTest
 	@Test
 	public void unauthorizedStopsChecksUntilTheConfigChanges() throws Exception
 	{
-		start(new SenderSettings(true, server.url(), "ost_revoked_key"));
+		start(new SenderSettings(true, server.url(), "fs_revoked_key"));
 		SenderStatus stopped = await("stopped", s -> s.getState() == SenderStatus.State.STOPPED);
 		assertEquals(SenderStatus.StopReason.UNAUTHORIZED, stopped.getStopReason());
 		int requests = server.server.getRequestCount();
@@ -320,10 +320,10 @@ public class EventSenderConnectionTest
 	public void quickConfigChangesGiveOneVerify() throws Exception
 	{
 		start(new SenderSettings(false, server.url(), FakeIngestServer.KEY), Duration.ofMillis(300));
-		sender.updateSettings(new SenderSettings(true, server.url(), "ost_a"));
-		sender.updateSettings(new SenderSettings(true, server.url(), "ost_ab"));
+		sender.updateSettings(new SenderSettings(true, server.url(), "fs_a"));
+		sender.updateSettings(new SenderSettings(true, server.url(), "fs_ab"));
 		sender.updateSettings(new SenderSettings(true, "http://127.0.0.1:1/", FakeIngestServer.KEY));
-		sender.updateSettings(new SenderSettings(true, server.url(), "ost_abc"));
+		sender.updateSettings(new SenderSettings(true, server.url(), "fs_abc"));
 		sender.updateSettings(good());
 		awaitConnected();
 		quiet();

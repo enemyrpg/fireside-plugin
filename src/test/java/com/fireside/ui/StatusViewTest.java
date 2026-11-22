@@ -19,7 +19,7 @@ import org.junit.Test;
 
 public class StatusViewTest
 {
-	private static final String KEY = "ost_key";
+	private static final String KEY = "fs_key";
 	private static final String URL = "http://127.0.0.1:3000";
 	private static final Instant NOW = Instant.parse("2026-11-18T18:00:00Z");
 	private static final ZoneId UTC = ZoneOffset.UTC;

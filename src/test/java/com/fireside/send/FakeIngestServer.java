@@ -27,7 +27,7 @@ import okhttp3.mockwebserver.RecordedRequest;
  */
 class FakeIngestServer extends Dispatcher
 {
-	static final String KEY = "ost_test_0123456789abcdef";
+	static final String KEY = "fs_test_0123456789abcdef";
 
 	/** One received batch. */
 	static final class Batch
