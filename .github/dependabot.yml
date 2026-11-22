@@ -1,0 +1,29 @@
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      gradle:
+        update-types: [minor, patch]
+    ignore:
+      # The RuneLite client comes from `latest.release` and must never be pinned.
+      - dependency-name: "net.runelite:*"
+      # Must match the OkHttp 3.14 that RuneLite ships.
+      - dependency-name: com.squareup.okhttp3:mockwebserver
+        update-types: [version-update:semver-major]
+      # The Plugin Hub builds with Lombok 1.18.30 (its verification template
+      # replaces build.gradle), so ours stays on the same version.
+      - dependency-name: org.projectlombok:lombok
+      # JUnit 4, as in RuneLite's example-plugin template.
+      - dependency-name: junit:junit
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]

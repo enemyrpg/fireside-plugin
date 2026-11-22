@@ -5,9 +5,9 @@ package com.fireside;
  * <p>
  * A constant instead of a value filled in by Gradle: the Plugin Hub builds
  * with {@code build=standard}, which replaces {@code build.gradle}, so no
- * build step of ours runs there. Keep it equal to {@code version} in
- * {@code build.gradle} and {@code runelite-plugin.properties} (checked by a
- * test).
+ * build step of ours runs there. release-please updates it together with
+ * {@code version} in {@code build.gradle}, {@code runelite-plugin.properties}
+ * and {@code version.txt} (kept equal by a test). Never edit it by hand.
  */
 public final class PluginVersion
 {
