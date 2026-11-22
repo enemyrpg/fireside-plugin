@@ -94,13 +94,13 @@ public class SessionTrackerTest
 		game.hash = ACCOUNT;
 		tick();
 		assertTrue("No session without a name", events.isEmpty());
-		game.name = "Zezima";
+		game.name = "Test Main";
 		tick();
 
 		assertEquals(types(EventType.SESSION_START), types());
 		Event start = events.get(0);
 		assertEquals(ACCOUNT, start.getAccountHash());
-		assertEquals(new SessionStart("Zezima", AccountType.IRONMAN, 420, "0.1.0"), start.getPayload());
+		assertEquals(new SessionStart("Test Main", AccountType.IRONMAN, 420, "0.1.0"), start.getPayload());
 		assertNotEquals("sessionId is its own UUID", start.getEventId(), start.getSessionId());
 	}
 
@@ -631,7 +631,7 @@ public class SessionTrackerTest
 	{
 		long hash = ACCOUNT;
 		@Nullable
-		String name = "Zezima";
+		String name = "Test Main";
 		int world = 420;
 		/** The game's stats; null while not loaded (like the client before stats arrive). */
 		@Nullable

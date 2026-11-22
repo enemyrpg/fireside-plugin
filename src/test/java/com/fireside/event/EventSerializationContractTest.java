@@ -46,7 +46,7 @@ public class EventSerializationContractTest
 	static Map<String, EventPayload> examples()
 	{
 		Map<String, EventPayload> examples = new LinkedHashMap<>();
-		examples.put("session.start", new SessionStart("Zezima", AccountType.IRONMAN, 420, "0.1.0"));
+		examples.put("session.start", new SessionStart("Test Main", AccountType.IRONMAN, 420, "0.1.0"));
 		examples.put("session.heartbeat", new SessionHeartbeat(12342, 420, Collections.singletonList("MEMBERS"),
 			"GERMANY", "Trade - Members", false));
 		examples.put("session.heartbeat (world list not loaded)", new SessionHeartbeat(12342, 420,
