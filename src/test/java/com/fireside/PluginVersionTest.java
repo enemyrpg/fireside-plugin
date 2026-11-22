@@ -44,4 +44,12 @@ public class PluginVersionTest
 		}
 		assertEquals("runelite-plugin.properties", PluginVersion.VERSION, properties.getProperty("version"));
 	}
+
+	/** release-please's {@code simple} release type keeps the version here too. */
+	@Test
+	public void versionMatchesVersionTxt() throws IOException
+	{
+		String text = new String(Files.readAllBytes(Paths.get("version.txt")), StandardCharsets.UTF_8);
+		assertEquals("version.txt", PluginVersion.VERSION, text.trim());
+	}
 }

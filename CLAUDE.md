@@ -94,6 +94,9 @@ contract package (JSON Schema + fixtures) lives in
   disclaimer and state that data is only sent to a server the user sets up.
   The repo must be public before Plugin Hub submission.
 - Code, comments and commit messages in English.
+- release-please owns the plugin version (`build.gradle`,
+  `runelite-plugin.properties`, `PluginVersion.java`, `version.txt`). Never
+  edit it by hand.
 
 ## Workflow
 - One task per branch and PR (e.g. `m8/rename-fireside`).

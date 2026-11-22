@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bootstrap-sha": "2f18f2ad81dc458ea886346dbcb9e68533e382d7",
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "include-component-in-tag": false,
+      "initial-version": "0.1.0",
+      "bump-minor-pre-major": true,
+      "extra-files": [
+        "build.gradle",
+        "runelite-plugin.properties",
+        "src/main/java/com/fireside/PluginVersion.java"
+      ]
+    }
+  }
+}

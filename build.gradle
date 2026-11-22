@@ -37,8 +37,9 @@ dependencies {
 }
 
 group = 'com.fireside'
-// Keep equal to PluginVersion.VERSION and version in runelite-plugin.properties (tested).
-version = '0.1.0'
+// Set by release-please, never by hand. Equal to PluginVersion.VERSION,
+// runelite-plugin.properties and version.txt (tested).
+version = '0.1.0' // x-release-please-version
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'

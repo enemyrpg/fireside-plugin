@@ -1,0 +1,25 @@
+name: Feature request
+description: Suggest something the plugin could collect or do.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Fireside only reads and reports data about your own accounts, and follows Jagex's third-party client rules. Requests that collect data about other players, automate input, reveal hidden information or give a gameplay advantage will be closed.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What do you want to track or see?
+      description: The problem or question you want answered, not only the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Suggested solution
+      description: Where the data could come from in the game, and how it should show up on the dashboard.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Other plugins or workarounds you have tried.

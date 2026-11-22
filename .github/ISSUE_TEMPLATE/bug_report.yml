@@ -1,0 +1,58 @@
+name: Bug report
+description: Something in the plugin does not work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!CAUTION]
+        > Do not post API keys, passwords, tunnel tokens, server host names or other players' names. Remove them from logs and screenshots before you post.
+
+        Server problems (dashboard, login, Docker) belong in [enemyrpg/fireside](https://github.com/enemyrpg/fireside/issues). Security issues: use [private vulnerability reporting](https://github.com/enemyrpg/fireside-plugin/security/advisories/new), not an issue.
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin version
+      description: The installed version. The latest release, unless you built the plugin yourself.
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: server-version
+    attributes:
+      label: Server version
+      description: '"Server version" in the Fireside side panel, after Test connection.'
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: contract-version
+    attributes:
+      label: Contract version
+      description: '"Server contract" in the Fireside side panel.'
+      placeholder: 1.41.0
+  - type: input
+    id: runelite-version
+    attributes:
+      label: RuneLite version
+      description: Shown in RuneLite's Info panel.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected and what happened instead. Include the approximate time and time zone.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. …
+        2. …
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log lines
+      description: From `~/.runelite/logs/client.log`. Remove API keys, host names and other players' names first.
+      render: text

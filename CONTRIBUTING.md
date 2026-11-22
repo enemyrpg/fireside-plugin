@@ -53,3 +53,19 @@ same character in two clients at the same time.
 **Icons:** `icon.png` (Plugin Hub) and the side panel icon are rendered from
 `assets/logo/fireside.svg` with `./scripts/render-icons.sh` (needs
 `rsvg-convert`). See `assets/logo/README.md`.
+
+## Pull requests and releases
+- One task per pull request. Larger changes: open an issue first.
+- PR titles follow [Conventional Commits](https://www.conventionalcommits.org/)
+  (`feat: …`, `fix: …`, `docs: …`, `ci: …`), checked by the **PR title**
+  workflow. PRs are squash merged, so the title becomes the commit message on
+  `master`, and the changelog is built from it.
+- [release-please](https://github.com/googleapis/release-please) owns the
+  version. Never edit it by hand. It keeps an open release PR that bumps the
+  version in `build.gradle`, `runelite-plugin.properties`, `PluginVersion.java`
+  and `version.txt` and updates `CHANGELOG.md`. Merging that PR tags
+  `v<version>` and creates a GitHub release. Before 1.0.0, `feat` bumps the
+  minor version and `fix` the patch version.
+- A release has no artifacts: the Plugin Hub builds the plugin from a commit.
+  After a release, update `commit=` in `plugins/fireside` in
+  `runelite/plugin-hub` to the release commit with a pull request.

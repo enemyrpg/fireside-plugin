@@ -1,0 +1,40 @@
+name: Release Please
+
+# Opens and updates the release PR from Conventional Commits, and tags
+# v<version> with a GitHub release when it is merged. Nothing is built or
+# uploaded: the Plugin Hub builds the plugin from a commit.
+#
+# Runs with a GitHub App token, because PRs and tags created with
+# GITHUB_TOKEN do not start other workflows (the release PR would get no CI).
+# Needs the repository variable RELEASE_APP_CLIENT_ID and the secret
+# RELEASE_APP_PRIVATE_KEY; until both exist, the job is skipped. Forks skip it.
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Release Please
+    if: github.repository == 'enemyrpg/fireside-plugin' && vars.RELEASE_APP_CLIENT_ID != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+        id: app-token
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
