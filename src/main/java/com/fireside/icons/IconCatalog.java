@@ -9,9 +9,8 @@ import java.util.Map;
 import lombok.Value;
 
 /**
- * Every icon the dashboard can show without the account having seen the thing
- * (10.12): all collection log items, all skills and all bosses/raids on the
- * hiscores. Read from the game's own data by {@link IconCatalogReader}.
+ * Every icon the dashboard can show without the account having seen the thing:
+ * all collection log items, all skills and all bosses/raids on the hiscores. Read from the game's own data by {@link IconCatalogReader}.
  */
 @Value
 public class IconCatalog

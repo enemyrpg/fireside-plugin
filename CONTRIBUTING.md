@@ -48,7 +48,8 @@ same character in two clients at the same time.
 **Contract:** the event and API contract from the server repo is pinned in
 `src/test/resources/contract/`, and tests validate against it. Update it with
 `./scripts/update-contract.sh <version>` (needs `gh`), then update
-`Contract.REQUIRED_VERSION`.
+`Contract.PINNED_VERSION`, and the other versions in `Contract` only if the
+plugin now needs the new contract.
 
 **Icons:** `icon.png` (Plugin Hub) and the side panel icon are rendered from
 `assets/logo/fireside.svg` with `./scripts/render-icons.sh` (needs

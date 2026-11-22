@@ -6,7 +6,7 @@ import lombok.Value;
 
 /**
  * What an icon belongs to: an item (its ID exactly as in the events), or a
- * skill or boss/raid by name (10.12). The server's key for the icon.
+ * skill or boss/raid by name. The server's key for the icon.
  */
 @Value
 public class IconKey
