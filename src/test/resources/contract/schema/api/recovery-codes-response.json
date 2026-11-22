@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "API: recovery-codes-response",
+  "type": "object",
+  "properties": {
+    "recoveryCodes": {
+      "minItems": 10,
+      "maxItems": 10,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z2-7]{5}-[a-z2-7]{5}$"
+      }
+    }
+  },
+  "required": [
+    "recoveryCodes"
+  ],
+  "additionalProperties": false
+}

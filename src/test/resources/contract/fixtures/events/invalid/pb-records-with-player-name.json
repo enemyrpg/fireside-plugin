@@ -7,6 +7,6 @@
   "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
   "payload": {
     "boss": "Fractured Archive",
-    "records": [{ "scope": "overall", "teamSize": 3, "seconds": 1088.4, "playerName": "Zezima" }]
+    "records": [{ "scope": "overall", "teamSize": 3, "seconds": 1088.4, "playerName": "Test Main" }]
   }
 }

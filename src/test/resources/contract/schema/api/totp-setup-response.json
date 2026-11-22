@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "API: totp-setup-response",
+  "type": "object",
+  "properties": {
+    "secret": {
+      "type": "string",
+      "pattern": "^[A-Z2-7]+$"
+    },
+    "otpauthUri": {
+      "type": "string",
+      "format": "starts_with",
+      "pattern": "^otpauth:\\/\\/totp\\/.*"
+    }
+  },
+  "required": [
+    "secret",
+    "otpauthUri"
+  ],
+  "additionalProperties": false
+}

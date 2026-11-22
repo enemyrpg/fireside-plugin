@@ -1,0 +1,42 @@
+{
+  "prices": {
+    "source": "CURRENT",
+    "fetchedAt": "2026-11-21T12:00:04.000Z"
+  },
+  "periods": [
+    {
+      "period": "24h",
+      "change": 8980,
+      "items": [
+        {
+          "kind": "ITEM",
+          "itemId": 27641,
+          "name": "Saturated heart",
+          "quantity": 1,
+          "priceEach": 61090000,
+          "previousPriceEach": 60950000,
+          "change": 140000
+        },
+        {
+          "kind": "POTION",
+          "itemId": 2434,
+          "name": "Prayer potion",
+          "doses": 340,
+          "itemDoses": 4,
+          "priceEach": 9200,
+          "previousPriceEach": 9212,
+          "change": -1020
+        },
+        {
+          "kind": "ITEM",
+          "itemId": 31106,
+          "name": "Confliction gauntlets",
+          "quantity": 1,
+          "priceEach": 57270000,
+          "previousPriceEach": 57400000,
+          "change": -130000
+        }
+      ]
+    }
+  ]
+}

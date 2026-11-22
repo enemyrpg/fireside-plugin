@@ -16,7 +16,8 @@
         "lootGeValue": 0,
         "lootCount": 0,
         "kcGainedByBoss": {}
-      }
+      },
+      "newCollectionLogCount": 0
     }
   ],
   "nextCursor": null

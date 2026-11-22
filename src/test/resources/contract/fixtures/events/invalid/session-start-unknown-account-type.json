@@ -6,7 +6,7 @@
   "occurredAt": "2026-11-08T19:42:13.512Z",
   "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
   "payload": {
-    "displayName": "Zezima",
+    "displayName": "Test Main",
     "accountType": "DEADMAN",
     "world": 420,
     "pluginVersion": "0.1.0"

@@ -20,7 +20,8 @@
       "kcGainedByBoss": {
         "Vorkath": 18
       }
-    }
+    },
+    "newCollectionLogCount": 0
   },
   "neighbors": {
     "olderId": "01933c3f-2222-7aaa-bbbb-ccccdddd0000",
@@ -108,5 +109,10 @@
       "startedAt": "2026-11-08T19:10:00.000Z",
       "endedAt": "2026-11-08T19:25:00.000Z"
     }
-  ]
+  ],
+  "collectionLog": {
+    "obtained": null,
+    "total": null,
+    "items": []
+  }
 }
