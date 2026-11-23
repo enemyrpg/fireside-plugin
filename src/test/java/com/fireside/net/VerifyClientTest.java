@@ -302,7 +302,7 @@ public class VerifyClientTest
 			})
 			.build();
 		VerifyClient c = new VerifyClient(noDns, gson, clock, Duration.ofSeconds(2), Duration.ofSeconds(2));
-		VerifyResult result = run(c, "http://tracker.invalid:3000", KEY);
+		VerifyResult result = run(c, "http://tracker.invalid:3100", KEY);
 		assertEquals(VerifyResult.Outcome.UNKNOWN_HOST, result.getOutcome());
 		assertTrue(result.getMessage().contains("tracker.invalid"));
 	}
@@ -344,7 +344,7 @@ public class VerifyClientTest
 	@Test
 	public void invalidUrlMakesNoRequest() throws Exception
 	{
-		assertEquals(VerifyResult.Outcome.INVALID_URL, run(client, "localhost:3000", KEY).getOutcome());
+		assertEquals(VerifyResult.Outcome.INVALID_URL, run(client, "localhost:3100", KEY).getOutcome());
 		assertEquals(0, server.getRequestCount());
 	}
 

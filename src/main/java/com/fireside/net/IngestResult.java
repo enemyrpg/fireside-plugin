@@ -12,8 +12,8 @@ import javax.annotation.Nullable;
 import lombok.Value;
 
 /**
- * Outcome of one {@code POST /api/v1/ingest}, classified as in the status
- * table in 03 and the M7 decisions in 07. Messages are for the user and never
+ * Outcome of one {@code POST /api/v1/ingest}, classified by the statuses in
+ * fireside's {@code docs/api.md}. Messages are for the user and never
  * contain the API key.
  */
 @Value

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "API: server-settings-response",
+  "type": "object",
+  "properties": {
+    "defaultInviteCanCreateApiKeys": {
+      "type": "boolean"
+    },
+    "instanceText": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "defaultInstanceText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 8000
+    }
+  },
+  "required": [
+    "defaultInviteCanCreateApiKeys",
+    "instanceText",
+    "defaultInstanceText"
+  ],
+  "additionalProperties": false
+}

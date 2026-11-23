@@ -14,7 +14,7 @@ public interface TfaRecordsView
 	/**
 	 * One section of {@code ALL_STATS_TABLES} (one per side tab), as plain
 	 * text with tags removed. Cells are one flat list, {@code headers.size()}
-	 * per row, in row order (#86 step 0B, {@code docs/plan/08-design.md}).
+	 * per row, in row order.
 	 */
 	@Value
 	class Section

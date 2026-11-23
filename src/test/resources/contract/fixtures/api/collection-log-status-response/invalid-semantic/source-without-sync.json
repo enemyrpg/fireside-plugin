@@ -1,6 +1,7 @@
 {
   "accountId": 1,
   "source": "RUNEPROFILE",
+  "sourceAvailable": true,
   "sync": null,
   "updatedAt": "2026-11-07T10:00:00.000Z",
   "obtained": 712,

@@ -1,12 +1,15 @@
-# gitleaks configuration: the default rules, plus the made-up API keys used
-# in tests and contract fixtures. Only these exact values are allowed, so a
+# gitleaks configuration: the default rules, plus the made-up API keys and
+# tokens used in tests and contract fixtures. Only these exact values are allowed, so a
 # real key anywhere in the repo is still reported.
 [extend]
 useDefault = true
 
 [allowlist]
-description = "Made-up API keys in tests and contract fixtures"
+description = "Made-up API keys and tokens in tests and contract fixtures"
 regexes = [
   '''fs_test_(0123456789abcdef|fedcba9876543210)''',
   '''fs_a1b2Cd3eFg4hIj5kLm6nOp7qRs8tUv9wXy0zAb1cD2e''',
+  # Invite and password reset token in the contract fixtures (base64url of a
+  # fixture sentence).
+  '''Q2xhdWRlIG1hZGUgdGhpcyBmaXh0dXJlIHRva2VuIQ''',
 ]

@@ -35,7 +35,7 @@ import org.junit.Test;
 /**
  * Full raid message sequences through {@link KillTracker} and {@link RaidTracker}.
  * Strings come from RuneLite's ChatCommandsPluginTest and Raid Data Tracker's tests;
- * see docs/plan/08-design.md part 8 for what is still unconfirmed in game.
+ * some sequences are not yet confirmed in game.
  */
 public class RaidTrackerTest
 {

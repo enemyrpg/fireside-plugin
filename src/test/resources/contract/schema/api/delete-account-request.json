@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "API: delete-account-request",
+  "type": "object",
+  "properties": {
+    "password": {
+      "type": "string",
+      "maxLength": 1024
+    }
+  },
+  "required": [
+    "password"
+  ],
+  "additionalProperties": false
+}

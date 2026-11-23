@@ -16,10 +16,9 @@ import net.runelite.client.util.Text;
  * {@code ALL_STATS_TABLES} and the loading spinner, never the party panels
  * ({@code PARTY_*}, other players' names). Client thread only.
  * <p>
- * Layout from #86 step 0B ({@code docs/plan/08-design.md}), checked in game
- * for PR 3: one dynamic child per side tab; in it, child 3 holds the title,
- * child 5's child 1 the row labels and child 5's child 2 all cells (a flat
- * list, one row after another). Labels and cells are layers with a text
+ * Layout as checked in game: one dynamic child per side tab; in it, child 3
+ * holds the title, child 5's child 1 the row labels and child 5's child 2 all
+ * cells (a flat list, one row after another). Labels and cells are layers with a text
  * child. The column headers are the children of the layer under child 4
  * that has one child per column. Anything else gives a section the parser
  * skips.

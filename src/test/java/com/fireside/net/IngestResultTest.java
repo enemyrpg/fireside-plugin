@@ -71,12 +71,12 @@ public class IngestResultTest
 	public void networkErrorsAreTemporary()
 	{
 		IngestResult r = IngestResult.fromException(new ConnectException("refused"),
-			ServerUrl.parse("http://127.0.0.1:3000"));
+			ServerUrl.parse("http://127.0.0.1:3100"));
 		assertEquals(IngestResult.Kind.TEMPORARY, r.getKind());
 		assertNull(r.getHttpStatus());
 		assertTrue(r.getMessage(), r.getMessage().contains("connection refused"));
 		assertEquals(IngestResult.Kind.TEMPORARY, IngestResult.fromException(new IOException(),
-			ServerUrl.parse("http://127.0.0.1:3000")).getKind());
+			ServerUrl.parse("http://127.0.0.1:3100")).getKind());
 	}
 
 	@Test

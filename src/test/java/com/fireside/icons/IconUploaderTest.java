@@ -687,7 +687,7 @@ public class IconUploaderTest
 		assertEquals("Bearer " + OTHER_KEY, again.authorization);
 	}
 
-	// ---- The import of the collection log, skills and bosses (10.12) ----------------
+	// ---- The import of the collection log, skills and bosses ------------------------
 
 	private static final String NAMED = "1.29.0";
 

@@ -1,0 +1,139 @@
+{
+  "session": {
+    "id": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+    "accountId": 1,
+    "startedAt": "2026-11-08T18:00:00.000Z",
+    "endedAt": "2026-11-08T20:00:00.000Z",
+    "endReason": "logout",
+    "world": 420,
+    "durationSeconds": 7200,
+    "activeSeconds": 6300,
+    "afkSeconds": 900,
+    "summary": {
+      "xpGainedTotal": 120000,
+      "xpGainedBySkill": {
+        "SLAYER": 100000,
+        "HITPOINTS": 20000
+      },
+      "lootGeValue": 2854200,
+      "lootCount": 18,
+      "kcGainedByBoss": {
+        "Vorkath": 18
+      }
+    },
+    "newCollectionLogCount": 2
+  },
+  "neighbors": {
+    "olderId": "01933c3f-2222-7aaa-bbbb-ccccdddd0000",
+    "newerId": null
+  },
+  "xp": [
+    {
+      "skill": "SLAYER",
+      "xpGained": 100000,
+      "startLevel": 89,
+      "endLevel": 90
+    },
+    {
+      "skill": "HITPOINTS",
+      "xpGained": 20000,
+      "startLevel": 99,
+      "endLevel": 99
+    }
+  ],
+  "loot": [
+    {
+      "id": 17,
+      "occurredAt": "2026-11-08T19:42:13.512Z",
+      "source": {
+        "type": "NPC",
+        "name": "Vorkath"
+      },
+      "killCount": 412,
+      "geValue": 2854200,
+      "haValue": 60000,
+      "items": [
+        {
+          "itemId": 11286,
+          "name": "Draconic visage",
+          "quantity": 1,
+          "gePriceEach": 2850000,
+          "haPriceEach": 60000
+        },
+        {
+          "itemId": 536,
+          "name": "Dragon bones",
+          "quantity": 2,
+          "gePriceEach": 2100,
+          "haPriceEach": 0
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "occurredAt": "2026-11-08T19:50:00.000Z",
+      "source": {
+        "type": "PLAYER",
+        "name": null
+      },
+      "killCount": null,
+      "geValue": 1500,
+      "haValue": 0,
+      "items": [
+        {
+          "itemId": 995,
+          "name": "Coins",
+          "quantity": 1500,
+          "gePriceEach": 1,
+          "haPriceEach": 0
+        }
+      ]
+    }
+  ],
+  "kc": [
+    {
+      "boss": "Vorkath",
+      "startKillCount": 394,
+      "endKillCount": 412,
+      "gained": 18
+    },
+    {
+      "boss": "Zulrah",
+      "startKillCount": 1,
+      "endKillCount": 5,
+      "gained": 4
+    }
+  ],
+  "afkPeriods": [
+    {
+      "startedAt": "2026-11-08T19:10:00.000Z",
+      "endedAt": "2026-11-08T19:25:00.000Z"
+    }
+  ],
+  "collectionLog": {
+    "obtained": null,
+    "total": null,
+    "items": [
+      {
+        "itemId": 22111,
+        "name": "Dragonbone necklace",
+        "tab": "Bosses",
+        "page": "Vorkath",
+        "pageObtained": 4,
+        "pageTotal": 7,
+        "at": "2026-11-08T19:42:13.512Z",
+        "approximate": false
+      },
+      {
+        "itemId": 21907,
+        "name": "Vorkath's head",
+        "tab": "Bosses",
+        "page": "Vorkath",
+        "pageObtained": 4,
+        "pageTotal": 7,
+        "at": "2026-11-08T20:02:31.004Z",
+        "approximate": true
+      }
+    ]
+  }
+}
