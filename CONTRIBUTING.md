@@ -55,6 +55,24 @@ plugin now needs the new contract.
 `assets/logo/fireside.svg` with `./scripts/render-icons.sh` (needs
 `rsvg-convert`). See `assets/logo/README.md`.
 
+## Labels
+- **Type:** one per issue: `bug`, `enhancement`, `documentation`, `ci`,
+  `question`.
+- **Area:** usually one: `area: loot`, `area: sessions`, `area: bank`,
+  `area: sync`.
+- **Cross-cutting:** `accessibility` (barriers for people with disabilities),
+  alongside the area.
+- **Status**, only when it applies: `needs decision`, `needs info`,
+  `blocked`, `good first issue`, `help wanted`.
+- **Priority**, only when it applies: `priority: high` or `priority: low`.
+  No priority label means normal.
+- **On closing:** `wontfix` (close as "not planned" and link the ADR in the
+  server's [docs/decisions/](https://github.com/enemyrpg/fireside/tree/main/docs/decisions)
+  it goes against) or `duplicate` (link the original issue).
+- Set automatically, don't add them by hand: `dependencies` and `java`
+  (Dependabot), `autorelease: pending` and `autorelease: tagged`
+  (release-please).
+
 ## Pull requests and releases
 - One task per pull request. Larger changes: open an issue first.
 - PR titles follow [Conventional Commits](https://www.conventionalcommits.org/)
