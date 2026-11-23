@@ -1,0 +1,23 @@
+{
+  "apiKey": {
+    "id": 1,
+    "name": "Gaming PC",
+    "prefix": "fs_a1b2",
+    "createdAt": "2026-11-01T18:00:00.000Z",
+    "lastUsedAt": "2026-11-10T19:30:00.000Z",
+    "revokedAt": null,
+    "revokedBy": null,
+    "createdByAdmin": false,
+    "owner": {
+      "id": 1,
+      "username": "admin"
+    },
+    "createdBy": {
+      "id": 1,
+      "username": "admin"
+    },
+    "revokedByUser": null,
+    "keyHash": "abababababababababababababababababababababababababababababababab"
+  },
+  "key": "fs_a1b2Cd3eFg4hIj5kLm6nOp7qRs8tUv9wXy0zAb1cD2e"
+}

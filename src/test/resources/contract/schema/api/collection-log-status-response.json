@@ -21,6 +21,9 @@
         }
       ]
     },
+    "sourceAvailable": {
+      "type": "boolean"
+    },
     "sync": {
       "anyOf": [
         {
@@ -145,6 +148,7 @@
   "required": [
     "accountId",
     "source",
+    "sourceAvailable",
     "sync",
     "updatedAt",
     "obtained",

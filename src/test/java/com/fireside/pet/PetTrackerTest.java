@@ -142,7 +142,7 @@ public class PetTrackerTest
 		{
 			tracker.onChatMessage(type, FOLLOWED, T);
 		}
-		game("Zezima has a funny feeling like he's being followed: Vorki at 412 kills.", T);
+		game("Test Alt has a funny feeling like he's being followed: Vorki at 412 kills.", T);
 		tracker.onTick(T + PetTracker.HOLD_TICKS);
 		assertTrue(events.isEmpty());
 	}

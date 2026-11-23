@@ -9,6 +9,6 @@
 
 ## Checklist
 
-- Contract changed: yes / no <!-- if yes: ./scripts/update-contract.sh <version> and Contract.REQUIRED_VERSION -->
+- Contract changed: yes / no <!-- if yes: ./scripts/update-contract.sh <version> and Contract.PINNED_VERSION -->
 - [ ] Docs updated (`README.md`, `CONTRIBUTING.md`), or not needed
 - [ ] The PR title follows Conventional Commits (`feat: …`, `fix: …`, `docs: …`)

@@ -1,0 +1,9 @@
+{
+  "user": {
+    "id": 2,
+    "username": "ola",
+    "role": "member",
+    "canCreateApiKeys": true,
+    "twoFactorEnabled": false
+  }
+}

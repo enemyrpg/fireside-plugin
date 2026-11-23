@@ -1,0 +1,42 @@
+{
+  "items": [
+    {
+      "id": "01933c40-2222-7aaa-bbbb-ccccdddd0002",
+      "accountId": 1,
+      "startedAt": "2026-11-08T21:00:00.000Z",
+      "endedAt": null,
+      "endReason": null,
+      "world": 420,
+      "durationSeconds": 600,
+      "activeSeconds": 600,
+      "afkSeconds": 0,
+      "summary": null,
+      "newCollectionLogCount": -1
+    },
+    {
+      "id": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+      "accountId": 1,
+      "startedAt": "2026-11-08T18:00:00.000Z",
+      "endedAt": "2026-11-08T20:00:00.000Z",
+      "endReason": "logout",
+      "world": 420,
+      "durationSeconds": 7200,
+      "activeSeconds": 6300,
+      "afkSeconds": 900,
+      "summary": {
+        "xpGainedTotal": 120000,
+        "xpGainedBySkill": {
+          "SLAYER": 100000,
+          "HITPOINTS": 20000
+        },
+        "lootGeValue": 2854200,
+        "lootCount": 18,
+        "kcGainedByBoss": {
+          "Vorkath": 18
+        }
+      },
+      "newCollectionLogCount": 1
+    }
+  ],
+  "nextCursor": "eyJpZCI6IjAxIn0"
+}

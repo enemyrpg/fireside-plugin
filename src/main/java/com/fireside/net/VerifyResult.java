@@ -90,7 +90,7 @@ public final class VerifyResult
 	static VerifyResult invalidUrl()
 	{
 		return error(Outcome.INVALID_URL,
-			"Invalid server URL. Use the server's full base address, e.g. http://127.0.0.1:3000.");
+			"Invalid server URL. Use the server's full base address, e.g. http://127.0.0.1:3100.");
 	}
 
 	static VerifyResult invalidKey()
@@ -145,7 +145,7 @@ public final class VerifyResult
 		if (code == 404)
 		{
 			return error(Outcome.NOT_FOUND,
-				"Not found (HTTP 404). Use the server's base URL, e.g. http://127.0.0.1:3000, without /api/v1.");
+				"Not found (HTTP 404). Use the server's base URL, e.g. http://127.0.0.1:3100, without /api/v1.");
 		}
 		if (code == 429)
 		{

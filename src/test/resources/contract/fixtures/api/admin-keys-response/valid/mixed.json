@@ -1,0 +1,61 @@
+{
+  "keys": [
+    {
+      "id": 3,
+      "name": "Old PC",
+      "prefix": "fs_0f3K",
+      "createdAt": "2026-10-01T10:00:00.000Z",
+      "lastUsedAt": null,
+      "revokedAt": "2026-11-01T09:00:00.000Z",
+      "revokedBy": "admin",
+      "createdByAdmin": true,
+      "owner": {
+        "id": 2,
+        "username": "ola"
+      },
+      "createdBy": null,
+      "revokedByUser": null
+    },
+    {
+      "id": 1,
+      "name": "Gaming PC",
+      "prefix": "fs_a1b2",
+      "createdAt": "2026-11-01T18:00:00.000Z",
+      "lastUsedAt": "2026-11-10T19:30:00.000Z",
+      "revokedAt": null,
+      "revokedBy": null,
+      "createdByAdmin": false,
+      "owner": {
+        "id": 1,
+        "username": "admin"
+      },
+      "createdBy": {
+        "id": 1,
+        "username": "admin"
+      },
+      "revokedByUser": null
+    },
+    {
+      "id": 2,
+      "name": "Ola's laptop",
+      "prefix": "fs_Zx9q",
+      "createdAt": "2026-11-18T10:00:00.000Z",
+      "lastUsedAt": null,
+      "revokedAt": "2026-11-18T12:00:00.000Z",
+      "revokedBy": "admin",
+      "createdByAdmin": true,
+      "owner": {
+        "id": 2,
+        "username": "ola"
+      },
+      "createdBy": {
+        "id": 1,
+        "username": "admin"
+      },
+      "revokedByUser": {
+        "id": 1,
+        "username": "admin"
+      }
+    }
+  ]
+}

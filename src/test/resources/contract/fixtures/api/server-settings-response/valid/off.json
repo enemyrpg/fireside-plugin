@@ -1,0 +1,5 @@
+{
+  "defaultInviteCanCreateApiKeys": false,
+  "instanceText": "This Fireside instance is run by Ada.\n\nAsk me anything.",
+  "defaultInstanceText": "This Fireside instance is run by [your name]. Contact: [how to reach you]."
+}

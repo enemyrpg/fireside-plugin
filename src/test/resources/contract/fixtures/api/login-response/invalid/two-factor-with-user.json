@@ -1,0 +1,10 @@
+{
+  "twoFactorRequired": true,
+  "user": {
+    "id": 1,
+    "username": "admin",
+    "role": "admin",
+    "canCreateApiKeys": true,
+    "twoFactorEnabled": true
+  }
+}

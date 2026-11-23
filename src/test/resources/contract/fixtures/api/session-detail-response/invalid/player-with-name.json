@@ -20,7 +20,8 @@
       "kcGainedByBoss": {
         "Vorkath": 18
       }
-    }
+    },
+    "newCollectionLogCount": 0
   },
   "neighbors": {
     "olderId": null,
@@ -35,7 +36,7 @@
       "occurredAt": "2026-11-08T19:50:00.000Z",
       "source": {
         "type": "PLAYER",
-        "name": "Zezima"
+        "name": "Test Main"
       },
       "killCount": null,
       "geValue": 1500,
@@ -50,5 +51,10 @@
         }
       ]
     }
-  ]
+  ],
+  "collectionLog": {
+    "obtained": null,
+    "total": null,
+    "items": []
+  }
 }

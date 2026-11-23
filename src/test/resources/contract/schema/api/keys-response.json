@@ -49,6 +49,23 @@
                 "type": "null"
               }
             ]
+          },
+          "revokedBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "owner",
+                  "admin"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdByAdmin": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -57,7 +74,9 @@
           "prefix",
           "createdAt",
           "lastUsedAt",
-          "revokedAt"
+          "revokedAt",
+          "revokedBy",
+          "createdByAdmin"
         ],
         "additionalProperties": false
       }

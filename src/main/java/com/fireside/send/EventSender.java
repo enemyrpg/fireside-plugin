@@ -49,7 +49,7 @@ import okhttp3.Call;
  * {@link #MAX_BATCH_EVENTS} events and {@link #MAX_BATCH_BYTES} bytes. After a
  * successful batch, the events that were already queued behind it go at once.
  * <p>
- * <b>Statuses</b> (03, "POST /ingest", and the M7 decisions in 07):
+ * <b>Statuses</b> (the {@code POST /ingest} statuses in fireside's {@code docs/api.md}):
  * <ul>
  * <li>200: confirmed events ({@code accepted} and {@code duplicates}) are removed;
  * {@code rejected} ones go to the error log. Nothing else is ever removed.</li>

@@ -1,21 +1,19 @@
 # Fireside – RuneLite plugin
 
 Collects data from Old School RuneScape (XP, loot, kill counts, sessions,
-AFK time, world info, later bank, quests and diaries) and sends it to a
+AFK time, world info, bank, quests, diaries and pets) and sends it to a
 self-hosted server (repo: `fireside`, cloned next to this repo in
 `../fireside`). License: BSD-2.
 
-Plans and decisions: `../fireside/docs/plan/` (Norwegian).
-`../fireside/docs/plan/07-byggeplan.md` lists tasks, acceptance criteria
-and decisions. `../fireside/docs/plan/10-m7-gjennomforing.md` describes how
-each M7 task was carried out, and `../fireside/docs/plan/11-m8-gjennomforing.md`
-how each M8 task is carried out.
+Server docs (English): `../fireside/docs/`, in particular
+`architecture.md`, `api.md`, `data-collected.md`, `legal.md` and the
+decision records in `decisions/`.
 
-The event format is defined in `fireside` (`shared/` and
-`../fireside/docs/plan/03-datamodell-og-api.md`). A pinned copy of the
+The event format is defined in `fireside` (the Zod schemas in
+`../fireside/shared/` and `../fireside/docs/api.md`). A pinned copy of the
 contract package (JSON Schema + fixtures) lives in
 `src/test/resources/contract/`. Legal constraints:
-`../fireside/docs/plan/09-juridisk.md`.
+`../fireside/docs/legal.md`.
 
 ## Commands
 - `./gradlew build` – build and test
@@ -99,7 +97,14 @@ contract package (JSON Schema + fixtures) lives in
   edit it by hand.
 
 ## Workflow
-- One task per branch and PR (e.g. `m8/rename-fireside`).
+- One task per branch and PR (e.g. `docs/after-release`).
+- Never push directly to `master`; every change goes through a PR.
+- PR titles follow Conventional Commits (`feat: …`, `fix: …`, `docs: …`),
+  checked by the PR title workflow. PRs are squash merged, so the title is
+  the commit message on `master` and release-please builds the changelog
+  and the next version from it.
+- The version is owned by release-please (see Rules). Its release PR is
+  merged by the developer.
 - Start with a plan, then tests, then implementation.
 - Features must be tested in-game before merge (the developer does this).
 - `../fireside-plugin-test` is the developer's test worktree. Never change,

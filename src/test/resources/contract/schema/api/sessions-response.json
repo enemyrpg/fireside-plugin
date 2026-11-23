@@ -136,6 +136,11 @@
                 "type": "null"
               }
             ]
+          },
+          "newCollectionLogCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
           }
         },
         "required": [
@@ -148,7 +153,8 @@
           "durationSeconds",
           "activeSeconds",
           "afkSeconds",
-          "summary"
+          "summary",
+          "newCollectionLogCount"
         ],
         "additionalProperties": false
       }

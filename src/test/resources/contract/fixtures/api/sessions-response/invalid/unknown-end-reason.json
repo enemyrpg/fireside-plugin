@@ -10,7 +10,8 @@
       "durationSeconds": 600,
       "activeSeconds": 600,
       "afkSeconds": 0,
-      "summary": null
+      "summary": null,
+      "newCollectionLogCount": 0
     },
     {
       "id": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
@@ -33,7 +34,8 @@
         "kcGainedByBoss": {
           "Vorkath": 18
         }
-      }
+      },
+      "newCollectionLogCount": 0
     }
   ],
   "nextCursor": "eyJpZCI6IjAxIn0"

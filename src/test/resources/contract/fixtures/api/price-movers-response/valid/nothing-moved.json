@@ -1,0 +1,14 @@
+{
+  "prices": {
+    "source": "CURRENT",
+    "fetchedAt": "2026-11-21T12:00:04.000Z"
+  },
+  "periods": [
+    {
+      "period": "24h",
+      "baselineAt": "2026-11-20T12:00:03.000Z",
+      "change": 0,
+      "items": []
+    }
+  ]
+}

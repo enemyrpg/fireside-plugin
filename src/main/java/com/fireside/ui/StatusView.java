@@ -87,7 +87,7 @@ public final class StatusView
 		if (url == null)
 		{
 			return new StatusView(Level.ERROR, "Invalid server URL",
-				"Use the server's full base address, e.g. http://127.0.0.1:3000.", warnings);
+				"Use the server's full base address, e.g. http://127.0.0.1:3100.", warnings);
 		}
 		if (url.isInsecure())
 		{
@@ -118,7 +118,7 @@ public final class StatusView
 		if (stop == SenderStatus.StopReason.NOT_FOUND)
 		{
 			return new StatusView(Level.ERROR, "Wrong server URL",
-				"The server answered 404 Not Found. Use the server's base URL, e.g. http://127.0.0.1:3000, "
+				"The server answered 404 Not Found. Use the server's base URL, e.g. http://127.0.0.1:3100, "
 					+ "without /api/v1." + RESUME, warnings);
 		}
 		if (stop == SenderStatus.StopReason.REDIRECT)
