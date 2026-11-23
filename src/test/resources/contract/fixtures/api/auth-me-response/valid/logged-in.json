@@ -1,0 +1,10 @@
+{
+  "mode": "login",
+  "user": {
+    "id": 2,
+    "username": "testmain",
+    "role": "member",
+    "canCreateApiKeys": false,
+    "twoFactorEnabled": false
+  }
+}

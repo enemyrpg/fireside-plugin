@@ -1,0 +1,5 @@
+{
+  "defaultInviteCanCreateApiKeys": true,
+  "instanceText": null,
+  "defaultInstanceText": "This Fireside instance is run by [your name]. Contact: [how to reach you]."
+}

@@ -1,0 +1,29 @@
+{
+  "items": [
+    {
+      "type": "drop",
+      "id": "drop:01933c40-3333-7aaa-bbbb-ccccdddd0001.1",
+      "at": "2026-11-08T19:30:00.000Z",
+      "accountId": 1,
+      "drop": {
+        "lootEventId": 18,
+        "accountId": 1,
+        "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+        "occurredAt": "2026-11-08T19:30:00.000Z",
+        "source": {
+          "type": "NPC",
+          "name": "Vorkath"
+        },
+        "itemId": 1249,
+        "name": "Dragon spear",
+        "quantity": 1,
+        "gePriceEach": 1200000,
+        "haPriceEach": 37500,
+        "geValue": 1200000,
+        "haValue": 37500
+      },
+      "newCollectionLog": true
+    }
+  ],
+  "nextCursor": null
+}

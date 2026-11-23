@@ -1,0 +1,22 @@
+{
+  "apiKey": {
+    "id": 4,
+    "name": "Ola's laptop",
+    "prefix": "fs_a1b2",
+    "createdAt": "2026-11-01T18:00:00.000Z",
+    "lastUsedAt": null,
+    "revokedAt": null,
+    "revokedBy": null,
+    "createdByAdmin": true,
+    "owner": {
+      "id": 2,
+      "username": "ola"
+    },
+    "createdBy": {
+      "id": 1,
+      "username": "admin"
+    },
+    "revokedByUser": null
+  },
+  "key": "fs_a1b2Cd3eFg4hIj5kLm6nOp7qRs8tUv9wXy0zAb1cD2e"
+}

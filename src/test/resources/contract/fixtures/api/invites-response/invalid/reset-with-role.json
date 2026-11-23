@@ -1,0 +1,16 @@
+{
+  "invites": [
+    {
+      "id": "AH5F2C3X",
+      "type": "password_reset",
+      "role": "member",
+      "targetUser": { "id": 2, "username": "ola" },
+      "createdBy": null,
+      "createdAt": "2026-11-18T08:00:00.000Z",
+      "expiresAt": "2026-11-19T08:00:00.000Z",
+      "status": "active",
+      "usedAt": null,
+      "revokedAt": null
+    }
+  ]
+}

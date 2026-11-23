@@ -26,7 +26,7 @@ public class ClientRaidView implements RaidView
 	};
 	/**
 	 * The eight member slots of the TFA HUD. Unused slots are hidden themselves
-	 * (#86 step 0A, {@code docs/plan/08-design.md}).
+	 * (checked in game).
 	 */
 	private static final int[] TFA_SLOTS = {
 		InterfaceID.TfaHud._0_CONTAINER, InterfaceID.TfaHud._1_CONTAINER, InterfaceID.TfaHud._2_CONTAINER,

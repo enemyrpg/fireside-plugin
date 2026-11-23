@@ -18,14 +18,14 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Reads The Fractured Archive's records table ({@code TfaStats}) into
- * {@code pb.records} events (#86). Client thread only.
+ * {@code pb.records} events. Client thread only.
  * <p>
  * Only reads what the player opened: never opens the table or clicks tabs.
  * While the table is open it is read once per game tick, unless a tab is
  * still loading. Only {@code ALL_STATS_TABLES} is read, never the party
  * panels (other players' names). The game only builds a tab's section when
  * the tab is opened, so the records of one opening are collected over many
- * reads. At most one event is sent per opening (#16): on the tick after the
+ * reads. At most one event is sent per opening: on the tick after the
  * table closes (a close and reopen in the same tick is one opening), or on
  * {@link #flush()} (logout, hop, client or plugin shutdown). It is sent only
  * if the opening has a record not yet sent for the account, or a faster one,

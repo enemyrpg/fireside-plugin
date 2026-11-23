@@ -1,0 +1,4 @@
+{
+  "canCreateApiKeys": false,
+  "revokeActiveKeys": "all"
+}

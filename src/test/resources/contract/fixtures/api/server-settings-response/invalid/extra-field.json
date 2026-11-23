@@ -1,0 +1,6 @@
+{
+  "defaultInviteCanCreateApiKeys": true,
+  "instanceText": null,
+  "defaultInstanceText": "Default",
+  "userAgentContact": "me@example.invalid"
+}

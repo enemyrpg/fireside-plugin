@@ -37,9 +37,9 @@ public class PetMessageParserTest
 	public void onlyAtTheStartOfTheMessage()
 	{
 		// A broadcast about another player, and a player quoting the message.
-		assertNull(PetMessageParser.parsePetMessage("Zezima has a funny feeling like he's being followed: "
+		assertNull(PetMessageParser.parsePetMessage("Test Alt has a funny feeling like he's being followed: "
 			+ "Vorki at 412 kills."));
-		assertNull(PetMessageParser.parsePetMessage("Zezima: " + FOLLOWED));
+		assertNull(PetMessageParser.parsePetMessage("Test Alt: " + FOLLOWED));
 		assertNull(PetMessageParser.parsePetMessage("lol " + BACKPACK));
 		assertNull(PetMessageParser.parsePetMessage("Your Vorkath kill count is: <col=ff0000>412</col>."));
 		assertNull(PetMessageParser.parsePetMessage(""));

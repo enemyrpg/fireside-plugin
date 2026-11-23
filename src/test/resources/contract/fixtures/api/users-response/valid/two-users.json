@@ -1,0 +1,28 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "role": "admin",
+      "canCreateApiKeys": true,
+      "createdAt": "2026-11-01T10:00:00.000Z",
+      "lastLoginAt": "2026-11-18T09:00:00.000Z",
+      "disabledAt": null,
+      "isSelf": true,
+      "activeApiKeys": 1,
+      "twoFactorEnabled": true
+    },
+    {
+      "id": 2,
+      "username": "ola",
+      "role": "member",
+      "canCreateApiKeys": false,
+      "createdAt": "2026-11-18T10:00:00.000Z",
+      "lastLoginAt": null,
+      "disabledAt": "2026-11-18T12:00:00.000Z",
+      "isSelf": false,
+      "activeApiKeys": 0,
+      "twoFactorEnabled": false
+    }
+  ]
+}

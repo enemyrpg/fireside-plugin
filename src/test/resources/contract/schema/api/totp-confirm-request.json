@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "API: totp-confirm-request",
+  "type": "object",
+  "properties": {
+    "password": {
+      "type": "string",
+      "maxLength": 1024
+    },
+    "code": {
+      "type": "string",
+      "maxLength": 64
+    }
+  },
+  "required": [
+    "password",
+    "code"
+  ],
+  "additionalProperties": false
+}

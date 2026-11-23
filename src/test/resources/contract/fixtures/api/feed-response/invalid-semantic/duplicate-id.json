@@ -1,0 +1,123 @@
+{
+  "items": [
+    {
+      "type": "session",
+      "id": "session:01933c40-1111-7aaa-bbbb-ccccdddd0001",
+      "at": "2026-11-08T20:00:00.000Z",
+      "accountId": 1,
+      "session": {
+        "id": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+        "accountId": 1,
+        "startedAt": "2026-11-08T18:00:00.000Z",
+        "endedAt": "2026-11-08T20:00:00.000Z",
+        "endReason": "logout",
+        "world": 420,
+        "durationSeconds": 7200,
+        "activeSeconds": 6300,
+        "afkSeconds": 900,
+        "summary": {
+          "xpGainedTotal": 120000,
+          "xpGainedBySkill": {
+            "SLAYER": 100000,
+            "HITPOINTS": 20000
+          },
+          "lootGeValue": 2854200,
+          "lootCount": 18,
+          "kcGainedByBoss": {
+            "Vorkath": 18
+          }
+        },
+        "newCollectionLogCount": 2
+      }
+    },
+    {
+      "type": "level",
+      "id": "level:01933c40-1111-7aaa-bbbb-ccccdddd0001.SLAYER",
+      "at": "2026-11-08T20:00:00.000Z",
+      "accountId": 1,
+      "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+      "skill": "SLAYER",
+      "fromLevel": 89,
+      "toLevel": 90
+    },
+    {
+      "type": "clog",
+      "id": "clog:1.21907",
+      "at": "2026-11-08T19:58:02.004Z",
+      "accountId": 1,
+      "itemId": 21907,
+      "name": "Vorkath's head",
+      "tab": "Bosses",
+      "page": "Vorkath",
+      "approximate": false,
+      "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+      "obtainedAfter": 341,
+      "total": 1734,
+      "drop": null
+    },
+    {
+      "type": "clog",
+      "id": "clog:1.21907",
+      "at": "2026-11-08T19:42:14.000Z",
+      "accountId": 1,
+      "itemId": 11286,
+      "name": "Draconic visage",
+      "tab": "Bosses",
+      "page": "Vorkath",
+      "approximate": false,
+      "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+      "obtainedAfter": 340,
+      "total": 1734,
+      "drop": {
+        "lootEventId": 17,
+        "geValue": 2850000
+      }
+    },
+    {
+      "type": "drop",
+      "id": "drop:01933c40-3333-7aaa-bbbb-ccccdddd0001.1",
+      "at": "2026-11-08T19:30:00.000Z",
+      "accountId": 1,
+      "drop": {
+        "lootEventId": 18,
+        "accountId": 1,
+        "sessionId": "01933c40-1111-7aaa-bbbb-ccccdddd0001",
+        "occurredAt": "2026-11-08T19:30:00.000Z",
+        "source": {
+          "type": "NPC",
+          "name": "Vorkath"
+        },
+        "itemId": 1249,
+        "name": "Dragon spear",
+        "quantity": 1,
+        "gePriceEach": 1200000,
+        "haPriceEach": 37500,
+        "geValue": 1200000,
+        "haValue": 37500
+      },
+      "newCollectionLog": false
+    },
+    {
+      "type": "pet",
+      "id": "pet:1.21992",
+      "at": "2026-11-07T21:10:00.000Z",
+      "accountId": 1,
+      "pet": {
+        "accountId": 1,
+        "itemId": 21992,
+        "name": "Vorki",
+        "obtainedAt": "2026-11-07T21:10:00.000Z",
+        "approximate": false,
+        "source": {
+          "type": "ACTIVITY",
+          "name": "Vorkath"
+        },
+        "killCount": 1204,
+        "xp": null,
+        "confirmed": true,
+        "origin": "CHAT"
+      }
+    }
+  ],
+  "nextCursor": "WyIyMDI2LTExLTA3VDIxOjEwOjAwLjAwMFoiLDMsInBldDoxIl0"
+}

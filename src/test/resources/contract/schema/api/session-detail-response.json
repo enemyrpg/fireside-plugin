@@ -134,6 +134,11 @@
               "type": "null"
             }
           ]
+        },
+        "newCollectionLogCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
         }
       },
       "required": [
@@ -146,7 +151,8 @@
         "durationSeconds",
         "activeSeconds",
         "afkSeconds",
-        "summary"
+        "summary",
+        "newCollectionLogCount"
       ],
       "additionalProperties": false
     },
@@ -409,6 +415,95 @@
         ],
         "additionalProperties": false
       }
+    },
+    "collectionLog": {
+      "type": "object",
+      "properties": {
+        "obtained": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "total": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "itemId": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "tab": {
+                "type": "string",
+                "minLength": 1
+              },
+              "page": {
+                "type": "string",
+                "minLength": 1
+              },
+              "pageObtained": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "pageTotal": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d{3}(?:Z))$"
+              },
+              "approximate": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "itemId",
+              "name",
+              "tab",
+              "page",
+              "pageObtained",
+              "pageTotal",
+              "at",
+              "approximate"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "obtained",
+        "total",
+        "items"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [
@@ -417,7 +512,8 @@
     "xp",
     "loot",
     "kc",
-    "afkPeriods"
+    "afkPeriods",
+    "collectionLog"
   ],
   "additionalProperties": false
 }

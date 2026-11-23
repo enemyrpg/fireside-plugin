@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "RATE_LIMITED",
+    "message": "The server is busy. Try again in a few seconds.",
+    "details": []
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "API: update-user-request",
+  "type": "object",
+  "properties": {
+    "username": {
+      "type": "string",
+      "maxLength": 64
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "member"
+      ]
+    },
+    "canCreateApiKeys": {
+      "type": "boolean"
+    },
+    "disabled": {
+      "type": "boolean"
+    },
+    "revokeActiveKeys": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

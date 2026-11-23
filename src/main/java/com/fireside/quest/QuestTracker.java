@@ -26,7 +26,7 @@ import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.api.gameval.VarbitID;
 
 /**
- * {@code quests.snapshot} and {@code diaries.snapshot} (10.8).
+ * {@code quests.snapshot} and {@code diaries.snapshot}.
  * <p>
  * <b>Never before the login data is complete.</b> The server treats an
  * account's first snapshot as the baseline ("finished before tracking"), so

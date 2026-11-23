@@ -20,7 +20,7 @@ import org.junit.Test;
 public class StatusViewTest
 {
 	private static final String KEY = "fs_key";
-	private static final String URL = "http://127.0.0.1:3000";
+	private static final String URL = "http://127.0.0.1:3100";
 	private static final Instant NOW = Instant.parse("2026-11-18T18:00:00Z");
 	private static final ZoneId UTC = ZoneOffset.UTC;
 
@@ -67,7 +67,7 @@ public class StatusViewTest
 	@Test
 	public void invalidUrlAndKey()
 	{
-		StatusView url = view("localhost:3000", KEY, status(ConnectionStatus.NONE));
+		StatusView url = view("localhost:3100", KEY, status(ConnectionStatus.NONE));
 		assertEquals(StatusView.Level.ERROR, url.getLevel());
 		assertEquals("Invalid server URL", url.getTitle());
 
@@ -199,7 +199,7 @@ public class StatusViewTest
 	@Test
 	public void insecureUrlWarns()
 	{
-		StatusView view = view("http://192.168.1.2:3000", KEY, status(connection(NOW, 0, false, null)));
+		StatusView view = view("http://192.168.1.2:3100", KEY, status(connection(NOW, 0, false, null)));
 		assertEquals(Collections.singletonList(StatusView.INSECURE_WARNING), view.getWarnings());
 		assertEquals("Connected with warnings", view.getTitle());
 	}
@@ -212,7 +212,7 @@ public class StatusViewTest
 			line);
 		assertEquals(java.util.Arrays.asList(StatusView.LOOT_TRACKER_OFF_WARNING, line), notConfigured.getWarnings());
 
-		StatusView invalid = StatusView.compute("localhost:3000", KEY, true, status(ConnectionStatus.NONE), NOW, UTC,
+		StatusView invalid = StatusView.compute("localhost:3100", KEY, true, status(ConnectionStatus.NONE), NOW, UTC,
 			true, null);
 		assertTrue(invalid.getWarnings().contains(StatusView.LOOT_TRACKER_OFF_WARNING));
 

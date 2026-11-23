@@ -38,9 +38,9 @@ import net.runelite.client.util.ImageUtil;
 import okhttp3.Call;
 
 /**
- * Uploads icons to the server: those of the items in queued events (10.3), and
+ * Uploads icons to the server: those of the items in queued events, and
  * once per login those of the whole collection log, all skills and all
- * bosses/raids (10.12).
+ * bosses/raids.
  * <p>
  * <b>Flow.</b> {@link #collect} takes the item IDs of every queued event
  * ({@link IconIds}, exactly as in the event). New IDs are asked about with
@@ -64,7 +64,7 @@ import okhttp3.Call;
  * icons" is on and the server's contract (from the sender's {@code verify}) is
  * at least {@link Contract#ICONS_VERSION}. An older server gets no icon requests.
  * <p>
- * <b>The import (10.12).</b> {@link #importAll} takes the icons of the whole
+ * <b>The import.</b> {@link #importAll} takes the icons of the whole
  * collection log, all skills and all bosses/raids ({@link IconCatalog}) through
  * the same flow: {@code wanted} first, then only what the server lacks is
  * loaded and uploaded. It needs contract {@link Contract#NAMED_ICONS_VERSION};
@@ -280,7 +280,7 @@ public class IconUploader
 
 	/**
 	 * Checks every icon in the catalog against the server and uploads what it
-	 * lacks (10.12). Call it once per login. Ignored while icons are off, the
+	 * lacks. Call it once per login. Ignored while icons are off, the
 	 * server is older than {@link Contract#NAMED_ICONS_VERSION} or an import is
 	 * already running; held until the server's contract version is known.
 	 */
