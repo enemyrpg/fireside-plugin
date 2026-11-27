@@ -55,15 +55,22 @@ plugin now needs the new contract.
 `assets/logo/fireside.svg` with `./scripts/render-icons.sh` (needs
 `rsvg-convert`). See `assets/logo/README.md`.
 
-## Labels
-- **Type:** one per issue: `bug`, `enhancement`, `documentation`, `ci`,
-  `question`.
+## Issue types and labels
+- **Type:** every issue has one GitHub issue type: Bug, Feature or Task.
+  The issue forms set Bug or Feature. Docs and CI work is a Task.
+- **What it is about:** `documentation` (docs only) and `ci` (workflows,
+  build and tooling), on issues with the type Task. `question` for a
+  question about use or setup.
 - **Area:** usually one: `area: loot`, `area: sessions`, `area: bank`,
   `area: sync`.
 - **Cross-cutting:** `accessibility` (barriers for people with disabilities),
   alongside the area.
 - **Status**, only when it applies: `needs decision`, `needs info`,
   `blocked`, `good first issue`, `help wanted`.
+- **Cross-repo:** `needs server` when the issue also needs a change in
+  [fireside](https://github.com/enemyrpg/fireside) (server, contract or
+  dashboard). Link the issues with GitHub's "blocked by" relationship, so the
+  one that has to land first blocks the other.
 - **Priority**, only when it applies: `priority: high` or `priority: low`.
   No priority label means normal.
 - **On closing:** `wontfix` (close as "not planned" and link the ADR in the
@@ -77,7 +84,9 @@ plugin now needs the new contract.
 - One task per pull request. Larger changes: open an issue first.
 - PR titles follow [Conventional Commits](https://www.conventionalcommits.org/)
   (`feat: …`, `fix: …`, `docs: …`, `ci: …`), checked by the **PR title**
-  workflow. PRs are squash merged, so the title becomes the commit message on
+  workflow. The type follows the issue's type, not its labels: a Bug is
+  usually a `fix:`, a Feature a `feat:`, and a Task `docs:`, `ci:`, `chore:`
+  or another type that fits. PRs are squash merged, so the title becomes the commit message on
   `master`, and the changelog is built from it.
 - [release-please](https://github.com/googleapis/release-please) owns the
   version. Never edit it by hand. It keeps an open release PR that bumps the
