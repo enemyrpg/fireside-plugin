@@ -19,6 +19,14 @@ updates:
       # JUnit 4, as in RuneLite's example-plugin template.
       - dependency-name: junit:junit
         update-types: [version-update:semver-major]
+      # Gradle 9 needs JVM 17 to run; the plugin builds with JDK 11 to match
+      # the Plugin Hub template.
+      - dependency-name: gradle-wrapper
+        update-types: [version-update:semver-major]
+      # Test-only. 2.x/3.x change the API and drop Jackson; the contract tests
+      # use 1.x.
+      - dependency-name: com.networknt:json-schema-validator
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
