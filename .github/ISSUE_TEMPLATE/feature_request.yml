@@ -1,6 +1,6 @@
 name: Feature request
 description: Suggest something the plugin could collect or do.
-labels: [enhancement]
+type: Feature
 body:
   - type: markdown
     attributes:
